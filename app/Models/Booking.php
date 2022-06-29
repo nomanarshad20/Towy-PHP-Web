@@ -25,12 +25,12 @@ class Booking extends Model
 
     public function driver()
     {
-        return $this->belongsTo(Driver::class,'driver_id');
+        return $this->belongsTo(User::class,'driver_id');
     }
 
     public function frachise()
     {
-        return $this->belongsTo(Franchise::class,'franchise_id');
+        return $this->belongsTo(User::class,'franchise_id');
     }
 
     public function vehicleType()

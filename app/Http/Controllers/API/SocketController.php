@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\DriversCoordinate;
 use App\Models\P2PBookingTracking;
 use App\Models\User;
+use App\Services\API\Socket\DriverStatusService;
 use App\Services\API\Socket\RideAcceptRejectService;
 use App\Traits\FindDistanceTraits;
 
@@ -16,16 +17,26 @@ class SocketController extends Controller
     use FindDistanceTraits;
 
     public $acceptRejectService;
+    public $driverService;
 
-    public function __construct(RideAcceptRejectService $acceptRejectService)
+    public function __construct(RideAcceptRejectService $acceptRejectService, DriverStatusService $driverStatusService)
     {
         $this->acceptRejectService = $acceptRejectService;
+        $this->driverService = $driverStatusService;
     }
 
     public function updateUser($data, $socket, $io)
     {
+        if (!isset($data['socket_id'])) {
+            $socket->emit('error', [
+                'result' => 'error',
+                'message' => 'Socket ID is a Required Field',
+                'data' => null
+            ]);
+        }
+
         if (!isset($data['user_id'])) {
-            $io->to($socket->id)->emit('error',
+            $io->to($data['socket_id'])->emit('error',
                 [
                     'result' => 'error',
                     'message' => 'User ID is a required field',
@@ -43,13 +54,6 @@ class SocketController extends Controller
             ]);
         }
 
-        if (!isset($data['socket_id'])) {
-            $io->emit('error', [
-                'result' => 'error',
-                'message' => 'Socket ID is a Required Field',
-                'data' => null
-            ]);
-        }
 
 
         if ($currentUser) {
@@ -86,22 +90,22 @@ class SocketController extends Controller
     {
         try {
 
-            $currentUser = User::where('socket_id', $data['socket_id'])->first();
+            if (!$data['user_id']) {
+                $socket->emit('error', [
+                        'result' => 'error',
+                        'message' => 'User ID is a Required Field',
+                        'data' => null
+                    ]
+                );
+            }
+
+            $currentUser = User::where('id', $data['user_id'])->where('socket_id', $data['socket_id'])->first();
 
             if (!$currentUser) {
                 $io->emit('error',
                     [
                         'result' => 'error',
                         'message' => 'User Not Found',
-                        'data' => null
-                    ]
-                );
-            }
-
-            if (!$data['user_id']) {
-                $io->to($currentUser->socket_id)->emit('error', [
-                        'result' => 'error',
-                        'message' => 'User ID is a Required Field',
                         'data' => null
                     ]
                 );
@@ -122,6 +126,7 @@ class SocketController extends Controller
 
 
             $checkForBooking = Booking::where('driver_id', $data['user_id'])
+                ->where('id', $data['booking_id'])
                 ->where('ride_status', 1)->first();
 
             if ($checkForBooking) {
@@ -139,8 +144,12 @@ class SocketController extends Controller
                     'status' => $checkForBooking->driver_status]);
 
                 //saving driver current lat and lng
-                $driver->latitude = $data->latitude;
-                $driver->latitude = $data->longitude;
+                $driver->latitude = $data['latitude'];
+                $driver->latitude = $data['longitude'];
+                $driver->area_name = $data['area_name'];
+                $driver->city = $data['city'];
+                $driver->bearing = $data['bearing'];
+                $driver->status = 2;
                 $driver->save();
 
                 $passengerSocketId = $checkForBooking->passenger->socket_id;
@@ -159,8 +168,15 @@ class SocketController extends Controller
                     ]);
                 }
 
+            } else {
+                //saving driver current lat and lng
+                $driver->latitude = $data['latitude'];
+                $driver->latitude = $data['longitude'];
+                $driver->area_name = $data['area_name'];
+                $driver->city = $data['city'];
+                $driver->bearing = $data['bearing'];
+                $driver->save();
             }
-
 
             $io->to($currentUser->socket_id)->emit('driverCoordinate',
                 [
@@ -219,6 +235,69 @@ class SocketController extends Controller
         }
 
         return $this->acceptRejectService->rideAcceptReject($data, $socket, $io);
+
+    }
+
+    public function changeBookingDriverStatus($data, $socket, $io)
+    {
+        if (!isset($data['socket_id'])) {
+            $socket->emit('error', [
+                'result' => 'error',
+                'message' => 'Socket ID is a Required Field',
+                'data' => null
+            ]);
+        }
+
+        if (!$data['user_id']) {
+            $io->to($data['socket_id'])->emit('error', [
+                    'result' => 'error',
+                    'message' => 'User ID is a Required Field',
+                    'data' => null
+                ]
+            );
+        }
+
+
+        $currentUser = User::where('id', $data['user_id'])
+            ->where('socket_id', $data['socket_id'])
+            ->first();
+
+        if (!$currentUser) {
+            $socket->emit('error',
+                [
+                    'result' => 'error',
+                    'message' => 'User Not Found',
+                    'data' => null
+                ]
+            );
+        }
+
+
+        if (!isset($data['booking_id'])) {
+            $io->to($currentUser->socket_id)->emit('error', [
+                'result' => 'error',
+                'message' => 'Booking ID is a Required Field',
+                'data' => null
+            ]);
+        }
+
+        if (!isset($data['driver_status'])) {
+            $io->to($currentUser->socket_id)->emit('error', [
+                'result' => 'error',
+                'message' => 'Driver Status is a Required Field',
+                'data' => null
+            ]);
+        }
+
+        if ($data['driver_status'] == 1) {
+            return $this->driverService->reachToPickUp($data, $socket, $io, $currentUser);
+        } elseif ($data['driver_status'] == 2) {
+            return $this->driverService->startRide($data, $socket, $io, $currentUser);
+        } elseif ($data['driver_status'] == 3) {
+            return $this->driverService->completeRide($data, $socket, $io, $currentUser);
+        }elseif($data['driver_status'] == 4){
+            return $this->driverService->collectFare($data, $socket, $io, $currentUser);
+        }
 
 
     }

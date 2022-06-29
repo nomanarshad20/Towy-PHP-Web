@@ -29,7 +29,7 @@ class SaveVehicleRequest extends FormRequest
             'name' => 'required',
             'model' => 'required',
             'registration_number' => 'required',
-            'registration_book' => 'mimes:jpeg,jpg,png',
+            'registration_book' => 'required|mimes:jpeg,jpg,png',
             'model_year' => 'required'
         ];
     }

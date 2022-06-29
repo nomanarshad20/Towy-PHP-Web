@@ -1,7 +1,7 @@
 <footer
     class="footer d-flex flex-column flex-md-row align-items-center justify-content-between px-4 py-3 border-top small">
     <p class="text-muted mb-1 mb-md-0">Copyright © {{\Carbon\Carbon::now()->format('Y')}} <a
-            href="https://www.nobleui.com/" target="_blank">TOWY</a>.</p>
+            href="https://www.nobleui.com/" target="_blank">TOTO Booking</a>.</p>
 {{--    <p class="text-muted">Handcrafted With--}}
 {{--        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"--}}
 {{--             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"--}}

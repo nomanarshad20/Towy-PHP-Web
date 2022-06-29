@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use CoreProc\WalletPlus\Models\Traits\HasWallets;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +14,9 @@ use App\Notifications\ForgotPasswordNotificationAdmin;
 class User extends Authenticatable
 {
     use LaratrustUserTrait;
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasWallets;
+//    use HasApiTokens, HasFactory, Notifiable;
+
 
     /**
      * The attributes that are mass assignable.
@@ -67,6 +69,7 @@ class User extends Authenticatable
         return $this->hasMany(UserWallet::class);
     }
 
+    /*
     public function validTransactions()
     {
         return $this->transactions()->where('status', 1);
@@ -91,9 +94,10 @@ class User extends Authenticatable
         return $this->credit() - $this->debit();
     }
 
-    /*public function allowWithdraw($amount) : bool
+    public function allowWithdraw($amount) : bool
     {
         return $this->balance() >= $amount;
-    }*/
+    }
+    */
 
 }

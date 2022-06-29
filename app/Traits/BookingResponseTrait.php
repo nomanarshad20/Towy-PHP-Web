@@ -37,8 +37,10 @@ trait BookingResponseTrait
             'vehicle_per_km_rate' => $booking->bookingDetail->per_km_rate,
             'vehicle_per_min_rate' => $booking->bookingDetail->per_min_rate,
             'min_vehicle_fare' => $booking->bookingDetail->min_fare,
-            'passenger_name' => $booking->passeger->name,
-            'driver_name' => isset($booking->driver) ? $booking->driver->name:null
+            'passenger_name' => isset($booking->passeger) ? $booking->passeger->name:null,
+            'driver_name' => isset($booking->driver) ? $booking->driver->name:null,
+            'driver_status' => (int)$booking->driver_status,
+            'driver_id' =>  $booking->driver_id
 
         ];
 

@@ -6,6 +6,7 @@ namespace App\Services\API\Driver;
 
 use App\Helper\ImageUploadHelper;
 use App\Models\Driver;
+use App\Models\DriversCoordinate;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Support\Facades\Auth;
@@ -28,8 +29,7 @@ class DriverInformationService
             }
 
 
-            if($request->referrer)
-            {
+            if ($request->referrer) {
                 $checkForReferrer = User::where('referral_code', $request->referrer)
                     ->where('id', "!=", $userID)
                     ->first();
@@ -87,6 +87,7 @@ class DriverInformationService
         if ($cnic_front_side) {
             $image = ImageUploadHelper::uploadImage($cnic_front_side, 'upload/driver/' . Auth::user()->id . '/');
 
+
             Auth::user()->driver->cnic_front_side = $image;
 
             if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
@@ -113,15 +114,15 @@ class DriverInformationService
 
             Auth::user()->driver->cnic_back_side = $image;
 
-            if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
-                && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
-                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
-                && Auth::user()->image) {
-                Auth::user()->steps = 4;
-            }
+//            if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
+//                && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
+//                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
+//                && Auth::user()->image) {
+//                Auth::user()->steps = 4;
+//            }
             Auth::user()->driver->save();
 
-            Auth::user()->save();
+//            Auth::user()->save();
         }
     }
 
@@ -132,15 +133,15 @@ class DriverInformationService
 
             Auth::user()->driver->license_front_side = $image;
 
-            if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
-                && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
-                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
-                && Auth::user()->image) {
-                Auth::user()->steps = 4;
-            }
+//            if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
+//                && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
+//                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
+//                && Auth::user()->image) {
+//                Auth::user()->steps = 4;
+//            }
             Auth::user()->driver->save();
 
-            Auth::user()->save();
+//            Auth::user()->save();
         }
     }
 
@@ -202,14 +203,14 @@ class DriverInformationService
             Auth::user()->driver->save();
 
 
-            if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
-                && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
-                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
-                && Auth::user()->image) {
-                Auth::user()->steps = 4;
-            }
+//            if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
+//                && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
+//                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
+//                && Auth::user()->image) {
+//                Auth::user()->steps = 4;
+//            }
 
-            Auth::user()->save();
+//            Auth::user()->save();
 
             $response = ['result' => 'success', 'message' => 'Vehicle Information Save Successfully.'];
 
@@ -218,6 +219,33 @@ class DriverInformationService
 
         } catch (\Exception $e) {
             $response = ['result' => 'error', 'message' => 'Error in Saving Vehicle: ' . $e];
+
+            return $response;
+        }
+    }
+
+    public function documentComplete()
+    {
+        try {
+
+            if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
+                && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
+                && isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->registration_book :false
+                && Auth::user()->image) {
+                Auth::user()->steps = 4;
+            }
+            Auth::user()->save();
+
+
+            DriversCoordinate::create(['status'=>0,'driver_id'=>Auth::user()->id]);
+
+            $response = ['result' => 'success', 'message' => 'All Documents are saved successfully.','code'=>200];
+
+            return $response;
+
+        }
+        catch (\Exception $e) {
+            $response = ['result' => 'error', 'message' => 'Error in Saving Step: ' . $e,'code'=>500];
 
             return $response;
         }

@@ -21,7 +21,7 @@ class RideAcceptRejectService
         $gettingCurrentUser = User::find($data['user_id']);
 
         if (!$gettingCurrentUser) {
-            $io->to($data['socket_id'])->emit('finalRideStatus',
+            $io->to($data['socket_id'])->emit('error',
                 [
                     'result' => 'error',
                     'message' => 'User Not Found',

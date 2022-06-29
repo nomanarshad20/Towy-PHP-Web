@@ -13,6 +13,8 @@ use App\Http\Controllers\API\Passenger\CreateRideController;
 use App\Http\Controllers\API\Passenger\FindDriversController;
 use App\Http\Controllers\API\Driver\DriverCancelRideController;
 use App\Http\Controllers\API\CancelReasonController;
+use App\Http\Controllers\API\Passenger\PassengerCancelRideController;
+use App\Http\Controllers\API\Driver\DriverController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -29,10 +31,13 @@ Route::group(['middleware' => ['json.response']], function () {
 
         Route::namespace('Passenger')->group(function () {
 
-            Route::namespace('Auth')->prefix('passenger')->group(function () {
-                Route::post('login', [AuthController::class, 'login']);
-                Route::post('register', [AuthController::class, 'register']);
-                Route::post('check-phone-number', [AuthController::class, 'checkPhoneNumber']);
+            Route::namespace('Auth')->group(function () {
+                Route::post('passenger-login', [AuthController::class, 'login']);
+                Route::post('passenger-register', [AuthController::class, 'register']);
+                Route::post('passenger-check-phone-number', [AuthController::class, 'checkPhoneNumber']);
+
+                Route::post('passenger-social-login', [AuthController::class, 'socialLoginMobile']);
+                Route::post('passenger-forget-password',[AuthController::class,'forgetPassword']);
 
             });
 
@@ -40,12 +45,12 @@ Route::group(['middleware' => ['json.response']], function () {
 
         });
 
-        Route::namespace('Common')->prefix('common')->group(function () {
-
-            Route::post('social-login', [AuthController::class, 'socialLoginMobile']);
-            Route::post('forget-password',[AuthController::class,'forgetPassword']);
-
-        });
+//        Route::namespace('Common')->group(function () {
+//
+//            Route::post('social-login', [AuthController::class, 'socialLoginMobile']);
+//            Route::post('forget-password',[AuthController::class,'forgetPassword']);
+//
+//        });
 
         Route::namespace('Driver')->group(function () {
             Route::namespace('Auth')->group(function () {
@@ -57,13 +62,15 @@ Route::group(['middleware' => ['json.response']], function () {
 
 
         Route::middleware('auth:sanctum')->group(function () {
-            Route::namespace('Passenger')->prefix('passenger')->group(function () {
-                Route::post('user-info-update', [AuthController::class, 'userDataUpdate']);
-                Route::post('find-near-drivers', [FindDriversController::class, 'findDriversByVehicle']);
-                Route::post('calculating-distance-and-fare',[RideInitialDistanceController::class,'findDistance']);
-                Route::post('create-booking',[CreateRideController::class,'booking']);
-                Route::post('logout',[AuthController::class,'logout']);
-                Route::post('update-password',[AuthController::class,'passwordUpdate']);
+            Route::namespace('Passenger')->group(function () {
+                Route::post('passenger-user-info-update', [AuthController::class, 'userDataUpdate']);
+                Route::post('passenger-find-near-drivers', [FindDriversController::class, 'findDriversByVehicle']);
+                Route::post('passenger-calculating-distance-and-fare',[RideInitialDistanceController::class,'findDistance']);
+                Route::post('passenger-create-booking',[CreateRideController::class,'booking']);
+                Route::post('passenger-logout',[AuthController::class,'logout']);
+                Route::post('passenger-update-password',[AuthController::class,'passwordUpdate']);
+                Route::post('passenger-cancel-ride',[PassengerCancelRideController::class,'cancelRide']);
+
             });
 
             Route::namespace('Driver')->group(function(){
@@ -71,14 +78,20 @@ Route::group(['middleware' => ['json.response']], function () {
                 Route::post('driver-save-document',[DriverInformationController::class,'saveDocument']);
                 Route::post('driver-save-vehicle-information',[DriverInformationController::class,'saveVehicleInformation']);
                 Route::post('driver-profile-update',[ProfileController::class,'saveProfile']);
+                Route::get('driver-document-complete',[DriverInformationController::class,'documentComplete']);
 
                 Route::post('driver-save-location',[DriverLocationController::class,'save']);
 
                 Route::get('driver-trip-history',[TripsController::class,'index']);
 
-                Route::get('driver-cancel-ride',[DriverCancelRideController::class,'cancelRide']);
+                Route::post('driver-cancel-ride',[DriverCancelRideController::class,'cancelRide']);
+
+                Route::get('change-driver-status',[DriverController::class,'changeDriverOnlineStatus']);
+
+                Route::get('get-driver-current-status',[DriverController::class,'getCurrentStatus']);
+
             });
-    
+
             Route::get('get-cancel-reason',[CancelReasonController::class,'index']);
 
         });

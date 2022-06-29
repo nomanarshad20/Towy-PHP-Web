@@ -9,17 +9,16 @@ use Image;
 
 class ImageUploadHelper
 {
-    public static function saveImage($image, $fileNameUpload, $path)
+    public static function saveImage($image, $fileNameUpload, $path,$drive)
     {
 
         Image::make($image)->save($path . $fileNameUpload);
 
-        return $path . $fileNameUpload;
+        return $drive . $fileNameUpload;
     }
 
     public static function uploadImage($uploadImage, $path)
     {
-
         $image = $uploadImage;
         $ext = $image->getClientOriginalExtension();
         $randomString = mt_rand(1000, 9999);
@@ -31,7 +30,7 @@ class ImageUploadHelper
             File::makeDirectory($path, 0777, true);
         }
 
-        $imageSave = ImageUploadHelper::saveImage($image, $fileNameUpload, $path);
+        $imageSave = ImageUploadHelper::saveImage($image, $fileNameUpload, $path,$drive);
 
         return $imageSave;
     }

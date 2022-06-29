@@ -7,9 +7,12 @@ namespace App\Services\API\Driver;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Traits\CreateUserWalletTrait;
 
 class AuthService
 {
+    use CreateUserWalletTrait;
+
     public function checkPhoneNumber($mobile_no)
     {
         $check = User::where('mobile_no', $mobile_no)->first();
@@ -95,8 +98,7 @@ class AuthService
                 $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
                 return $response;
             }
-        }
-        else {
+        } else {
             $checkUserState = User::where('mobile_no', $mobileNo)->whereNUll('password')
                 ->where('user_type', $userType)
                 ->first();
@@ -157,6 +159,41 @@ class AuthService
             }
         }
 
+        // Get Driver Wallet
+        $passengerWallet = Auth::user()->wallet('Driver-Wallet');
+
+        if (!isset($passengerWallet) || $passengerWallet == null) {
+            // Create New Wallet For Driver
+            $this->createUserWallet(Auth::user(), 'Driver-Wallet');
+            //Again Get Driver Wallet
+            $passengerWallet = Auth::user()->wallet('Driver-Wallet');
+        }
+
+        $driverStatus = null;
+        if (isset(Auth::user()->driverCoordinate)) {
+
+            $driverStatus = Auth::user()->driverCoordinate->status;
+//            if( Auth::user()->driverCoordinate->status == 0 )
+//            {
+//                $driverStatus = 'offline';
+//            }
+//            elseif(Auth::user()->driverCoordinate->status == 1)
+//            {
+//                $driverStatus = 'online';
+//            }
+//            elseif(Auth::user()->driverCoordinate->status == 2)
+//            {
+//                $driverStatus = 'onride';
+//            }
+//            elseif(Auth::user()->driverCoordinate->status == 3)
+//            {
+//                $driverStatus = 'ride_request';
+//            }
+//
+        }
+
+
+        $balance = $passengerWallet->balance ?? 0;
 
         $data = [
             'mobile_no' => Auth::user()->mobile_no,
@@ -172,7 +209,9 @@ class AuthService
             'vehicle_type_id' => isset(Auth::user()->driver->vehicleType) ? Auth::user()->driver->vehicle_type_id : 'N/A',
             'vehicle_type_name' => isset(Auth::user()->driver->vehicleType) ? Auth::user()->driver->vehicleType->name : 'N/A',
             'documents' => (object)$driverDocumentStatus,
-            'image' => Auth::user()->image
+            'image' => Auth::user()->image,
+            'driver_wallet_balance' => $balance,
+            'availability_status' => $driverStatus
 
         ];
 
@@ -214,7 +253,7 @@ class AuthService
             'vehicle_type_id' => isset($user->driver->vehicle) ? $user->driver->vehicle_type_id : 'N/A',
             'vehicle_type_name' => isset($user->driver->vehicle) ? $user->driver->vehicleType->name : 'N/A',
             'documents' => (object)$driverDocumentStatus,
-            'image' => $user->image
+            'image' => $user->image,
 //            'otp' => $user->otp
         ];
 

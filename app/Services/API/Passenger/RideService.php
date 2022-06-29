@@ -6,11 +6,13 @@ namespace App\Services\API\Passenger;
 use App\Models\AssignBookingDriver;
 use App\Models\Booking;
 use App\Models\BookingDetail;
+use App\Models\Setting;
 use App\Models\User;
 use App\Models\VehicleType;
 use App\Traits\BookingResponseTrait;
 use App\Traits\FindDistanceTraits;
 use App\Traits\FindDriverTrait;
+//use App\Traits\UserWalletTraits;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -18,10 +20,11 @@ use Illuminate\Support\Facades\DB;
 
 class RideService
 {
-    //use FindDistanceTraits;
+
     use FindDistanceTraits;
     use FindDriverTrait;
     use BookingResponseTrait;
+    //use UserWalletTraits;
 
     public function saveBooking($request)
     {
@@ -109,10 +112,23 @@ class RideService
         }
 
         try {
+
             $vehicleTypeRecord  = VehicleType::find($request->vehicle_type_id);
 
             if($vehicleTypeRecord)
             {
+
+                $setting  = Setting::first();
+                $cancel_allowed_time = 0;
+                $cancel_ride_passenger_fine_amount = 0;
+                $cancel_ride_driver_fine_amount = 0;
+                if($setting)
+                {
+                    $cancel_allowed_time = $setting->cancel_ride_time;
+                    $cancel_ride_passenger_fine_amount = $setting->cancel_ride_passenger_fine_amount;
+                    $cancel_ride_driver_fine_amount = $setting->cancel_ride_driver_fine_amount;
+                }
+
 
                 $bookingDetailArray = [
                     'booking_id' => $bookingTable->id,
@@ -120,7 +136,10 @@ class RideService
                     'vehicle_tax' => $vehicleTypeRecord->tax_rate,
                     'vehicle_per_km_rate' => $vehicleTypeRecord->per_km_rate,
                     'vehicle_per_min_rate' => $vehicleTypeRecord->per_min_rate,
-                    'min_vehicle_fare' => $vehicleTypeRecord->min_fare
+                    'min_vehicle_fare' => $vehicleTypeRecord->min_fare,
+                    'cancel_ride_time' => $cancel_allowed_time,
+                    'cancel_ride_passenger_fine_amount' => $cancel_ride_passenger_fine_amount,
+                    'cancel_ride_driver_fine_amount' => $cancel_ride_driver_fine_amount
                 ];
 
 

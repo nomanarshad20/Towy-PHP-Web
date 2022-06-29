@@ -27,7 +27,8 @@ class CancelRideRequest extends FormRequest
     {
         return [
             'booking_id' => 'required',
-            'cancel_reason_id' => 'required'
+            'cancel_reason_id' => 'required',
+            'other_reason' =>  'required_if:cancel_reason_id,5'
         ];
     }
 

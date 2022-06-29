@@ -14,13 +14,12 @@ trait FindDistanceTraits
 
         $url = "https://maps.googleapis.com/maps/api/directions/json?origin=" . $pickUpLat . "," . $pickupLng . "&destination=" . $dropOffLat . "," . $dropOffLng . "&sensor=false&mode=driving&key=" . env('GOOGLE_MAP');
 
-        $client =  new Client;
+        $client = new Client;
 
         $makeRequest = $client->request('GET', $url);
 
         $response = $makeRequest->getBody();
-        $responseCode = json_decode($response,true);
-
+        $responseCode = json_decode($response, true);
 
 
         return [
@@ -32,20 +31,24 @@ trait FindDistanceTraits
     }
 
 
-    public function gettingVehicleTypeRecords($distance = null)
+    public function gettingVehicleTypeRecords($distance = null, $peakRate = null)
     {
 
         $findVehicleFares = VehicleType::get();
 
         $data = array();
 
-        foreach($findVehicleFares as $findVehicleFare)
-        {
+        foreach ($findVehicleFares as $findVehicleFare) {
             if ($findVehicleFare) {
-
+                $peak_factor_applied = 0;
                 $estimatedFare = 0;
                 if ($distance) {
                     $estimatedFare = $findVehicleFare->per_km_rate * $distance;
+                    if ($peakRate) {
+                        $estimatedFare = $estimatedFare * $peakRate;
+                        $peak_factor_applied = 1;
+                    }
+
                 }
 
 
@@ -54,19 +57,18 @@ trait FindDistanceTraits
                     'waiting_price_per_min' => (float)$findVehicleFare->waiting_price_per_min,
                     'vehicle_type_id' => $findVehicleFare->id,
                     'total_distance' => (float)$distance,
-                    'estimated_fare' => (float)$estimatedFare,'name'=>$findVehicleFare->name];
+                    'peak_factor_applied' => $peak_factor_applied,
+                    'peak_factor_rate' => $peakRate,
+                    'estimated_fare' => (float)$estimatedFare, 'name' => $findVehicleFare->name];
 
             }
         }
 
-        if(sizeof($data) > 0)
-        {
+        if (sizeof($data) > 0) {
             return $data;
-        }
-        else{
+        } else {
             return false;
         }
-
 
 
     }

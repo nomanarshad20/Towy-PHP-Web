@@ -33,12 +33,12 @@ class DriverLoginRequest extends FormRequest
         ];
     }
 
-//    public function messages()
-//    {
-//        return [
-//            'mobile_no.exists' => 'This mobile no has already been taken.Please go to login scree'
-//        ];
-//    }
+    public function messages()
+    {
+        return [
+            'mobile_no.exists' => "Account doesn't exist"
+        ];
+    }
 
     public function failedValidation(Validator $validator)
     {

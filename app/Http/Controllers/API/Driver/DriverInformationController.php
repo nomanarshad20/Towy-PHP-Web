@@ -47,7 +47,7 @@ class DriverInformationController extends Controller
         }
 
         DB::commit();
-        return makeResponse('success', 'Information Save Successfully', 200, $userResponse);
+        return makeResponse('success', 'Information Saved Successfully', 200, $userResponse);
     }
 
     public function saveDocument(SaveDriverDocument $request)
@@ -74,7 +74,7 @@ class DriverInformationController extends Controller
 
         $data = $this->authService->loginUserResponse();
 
-        return makeResponse('success', 'Document Upload Successfully', 200, $data);
+        return makeResponse('success', 'Document Uploaded Successfully', 200, $data);
     }
 
     public function saveVehicleInformation(SaveVehicleRequest $request)
@@ -84,13 +84,27 @@ class DriverInformationController extends Controller
         if($vehicleInformation['result'] == 'success')
         {
             $data = $this->authService->loginUserResponse();
-
         }
         else{
             return makeResponse('error',$vehicleInformation['message'],500);
         }
 
         return makeResponse('success',$vehicleInformation['message'] , 200, $data);
+
+    }
+
+    public function documentComplete()
+    {
+        $documentComplete = $this->driverService->documentComplete();
+
+        if($documentComplete['result'] == 'error')
+        {
+            return makeResponse('error',$documentComplete['message'],$documentComplete['code']);
+        }
+
+        $data = $this->authService->loginUserResponse();
+
+        return makeResponse('success',$documentComplete['message'] , 200, $data);
 
     }
 }

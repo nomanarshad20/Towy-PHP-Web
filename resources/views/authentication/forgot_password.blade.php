@@ -1,7 +1,7 @@
 @extends('layouts.admin.index')
 
 @section('title')
-    Forgot Password
+    Login
 @endsection
 
 
@@ -15,20 +15,10 @@
                     <div class="card">
                         <div class="row">
 
-                            <div class="col-md-5 pe-md-0">
-                                <div class="auth-side-wrapper">
-
-                                </div>
-                            </div>
-
-
-                            <div class="col-md-6 ps-md-0">
+                            <div class="col-md-12 ps-md-0">
                                 <div class="auth-form-wrapper px-4 py-5">
-                                    <a href="#" class="noble-ui-logo text-center d-block mb-2">
-                                        TOWY
-{{--                                        <span>Booking</span>--}}
-                                    </a>
-                                    <h5 class="text-muted text-center fw-normal mb-4">Send Password Reset Link on Your Email</h5>
+                                    <a href="#" class="noble-ui-logo text-center d-block mb-2">ToTo<span>Booking</span></a>
+                                    <h5 class="text-muted text-center fw-normal mb-4">Find Your Account?</h5>
                                     <form class="forms-sample" id="forgotPasswordForm">
                                         @csrf
                                         <div class="mb-3">
@@ -43,8 +33,6 @@
                                             </a>
 
                                         </div>
-                                        <a href="{{route('loginPage')}}" class="d-block mt-3 text-muted">Back To Login Page</a>
-
                                     </form>
                                 </div>
                             </div>

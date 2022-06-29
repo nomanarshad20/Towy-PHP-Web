@@ -60,9 +60,15 @@ class Socket extends Command
                 return $this->socketService->p2pTracking($data,$io,$socket);
             });
 
-            //driver will hit that and response will be send to passenger in case of active booking
+            //accept and reject booking. Notification will be send by and also response will be send from socket as well
             $socket->on('accept-reject-ride', function ($data) use ($io, $socket) {
                 return $this->socketService->acceptRejectRide($data,$io,$socket);
+            });
+
+
+            //accept and reject booking. Notification will be send by and also response will be send from socket as well
+            $socket->on('driver-change-booking-driver-status', function ($data) use ($io, $socket) {
+                return $this->socketService->changeBookingDriverStatus($data,$io,$socket);
             });
 
         });

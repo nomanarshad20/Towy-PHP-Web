@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Passenger;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\API\CreateBookingRequest;
+use App\Models\DriversCoordinate;
 use App\Traits\SendFirebaseNotificationTrait;
 use Illuminate\Http\Request;
 
@@ -64,7 +65,7 @@ class CreateRideController extends Controller
             //
             if (isset($saveDrivers['data']) && $saveDrivers['data']) {
 
-                $driver =  $saveDrivers['data']['id']->driver->update(['status'=>3]);
+                $driver =  DriversCoordinate::where('driver_id',$saveDrivers['data']['id'])->update(['status'=>3]);
 
                 $notification_type = 11;
                 $sendNotificationToDriver = $this->rideRequestNotification($saveDrivers['data'],$bookingData['data'],$notification_type);

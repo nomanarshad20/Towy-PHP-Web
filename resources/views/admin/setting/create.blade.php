@@ -6,7 +6,6 @@
 
 
 
-
 @section('body')
 
     <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
@@ -38,6 +37,52 @@
                             </div><!-- Col -->
 
 
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Allowed time to Cancel Without Fine </label>
+                                    <input type="text" name="cancel_ride_time" class="form-control"
+                                           placeholder="Enter Time (In Minutes)"
+                                           value="{{isset($data->cancel_ride_time) ? $data->cancel_ride_time:''}}"
+                                           onkeypress="return isNumberKey(event)">
+                                </div>
+                            </div><!-- Col -->
+
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Driver Cancel Ride Fine %</label>
+                                    <input type="text" name="driver_cancel_fine_amount" class="form-control"
+                                           placeholder="Enter Driver Cancel Ride Fine  %"
+                                           onkeypress="return isNumberKey(event)"
+                                           value="{{isset($data->driver_cancel_fine_amount) ? $data->driver_cancel_fine_amount:''}}"
+                                    >
+                                </div>
+                            </div><!-- Col -->
+
+
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Passenger Cancel Ride Fine %</label>
+                                    <input type="text" name="passenger_cancel_fine_amount" class="form-control"
+                                           placeholder="Enter Passenger Cancel Ride Fine %"
+                                           onkeypress="return isNumberKey(event)"
+                                           value="{{isset($data->passenger_cancel_fine_amount) ? $data->passenger_cancel_fine_amount:''}}"
+                                    >
+                                </div>
+                            </div><!-- Col -->
+
+
+
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Allowed Waiting Time for Driver At Pick Up Location (In Minutes)</label>
+                                    <input type="text" name="allowed_waiting_time" class="form-control"
+                                           placeholder="Enter Allowed Waiting Time for Driver At Pick Up Location (In Minutes)"
+                                           onkeypress="return isNumberKey(event)"
+                                           value="{{isset($data->allowed_waiting_time) ? $data->allowed_waiting_time:''}}"
+                                    >
+                                </div>
+                            </div><!-- Col -->
+
 
                         </div><!-- Row -->
 
@@ -58,8 +103,11 @@
 
 
 
+
+
     <script>
         $(document).ready(function () {
+
 
             $('.createBtn').click(function () {
 

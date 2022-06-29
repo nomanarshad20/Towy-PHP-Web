@@ -1,7 +1,7 @@
 @extends('layouts.admin.index')
 
 @section('title')
-    Reset Password
+    Login
 @endsection
 
 
@@ -15,19 +15,10 @@
                     <div class="card">
                         <div class="row">
 
-                            <div class="col-md-5 pe-md-0">
-                                <div class="auth-side-wrapper">
-
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 ps-md-0">
+                            <div class="col-md-12 ps-md-0">
                                 <div class="auth-form-wrapper px-4 py-5">
-                                    <a href="#" class="noble-ui-logo text-center d-block mb-2">
-                                        TOWY
-{{--                                        <span>Booking</span>--}}
-                                    </a>
-                                    <h5 class="text-muted text-center fw-normal mb-4">Reset Your Password</h5>
+                                    <a href="#" class="noble-ui-logo text-center d-block mb-2">ToTo<span>Booking</span></a>
+                                    <h5 class="text-muted text-center fw-normal mb-4">Find Your Account?</h5>
                                     <form class="forms-sample" id="updatePassForm">
                                         @csrf
                                         <div class="mb-3">

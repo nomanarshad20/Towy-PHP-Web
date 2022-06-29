@@ -9,12 +9,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Rules\MatchOldPassword;
 use Illuminate\Http\Request;
-
+use App\Traits\CreateUserWalletTrait;
 //use Illuminate\Support\Facades\Validator;
 use Validator;
 
 class AuthService
 {
+    use CreateUserWalletTrait;
+
     public function checkPhoneNumber($mobile_no)
     {
         $check = User::where('mobile_no', $mobile_no)->where('user_type', 1)->first();
@@ -38,7 +40,8 @@ class AuthService
 
         return $response;
 
-    }*/
+    }
+    */
 
     public function userLoginCheck($mobileNo, $password, $userType)
     {
@@ -354,6 +357,18 @@ class AuthService
     {
 
         if (isset($user)) {
+            // Get Passenger Wallet
+            $passengerWallet    =    $user->wallet('Passenger-Wallet');
+
+            if(!isset($passengerWallet) || $passengerWallet == null) {
+                // Create Wallet For Passenger
+                $this->createUserWallet($user,'Passenger-Wallet');
+                //Again Get Passenger Wallet
+                $passengerWallet = $user->wallet('Passenger-Wallet');
+            }
+
+            $balance = $passengerWallet->balance ?? 0;
+
             $userArr = [
                 'user_id' => $user->id,
                 'email' => $user->email,
@@ -365,7 +380,8 @@ class AuthService
                 'steps' => $user->steps,
                 'provider' => $user->provider,
                 'image' => $user->image,
-                'name' => $user->name
+                'name' => $user->name,
+                'wallet_balance'=> $balance
             ];
 
             if (isset($accessToken) && $accessToken != null) {
@@ -380,6 +396,7 @@ class AuthService
 
 
     }
+
 
 
 }

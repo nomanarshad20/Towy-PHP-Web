@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\VehicleTypeController;
 use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\VehicleFareController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\PeakFactorController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -101,6 +102,15 @@ Route::namespace('Admin')->group(function () {
 
         Route::get('settings',[SettingController::class,'index'])->name('setting');
         Route::post('save-settings',[SettingController::class,'save'])->name('saveSetting');
+
+        Route::get('peak-factor-listing',[PeakFactorController::class,'index'])->name('peakFactorListing');
+        Route::get('peak-factor-create',[PeakFactorController::class,'create'])->name('peakFactorCreate');
+        Route::post('peak-factor-save',[PeakFactorController::class,'save'])->name('peakFactorSave');
+        Route::get('peak-factor-edit/{id}',[PeakFactorController::class,'edit'])->name('peakFactorEdit');
+        Route::post('peak-factor-update',[PeakFactorController::class,'update'])->name('peakFactorUpdate');
+        Route::post('peak-factor-delete',[PeakFactorController::class,'delete'])->name('peakFactorDelete');
+
+
 
 
 

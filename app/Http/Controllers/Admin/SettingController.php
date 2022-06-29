@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\SaveSettingRequest;
 use App\Services\Admin\SettingService;
 use Illuminate\Http\Request;
 
@@ -20,7 +21,7 @@ class SettingController extends Controller
         return $this->settingService->index();
     }
 
-    public function save(Request $request)
+    public function save(SaveSettingRequest $request)
     {
         return $this->settingService->save($request);
     }

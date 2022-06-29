@@ -33,8 +33,23 @@ trait SendFirebaseNotificationTrait
         return true;
     }
 
+    public function duringRideNotifications($passengerFCM,$booking,$notification_type)
+    {
+        $data = array();
+        $data['notification_type']  = $notification_type;
+        $data ['title'] = 'Driver Arrived';
+        $data['body'] = 'Driver Reached to Your PickUp Location';
+        $data['data'] = (object)$booking;
+
+        $this->sendPushNotification($passengerFCM,$data);
+
+        return true;
+    }
+
+
     public function sendPushNotification($fcm, $dataBody)
     {
+
         $client = new \GuzzleHttp\Client(['verify' => false]);
         $API_SERVER_KEY = env('FCM_SERVER_KEY');
 
@@ -48,7 +63,7 @@ trait SendFirebaseNotificationTrait
                     'Content-Type' => 'application/json'
                 ],
                 'body' => json_encode([
-                    "to" => 'dO3iYmudTKi8_9SFaxhkEY:APA91bHNX0j9NPmjkddfzBOlX1Q2pqAth2XX6JCq0WaUaHngvoMTKO3RArpuTHxABNv7Xmle0CqjX1Qe2TEnD8451NxBQTKNhH-kWPxsKk2802YP2cbIsof0dLGo5iKh4G1rlmhTFgZ4',
+                    "to" => $fcm,
                     "priority" => "high",
                     "content_available" => true,
                     "mutable_content" => true,

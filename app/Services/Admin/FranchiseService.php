@@ -7,9 +7,11 @@ namespace App\Services\Admin;
 use App\Models\Franchise;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use App\Traits\CreateUserWalletTrait;
 
 class FranchiseService
 {
+    use CreateUserWalletTrait;
     public function index()
     {
         $data = User::where('user_type', 3)->get();
@@ -29,6 +31,19 @@ class FranchiseService
             $user = User::create(['name' => $request->name, 'mobile_no' => $request->mobile_no,
                 'email' => $request->email, 'password' => bcrypt($request->password), 'user_type' => 3
             ]);
+
+            $franchiseWalletName = $request->name."-Wallet";
+            // Get Franchise Wallet
+            $franchiseWallet     =    $user->wallet($franchiseWalletName);
+
+            if(!isset($franchiseWallet) || $franchiseWallet == null) {
+                // Create New Franchise Wallet
+                $this->createUserWallet($user,$franchiseWalletName);
+                //Again Get Franchise Wallet
+                $franchiseWallet = $user->wallet($franchiseWalletName);
+                $balance = $franchiseWallet->balance ?? 0;
+            }
+
         } catch (\Exception $e) {
             DB::rollBack();
             return makeResponse('error', 'Error in Creating Franchise: ' . $e, 500);

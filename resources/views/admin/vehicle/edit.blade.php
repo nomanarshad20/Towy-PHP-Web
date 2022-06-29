@@ -67,7 +67,7 @@
                                     <select class="form-control" name="driver_id">
                                         <option value="" selected disabled>Select</option>
                                         @foreach($drivers as $driver)
-                                            <option value="{{$driver->user->id}}" {{$data->driver->user_id == $driver->user->id ? 'selected':''}}>{{$driver->user->name}}</option>
+                                            <option value="{{$driver->user->id}}" {{isset($data->driver) ? $data->driver->user_id == $driver->user->id ? 'selected':'':''}}>{{$driver->user->name}}</option>
                                         @endforeach
                                     </select>
 
