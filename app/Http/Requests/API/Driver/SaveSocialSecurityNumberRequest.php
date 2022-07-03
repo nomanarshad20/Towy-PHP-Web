@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Admin;
+namespace App\Http\Requests\API\Driver;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class SaveSettingRequest extends FormRequest
+class SaveSocialSecurityNumberRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,12 +24,14 @@ class SaveSettingRequest extends FormRequest
     public function rules()
     {
         return [
-            'search_range' => 'required',
-            'cancel_ride_time' => 'required',
-            'driver_cancel_fine_amount' => 'required',
-            'passenger_cancel_fine_amount' => 'required',
-            'allowed_waiting_time' => 'required',
-            'min_time_interval' => 'required'
+            'ssn' => 'required'
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'ssn.required' => 'Social Security Number is a Required Field'
         ];
     }
 }

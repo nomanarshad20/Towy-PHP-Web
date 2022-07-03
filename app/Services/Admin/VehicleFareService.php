@@ -41,6 +41,8 @@ class VehicleFareService
         $data->tax_rate =  $request->tax_rate;
         $data->name =  $request->name;
         $data->created_by =  Auth::user()->id;
+        $data->initial_distance_rate =  $request->initial_distance_rate;
+        $data->initial_time_rate = $request->initial_time_rate;
 //        $data->created_at = Carbon::now()->format('Y-m-d H:i:s');
 //        $data->updated_at = Carbon::now()->format('Y-m-d H:i:s');
 

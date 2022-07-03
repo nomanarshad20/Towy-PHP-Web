@@ -27,14 +27,47 @@ class AuthService
 //            $otpCode = mt_rand(1000, 9999);
 
 
+            $checkType =  $this->checkType($request->login);
+
+            $mobile = $email = null;
+
+            if($checkType == 'mobile_no')
+            {
+                $mobile = $request->login;
+                $email =  null;
+
+                $checkUser =  User::where('mobile_no',$mobile)->first();
+                if($checkUser)
+                {
+                    $response = ['result'=>'error','message'=>'This mobile number is already is in use','code'=>422];
+                    return $response;
+                }
+            }
+            elseif($checkType == 'email'){
+                $mobile = null;
+                $email =  $request->login;
+
+                $checkUser =  User::where('email',$email)->first();
+                if($checkUser)
+                {
+                    $response = ['result'=>'error','message'=>'The email is already is in use','code'=>422];
+                    return $response;
+                }
+            }
+            else{
+                $response = ['result'=>'error','message'=>'Please Enter Valid Mobile No or Email','code'=>422];
+                return $response;
+            }
+
+
             $user = User::create([
 //                'otp' => $otpCode,
-                'mobile_no' => $request->mobile_no,
+                'mobile_no' => $mobile,
                 'fcm_token' => $request->fcm_token,
                 'user_type' => $request->user_type,
 //                'steps' => 1,
 //                'name' => $request->name,
-//                'email' => $request->email,
+                'email' => $email,
 //                'password' => bcrypt($request->password),
 //                'steps' => 3,
 //                'referrer' => $request->referrer,
@@ -53,7 +86,7 @@ class AuthService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            $response = ['result' => 'error', 'data' => $e];
+            $response = ['result' => 'error', 'data' => $e,'code'=>500];
         }
 
         return $response;
@@ -78,11 +111,26 @@ class AuthService
 
     }
 
-    public function checkUser($mobileNo, $password, $userType)
+    public function checkUser($login, $password, $userType)
     {
+        $checkLoginType =  $this->checkType($login);
 
         if ($password) {
-            $credentials = ['mobile_no' => $mobileNo, 'password' => $password];
+
+            if($checkLoginType == 'mobile_no')
+            {
+                $credentials = ['mobile_no' => $login, 'password' => $password];
+            }
+            elseif($checkLoginType == 'email')
+            {
+                $credentials = ['email' => $login, 'password' => $password];
+            }
+            else{
+                $response = ['result'=>'error','message'=>'Please Enter Valid Mobile No or Email','code'=>422];
+                return $response;
+            }
+
+
 
             if (Auth::attempt($credentials)) {
                 if (Auth::user()->user_type == $userType) {
@@ -146,7 +194,7 @@ class AuthService
 
         $driverDocumentStatus = array();
         if (Auth::user()->is_verified == 0) {
-            if (Auth::user()->steps == 3) {
+            if (Auth::user()->steps == 2) {
 
                 $driverDocumentStatus = [
                     'cnic_front_side' => isset(Auth::user()->driver) ? Auth::user()->driver->cnic_front_side ? 1 : 0 : 0,
@@ -154,6 +202,7 @@ class AuthService
                     'license_front_side' => isset(Auth::user()->driver) ? Auth::user()->driver->license_front_side ? 1 : 0 : 0,
                     'license_back_side' => isset(Auth::user()->driver) ? Auth::user()->driver->license_back_side ? 1 : 0 : 0,
                     'image' => Auth::user()->image ? 1 : 0,
+                    'ssn' => Auth::user()->driver->ssn ? 1:0,
                     'registration_book' => isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->registration_book ? 1 : 0 : 0
                 ];
             }
@@ -211,8 +260,10 @@ class AuthService
             'documents' => (object)$driverDocumentStatus,
             'image' => Auth::user()->image,
             'driver_wallet_balance' => $balance,
-            'availability_status' => $driverStatus
-
+            'availability_status' => $driverStatus,
+            'vehicle_registration_number' => isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->registration_number : null,
+            'name' => Auth::user()->name,
+            'rating' => 5,
         ];
 
         if ($token) {
@@ -347,6 +398,16 @@ class AuthService
             return $response;
         }
 
+    }
+
+    public function checkType($login)
+    {
+        if(is_numeric($login)){
+            return 'mobile_no';
+        }
+        elseif (filter_var($login, FILTER_VALIDATE_EMAIL)) {
+            return 'email';
+        }
     }
 
 }

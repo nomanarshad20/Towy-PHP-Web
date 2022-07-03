@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Passenger;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\API\FindDistanceRequest;
+use App\Models\PeakFactor;
 use App\Services\API\Passenger\RideService;
 use App\Services\API\PeakService;
 use App\Traits\FindDistanceTraits;
@@ -46,9 +47,11 @@ class RideInitialDistanceController extends Controller
             $findDriver = $this->fetchDrivers($data);
             $totalDriver = count($findDriver);
             $peakRate = null;
-            if($totalBooking > $totalDriver)
+
+
+            if($totalBooking > $totalDriver && $totalDriver > 0)
             {
-                $peakFactor = PeakService::where('start_point','<=',$totalBooking)->where('end_point','>=',$totalBooking)->first();
+                $peakFactor = PeakFactor::where('start_point','<=',$totalBooking)->where('end_point','>=',$totalBooking)->first();
 
                 $peakRate = $peakFactor->factor_rate;
             }
@@ -68,7 +71,7 @@ class RideInitialDistanceController extends Controller
         }
 
         if (sizeof($gettingVehicleTypeRecords) > 0) {
-            return makeResponse('success', 'Distance and Fare Caluclate Successfully', 200, $gettingVehicleTypeRecords);
+            return makeResponse('success', 'Distance and Fare Calculated Successfully', 200, $gettingVehicleTypeRecords);
         } else {
             return makeResponse('error', 'Record Not Found', 500);
 

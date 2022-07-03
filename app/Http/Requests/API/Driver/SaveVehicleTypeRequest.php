@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class DriverRegisterRequest extends FormRequest
+class SaveVehicleTypeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,21 +26,7 @@ class DriverRegisterRequest extends FormRequest
     public function rules()
     {
         return [
-            'login' => 'required',
-            'fcm_token' => 'required',
-            'user_type' => 'required|in:2',
-            'first_name' => 'required',
-            'last_name' => 'required',
-//            'email' => 'required|email',
-            'city' => 'required',
-            'password' => 'required|min:8|confirmed'
-        ];
-    }
-
-    public function messages()
-    {
-        return [
-            'mobile_no.unique' => 'This mobile number is already registered. Please go to login screen'
+            'vehicle_type_id' => 'required|exists:vehicle_types,id'
         ];
     }
 

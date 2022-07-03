@@ -23,21 +23,24 @@
                         @csrf
                         <input type="hidden" name="id" value="{{$data->id}}">
                         <div class="row">
+
                             <div class="col-sm-6">
                                 <div class="mb-3">
                                     <label class="form-label">Name</label>
-                                    <input type="text" name="name" class="form-control" placeholder="Enter Name"
-                                           value="{{$data->name}}">
+                                    <input type="text" name="name" class="form-control"
+                                           placeholder="Enter Name"
+                                           value="{{isset($data->name) ? $data->name:''}}"
+                                           onkeypress="return isCharacterKey(event)">
                                 </div>
                             </div><!-- Col -->
-
 
                             <div class="col-sm-6">
                                 <div class="mb-3">
                                     <label class="form-label">Min Fare</label>
                                     <input type="text" name="min_fare" class="form-control"
-                                           value="{{$data->min_fare}}"
-                                           placeholder="Enter Min Fare" onkeypress="return isNumberKey(event)">
+                                           placeholder="Enter Min Fare"
+                                           value="{{isset($data->min_fare) ? $data->min_fare:''}}"
+                                           onkeypress="return isNumberKey(event)">
                                 </div>
                             </div><!-- Col -->
                             <div class="col-sm-6">
@@ -45,7 +48,7 @@
                                     <label class="form-label">Per Km Rate</label>
                                     <input type="text" name="per_km_rate" class="form-control"
                                            onkeypress="return isNumberKey(event)"
-                                           value="{{$data->per_km_rate}}"
+                                           value="{{isset($data->per_km_rate) ? $data->per_km_rate:''}}"
                                            placeholder="Enter Per Km Rate" autocomplete="chrome-off">
                                 </div>
                             </div><!-- Col -->
@@ -55,8 +58,30 @@
                                 <div class="mb-3">
                                     <label class="form-label">Per Min Rate</label>
                                     <input type="text" name="per_min_rate" class="form-control"
-                                           value="{{$data->per_min_rate}}"
+                                           value="{{isset($data->per_min_rate) ? $data->per_min_rate:''}}"
                                            placeholder="Enter Per Min Rate" onkeypress="return isNumberKey(event)">
+
+
+                                </div>
+                            </div><!-- Col -->
+
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Initial Per Km Rate (Before PickUp)</label>
+                                    <input type="text" name="initial_distance_rate" class="form-control"
+                                           onkeypress="return isNumberKey(event)"
+                                           value="{{isset($data->initial_distance_rate) ? $data->initial_distance_rate:''}}"
+                                           placeholder="Enter Initial Per Km Rate" autocomplete="chrome-off">
+                                </div>
+                            </div><!-- Col -->
+
+
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Initial Per Min Rate (Before PickUp)</label>
+                                    <input type="text" name="initial_time_rate" class="form-control"
+                                           value="{{isset($data->initial_time_rate) ? $data->initial_time_rate:''}}"
+                                           placeholder="Enter Initial Per Min Rate" onkeypress="return isNumberKey(event)">
 
 
                                 </div>
@@ -67,7 +92,7 @@
                                     <label class="form-label">Waiting Price Per Min</label>
                                     <input type="text" name="waiting_price_per_min" class="form-control"
                                            placeholder="Enter Waiting Price Per Min"
-                                           value="{{$data->waiting_price_per_min}}"
+                                           value="{{isset($data->waiting_price_per_min) ? $data->waiting_price_per_min:''}}"
                                            onkeypress="return isNumberKey(event)">
 
 
@@ -79,19 +104,9 @@
                                 <div class="mb-3">
                                     <label class="form-label">Tax (%)</label>
                                     <input type="text" name="tax_rate" class="form-control"
-                                           value="{{$data->tax_rate}}"
+                                           value="{{isset($data->tax_rate) ? $data->tax_rate:''}}"
                                            placeholder="Enter Tax (%)" onkeypress="return isNumberKey(event)">
 
-
-                                </div>
-                            </div><!-- Col -->
-
-
-                            <div class="col-sm-12">
-                                <div class="mb-3">
-                                    <label class="form-label">Description</label>
-                                    <textarea name="description" class="form-control"
-                                              placeholder="Enter Description">{{$data->description}}</textarea>
 
                                 </div>
                             </div><!-- Col -->

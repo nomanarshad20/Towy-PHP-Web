@@ -29,7 +29,9 @@ class SaveVehicleFareRequest extends FormRequest
             'min_fare' => 'required',
             'tax_rate' => 'required',
             'waiting_price_per_min' => 'required',
-            'name' => 'required'
+            'name' => 'required',
+            'initial_distance_rate' => 'required',
+            'initial_time_rate' => 'required'
         ];
     }
 }

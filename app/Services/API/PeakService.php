@@ -15,14 +15,20 @@ class PeakService
     public function calculateTotalBooking($pick_up_lat, $pick_up_lng)
     {
         $distanceRange = 10;
+        $timeInterval = 10;
+
         $setting = Setting::first();
         if ($setting) {
             if ($setting->search_range) {
                 $distanceRange = $setting->search_range;
             }
+
+            if($setting->min_time_interval)
+            {
+                $timeInterval = $setting->min_time_interval;
+            }
         }
 
-        $timeInterval = 5;
 
         $lat = $pick_up_lat;
         $lng = $pick_up_lng;

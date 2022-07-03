@@ -28,7 +28,7 @@ class AuthController extends Controller
     public function login(DriverLoginRequest $request)
     {
         try{
-            $checkUser = $this->authService->checkUser($request->mobile_no,$request->password,$request->user_type);
+            $checkUser = $this->authService->checkUser($request->login,$request->password,$request->user_type);
         }
         catch (\Exception $e)
         {
@@ -84,7 +84,7 @@ class AuthController extends Controller
         if($createUser['result'] == 'error')
         {
             DB::rollBack();
-            return makeResponse('error','Error in Saving User Record: '.$createUser['data'],500);
+            return makeResponse($createUser['result'],$createUser['message'],$createUser['code']);
         }
 
         $saveUserInformation = $this->driverService->save($request,$createUser['data']);

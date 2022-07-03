@@ -22,7 +22,8 @@ class SettingService
             'cancel_ride_time' =>$request->cancel_ride_time,
             'passenger_cancel_fine_amount' => $request->passenger_cancel_fine_amount,
             'driver_cancel_fine_amount' => $request->driver_cancel_fine_amount,
-            'allowed_waiting_time' =>  $request->allowed_waiting_time
+            'allowed_waiting_time' =>  $request->allowed_waiting_time,
+            'min_time_interval' =>  $request->min_time_interval
         ];
 
         if($request->id)

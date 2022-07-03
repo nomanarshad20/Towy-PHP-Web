@@ -79,6 +79,9 @@ Route::group(['middleware' => ['json.response']], function () {
                 Route::post('driver-save-vehicle-information',[DriverInformationController::class,'saveVehicleInformation']);
                 Route::post('driver-profile-update',[ProfileController::class,'saveProfile']);
                 Route::get('driver-document-complete',[DriverInformationController::class,'documentComplete']);
+                Route::get('driver-get-vehicle-types',[DriverInformationController::class,'getVehicleType']);
+                Route::get('driver-save-vehicle-type',[DriverInformationController::class,'saveVehicleType']);
+                Route::get('driver-save-social-security-number',[DriverInformationController::class,'saveSocialSecurityNumber']);
 
                 Route::post('driver-save-location',[DriverLocationController::class,'save']);
 
@@ -89,6 +92,7 @@ Route::group(['middleware' => ['json.response']], function () {
                 Route::get('change-driver-status',[DriverController::class,'changeDriverOnlineStatus']);
 
                 Route::get('get-driver-current-status',[DriverController::class,'getCurrentStatus']);
+                Route::get('driver-logout',[DriverController::class,'driverLogout']);
 
             });
 

@@ -70,6 +70,28 @@
 
                             <div class="col-sm-6">
                                 <div class="mb-3">
+                                    <label class="form-label">Initial Per Km Rate (Before PickUp)</label>
+                                    <input type="text" name="initial_distance_rate" class="form-control"
+                                           onkeypress="return isNumberKey(event)"
+                                           value="{{isset($data->initial_distance_rate) ? $data->initial_distance_rate:''}}"
+                                           placeholder="Enter Initial Per Km Rate" autocomplete="chrome-off">
+                                </div>
+                            </div><!-- Col -->
+
+
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Initial Per Min Rate (Before PickUp)</label>
+                                    <input type="text" name="initial_time_rate" class="form-control"
+                                           value="{{isset($data->initial_time_rate) ? $data->initial_time_rate:''}}"
+                                           placeholder="Enter Initial Per Min Rate" onkeypress="return isNumberKey(event)">
+
+
+                                </div>
+                            </div><!-- Col -->
+
+                            <div class="col-sm-6">
+                                <div class="mb-3">
                                     <label class="form-label">Waiting Price Per Min</label>
                                     <input type="text" name="waiting_price_per_min" class="form-control"
                                            placeholder="Enter Waiting Price Per Min"

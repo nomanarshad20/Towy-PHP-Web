@@ -5,7 +5,10 @@ namespace App\Http\Controllers\API\Driver;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\API\Driver\DriverSaveInformationRequest;
 use App\Http\Requests\API\Driver\SaveDriverDocument;
+use App\Http\Requests\API\Driver\SaveSocialSecurityNumberRequest;
 use App\Http\Requests\API\Driver\SaveVehicleRequest;
+use App\Http\Requests\API\Driver\SaveVehicleTypeRequest;
+use App\Services\Admin\Auth\LoginService;
 use App\Services\API\Driver\AuthService;
 use App\Services\API\Driver\DriverInformationService;
 use Illuminate\Http\Request;
@@ -106,5 +109,40 @@ class DriverInformationController extends Controller
 
         return makeResponse('success',$documentComplete['message'] , 200, $data);
 
+    }
+
+    public function getVehicleType()
+    {
+        $getVehicleTypes =  $this->driverService->getVehicleType();
+
+        return makeResponse($getVehicleTypes['result'],$getVehicleTypes['message'],$getVehicleTypes['code'], $getVehicleTypes['data']);
+    }
+
+    public function saveVehicleType(SaveVehicleTypeRequest  $request)
+    {
+        $saveVehicleType =  $this->driverService->saveVehicleType($request);
+
+        if($saveVehicleType['result'] == 'error')
+        {
+            return makeResponse($saveVehicleType['result'],$saveVehicleType['message'],$saveVehicleType['code']);
+        }
+
+        $data = $this->authService->loginUserResponse();
+
+        return makeResponse($saveVehicleType['result'],$saveVehicleType['message'],$saveVehicleType['code'],$data);
+    }
+
+    public function saveSocialSecurityNumber(SaveSocialSecurityNumberRequest $request)
+    {
+        $saveVehicleType =  $this->driverService->saveSocialSecurityNumber($request);
+
+        if($saveVehicleType['result'] == 'error')
+        {
+            return makeResponse($saveVehicleType['result'],$saveVehicleType['message'],$saveVehicleType['code']);
+        }
+
+        $data = $this->authService->loginUserResponse();
+
+        return makeResponse($saveVehicleType['result'],$saveVehicleType['message'],$saveVehicleType['code'],$data);
     }
 }

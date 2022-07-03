@@ -7,6 +7,7 @@ use App\Http\Requests\API\Driver\DriverConnectionStatusRequest;
 use App\Services\API\Driver\AuthService;
 use App\Services\API\Driver\DriverService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DriverController extends Controller
 {
@@ -53,5 +54,19 @@ class DriverController extends Controller
         }
 
         return makeResponse($driverStatus['result'], $driverStatus['message'], $driverStatus['code'], $data);
+    }
+
+    public function driverLogout()
+    {
+        try {
+            Auth::user()->driverCoordinate->update(['status' => 0]);
+            Auth::user()->tokens()->delete();
+
+            return makeResponse('success', 'Driver Logout Successfully', 200);
+        } catch (\Exception $e) {
+            return makeResponse('error', 'Error during driver logout: ' . $e, 200);
+
+        }
+
     }
 }

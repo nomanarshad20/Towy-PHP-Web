@@ -9,6 +9,7 @@ use App\Models\Driver;
 use App\Models\DriversCoordinate;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Models\VehicleType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use const http\Client\Curl\AUTH_ANY;
@@ -45,19 +46,20 @@ class DriverInformationService
             }
 
 
-            $checkForEMail = User::where('id', '!=', $userID)
-                ->where('email', $request->email)->first();
+//            $checkForEMail = User::where('id', '!=', $userID)
+//                ->where('email', $request->email)->first();
 
-            if ($checkForEMail) {
-                $response = ['result' => 'error', 'message' => 'Email is already taken', 'code' => 422];
+//            if ($checkForEMail) {
+//                $response = ['result' => 'error', 'message' => 'Email is already taken', 'code' => 422];
+//
+//                return $response;
+//            }
 
-                return $response;
-            }
-
-            Auth::user()->name = $request->name;
-            Auth::user()->email = $request->email;
+            Auth::user()->first_name = $request->first_name;
+            Auth::user()->last_name = $request->last_name;
+//            Auth::user()->email = $request->email;
             Auth::user()->password = bcrypt($request->password);
-            Auth::user()->steps = 3;
+            Auth::user()->steps = 1;
 
             Auth::user()->save();
         } catch (\Exception $e) {
@@ -67,7 +69,7 @@ class DriverInformationService
         }
 
         try {
-            $driver = Driver::create(['user_id' => Auth::user()->id, 'vehicle_type_id' => 1,
+            $driver = Driver::create(['user_id' => Auth::user()->id,
                 'city' => $request->city]);
             DB::commit();
 
@@ -229,26 +231,86 @@ class DriverInformationService
         try {
 
             if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
-                && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
-                && isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->registration_book :false
+            && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
+            && isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->registration_book : false
                 && Auth::user()->image) {
                 Auth::user()->steps = 4;
             }
             Auth::user()->save();
 
 
-            DriversCoordinate::create(['status'=>0,'driver_id'=>Auth::user()->id]);
+            DriversCoordinate::create(['status' => 0, 'driver_id' => Auth::user()->id]);
 
-            $response = ['result' => 'success', 'message' => 'All Documents are saved successfully.','code'=>200];
-
-            return $response;
-
-        }
-        catch (\Exception $e) {
-            $response = ['result' => 'error', 'message' => 'Error in Saving Step: ' . $e,'code'=>500];
+            $response = ['result' => 'success', 'message' => 'All Documents are saved successfully.', 'code' => 200];
 
             return $response;
+
+        } catch (\Exception $e) {
+            $response = ['result' => 'error', 'message' => 'Error in Saving Step: ' . $e, 'code' => 500];
+
+            return $response;
         }
+    }
+
+    public function getVehicleType()
+    {
+        $data = VehicleType::select('id', 'name')->where('status', 1)->get();
+//        $vehicleTypeArray =  array();
+//        foreach($data as $vehicleType)
+//        {
+//            $vehicleTypeArray[] = ['id'=>$vehicleType->id,'name'=>$vehicleType->name];
+//        }
+
+        if (sizeof($data) > 0) {
+            $response = ['result' => 'success', 'message' => 'Vehicle Type Found Successfully', 'code' => 200, 'data' => $data];
+        } else {
+            $response = ['result' => 'error', 'message' => 'Vehicle Type Not Found', 'code' => 404, 'data' => null];
+        }
+        return $response;
+    }
+
+    public function saveVehicleType($request)
+    {
+        DB::beginTransaction();
+        try {
+            Auth::user()->driver->vehicle_type_id = $request->vehicle_type_id;
+            Auth::user()->driver->save();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $response = ['result' => 'error', 'message' => 'Error in Saving Vehicle Type Record: ' . $e, 'code' => 500];
+            return $response;
+        }
+
+        try {
+            Auth::user()->steps = 2;
+            Auth::user()->save();
+            DB::commit();
+            $response = ['result' => 'success', 'message' => 'Vehicle Type Save Successfully', 'code' => 200];
+            return $response;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $response = ['result' => 'error', 'message' => 'Error in Saving Vehicle Type Record: ' . $e, 'code' => 500];
+            return $response;
+        }
+    }
+
+    public function saveSocialSecurityNumber($request)
+    {
+        DB::beginTransaction();
+        try {
+            Auth::user()->driver->ssn = $request->ssn;
+            Auth::user()->driver->save();
+
+            DB::commit();
+            $response = ['result' => 'success', 'message' => 'Social Security Number Save Successfully', 'code' => 200];
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $response = ['result' => 'error', 'message' => 'Error in Saving Vehicle Type Record: ' . $e, 'code' => 500];
+
+        }
+        return $response;
+
     }
 
 

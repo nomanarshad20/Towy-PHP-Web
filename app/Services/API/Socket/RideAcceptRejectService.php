@@ -143,9 +143,10 @@ class RideAcceptRejectService
 
             $findNextDriver = AssignBookingDriver::where('booking_id', $findBooking->id)
                 ->whereNull('status')
-                ->where('id', '!=', $findDriverRecord->id)
+                ->where('driver_id', '!=', $gettingCurrentUser->id)
                 ->orderBy('id', 'asc')
                 ->first();
+
 
             if ($findNextDriver) {
                 $driverRecord = User::find($findNextDriver->driver_id);
@@ -179,6 +180,29 @@ class RideAcceptRejectService
                         'data' => null
                     ]
                 );
+            }
+            else{
+                if($data['driver_action'] == 2)
+                {
+                    $socket->to($gettingCurrentUser->socket_id)->emit('finalRideStatus',
+                        [
+                            'result' => 'error',
+                            'message' => "You have ignored ride request" ,
+                            'data' => null
+                        ]
+                    );
+                }
+                elseif($data['driver_action'] == 0)
+                {
+                    $socket->to($gettingCurrentUser->socket_id)->emit('finalRideStatus',
+                        [
+                            'result' => 'error',
+                            'message' => "You have rejected ride request" ,
+                            'data' => null
+                        ]
+                    );
+                }
+
             }
         }
 

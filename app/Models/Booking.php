@@ -28,7 +28,7 @@ class Booking extends Model
         return $this->belongsTo(User::class,'driver_id');
     }
 
-    public function frachise()
+    public function franchise()
     {
         return $this->belongsTo(User::class,'franchise_id');
     }

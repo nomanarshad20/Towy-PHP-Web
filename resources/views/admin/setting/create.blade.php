@@ -84,6 +84,22 @@
                             </div><!-- Col -->
 
 
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Min Time Interval For Peak Factor(In Minutes)</label>
+                                    <input type="text" name="min_time_interval" class="form-control"
+                                           placeholder="Enter Min Time Interval For Peak Factor(In Minutes)"
+                                           onkeypress="return isNumberKey(event)"
+                                           value="{{isset($data->min_time_interval) ? $data->min_time_interval:''}}"
+                                    >
+                                </div>
+                            </div><!-- Col -->
+
+
+
+
+
+
                         </div><!-- Row -->
 
 

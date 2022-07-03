@@ -90,8 +90,16 @@ class SocketController extends Controller
     {
         try {
 
-            if (!$data['user_id']) {
+            if (!isset($data['socket_id'])) {
                 $socket->emit('error', [
+                    'result' => 'error',
+                    'message' => 'Socket ID is a Required Field',
+                    'data' => null
+                ]);
+            }
+
+            if (!$data['user_id']) {
+                $socket->emit('driverCoordinate', [
                         'result' => 'error',
                         'message' => 'User ID is a Required Field',
                         'data' => null
@@ -104,7 +112,7 @@ class SocketController extends Controller
             if (!$currentUser) {
                 $io->emit('error',
                     [
-                        'result' => 'error',
+                        'result' => 'driverCoordinate',
                         'message' => 'User Not Found',
                         'data' => null
                     ]
@@ -116,7 +124,7 @@ class SocketController extends Controller
                 ->first();
             if (!$driver) {
 
-                $io->to($currentUser->socket_id)->emit('error', [
+                $io->to($currentUser->socket_id)->emit('driverCoordinate', [
                     'result' => 'error',
                     'message' => 'Record Not Found',
                     'data' => null
@@ -125,50 +133,55 @@ class SocketController extends Controller
             }
 
 
-            $checkForBooking = Booking::where('driver_id', $data['user_id'])
-                ->where('id', $data['booking_id'])
-                ->where('ride_status', 1)->first();
+            if($data['booking_id'])
+            {
 
-            if ($checkForBooking) {
+                $checkForBooking = Booking::where('driver_id', $data['user_id'])
+                    ->where('id', $data['booking_id'])
+                    ->where('ride_status', 1)->first();
 
-                $calculateDistance = $this->getDistance($data->latitude, $data->longitude,
-                    $driver->latitude,
-                    $driver->longitude);
+                if ($checkForBooking) {
 
-                $distanceInKm = str_replace(',', '', str_replace('km', '', $calculateDistance['text']));
+                    $calculateDistance = $this->getDistance($data->latitude, $data->longitude,
+                        $driver->latitude,
+                        $driver->longitude);
 
-                P2PBookingTracking::create(['booking_id' => $checkForBooking->id,
-                    'driver_id' => $checkForBooking->driver_id,
-                    'latitude' => $data->latitude, 'longitude' => $data->longitude,
-                    'distance' => trim($distanceInKm),
-                    'status' => $checkForBooking->driver_status]);
+                    $distanceInKm = str_replace(',', '', str_replace('km', '', $calculateDistance['text']));
 
-                //saving driver current lat and lng
-                $driver->latitude = $data['latitude'];
-                $driver->latitude = $data['longitude'];
-                $driver->area_name = $data['area_name'];
-                $driver->city = $data['city'];
-                $driver->bearing = $data['bearing'];
-                $driver->status = 2;
-                $driver->save();
+                    P2PBookingTracking::create(['booking_id' => $checkForBooking->id,
+                        'driver_id' => $checkForBooking->driver_id,
+                        'latitude' => $data->latitude, 'longitude' => $data->longitude,
+                        'distance' => trim($distanceInKm),
+                        'status' => $checkForBooking->driver_status]);
 
-                $passengerSocketId = $checkForBooking->passenger->socket_id;
+                    //saving driver current lat and lng
+                    $driver->latitude = $data['latitude'];
+                    $driver->latitude = $data['longitude'];
+                    $driver->area_name = $data['area_name'];
+                    $driver->city = $data['city'];
+                    $driver->bearing = $data['bearing'];
+                    $driver->status = 2;
+                    $driver->save();
 
-                if ($passengerSocketId) {
-                    $io->to($passengerSocketId)->emit('driverCoordinate', [
-                        'result' => 'success',
-                        'message' => 'Driver Coordinate Save Successfully',
-                        'data' => [
-                            "latitude" => $driver->latitude,
-                            "longitude" => $driver->longitude,
-                            "city" => $driver->city,
-                            "area_name" => $driver->area_name,
-                            "bearing" => $driver->bearing
-                        ],
-                    ]);
+                    $passengerSocketId = $checkForBooking->passenger->socket_id;
+
+                    if ($passengerSocketId) {
+                        $io->to($passengerSocketId)->emit('driverCoordinate', [
+                            'result' => 'success',
+                            'message' => 'Driver Coordinate Save Successfully',
+                            'data' => [
+                                "latitude" => $driver->latitude,
+                                "longitude" => $driver->longitude,
+                                "city" => $driver->city,
+                                "area_name" => $driver->area_name,
+                                "bearing" => $driver->bearing
+                            ],
+                        ]);
+                    }
+
                 }
-
-            } else {
+            }
+            else {
                 //saving driver current lat and lng
                 $driver->latitude = $data['latitude'];
                 $driver->latitude = $data['longitude'];
@@ -194,7 +207,7 @@ class SocketController extends Controller
 
         } catch (\Exception $e) {
 
-            $io->to($currentUser->socket_id)->emit('error',
+            $io->to($currentUser->socket_id)->emit('driverCoordinate',
                 [
                     'result' => 'error',
                     'message' => 'Error in Saving Coordinate: ' . $e,

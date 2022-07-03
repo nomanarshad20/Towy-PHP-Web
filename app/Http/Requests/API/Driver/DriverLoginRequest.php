@@ -26,7 +26,7 @@ class DriverLoginRequest extends FormRequest
     public function rules()
     {
         return [
-            'mobile_no' => 'required|exists:users,mobile_no',
+            'login' => 'required',
             'fcm_token' => 'required',
             'user_type' => 'required|in:2',
             'password' => 'min:8|required'
@@ -36,7 +36,7 @@ class DriverLoginRequest extends FormRequest
     public function messages()
     {
         return [
-            'mobile_no.exists' => "Account doesn't exist"
+            'login' => "Either Enter Your Mobile No or Email In Order To Proceed"
         ];
     }
 
