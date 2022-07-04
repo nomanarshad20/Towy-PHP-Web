@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Rules\MatchOldPassword;
 use Illuminate\Http\Request;
 use App\Traits\CreateUserWalletTrait;
+
 //use Illuminate\Support\Facades\Validator;
 use Validator;
 
@@ -43,11 +44,15 @@ class AuthService
     }
     */
 
-    public function userLoginCheck($mobileNo, $password, $userType)
+    public function userLoginCheck($mobileNo, $userType)
     {
-        $credentials = ['mobile_no' => $mobileNo, 'password' => $password];
+//        $credentials = ['mobile_no' => $mobileNo,];
+        $userFind = User::where('mobile_no', $mobileNo)->where('user_type', $userType)
+            ->where('is_verified', 1)
+            ->first();
 
-        if (Auth::attempt($credentials)) {
+        if ($userFind) {
+            Auth::loginUsingId($userFind->id);
             if (Auth::user()->user_type == $userType) {
                 Auth::user()->tokens()->delete();
                 $token = Auth::user()->createToken('TOTOBookingApp')->plainTextToken;
@@ -83,15 +88,16 @@ class AuthService
                 'mobile_no' => $request->mobile_no,
                 'fcm_token' => $request->fcm_token,
                 'user_type' => $request->user_type,
-                'steps' => 1
-//                'otp' => $otpCode,
+                'steps' => 5,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+                "is_verified" => 1
             ]);
 
-            $user->name = $request->name;
-            $user->email = $request->email;
-            $user->password = Hash::make($request['password']);
+
             $user->referral_code = "passenger-00" . $user->id;
-            $user->is_verified = 1;
             $user->save();
 
             Auth::loginUsingId($user->id, true);
@@ -120,48 +126,44 @@ class AuthService
         DB::beginTransaction();
         try {
 
-            $user = User::where('email', $request->email)->orWhere('social_uid', $request->social_uid)->first();
-            if (isset($user) && !empty($user)) {
-                if ($user->status != 1 || $request->user_type != $user->user_type) {
-                    $message = "Your Account is disabled. Kindly contact To our support!";
-                    if ($request->user_type == 1 && $request->user_type != $user->account_type)
-                        $message = "Your are not allowed to login, email already register as Driver.";
-                    if ($request->user_type == 2 && $request->user_type != $user->account_type)
-                        $message = "Your are not allowed to login, email already register as Passenger.";
+            $user = User::where('social_uid', $request->social_uid)->where('provider', $request->provider)->first();
 
-                    $response = ['result' => 'error', 'message' => $message];
+            if ($user) {
 
-                } else {
-                    $user->fcm_token = $request->fcm_token;
-                    $user->save();
+                $user->email = isset($request->email) ? $request->email : null;
+                $user->social_uid = $request->social_uid;
+                $user->provider = $request->provider;
+                $user->fcm_token = $request->fcm_token;
+                $user->save();
+
+                $message = "Login Successfully";
+            }
+            else {
+
+                $checkEmail = User::where('email', $request->email)->first();
+                if($checkEmail)
+                {
+                    DB::rollBack();
+                    $response = ['result' => 'error','message'=>'Email Already Exist','code'=>401];
+                    return $response;
+//                    return makeResponse('error', 'Email Already Exist', 401);
                 }
-            } else if (!isset($user) && $user == "") {
-//                $allowed_platforms = [
-//                    'facebook',
-//                    'google',
-//                    'apple'
-//                    //'instagram'
-//                ];
-//                if (!in_array($request->provider, $allowed_platforms, true)) {
-//                      $message = "Wrong Platform or Platform not allowed!";
-//                        $response       = ['result' => 'error', 'message' => $message];
-//                }else{
-//                }
 
                 $user = User::create([
                     'fcm_token' => $request->fcm_token,
                     'email' => $request->email,
                     'user_type' => $request->user_type,
-                    'steps' => 1
+                    'steps' => 5,
+                    'provider' => $request->provider,
+                    'social_uid' =>  $request->social_uid,
+                    'is_verified' => 1,
+//                    'first_name' => $request->first_name,
+//                    'last_name' => $request->last_name
                 ]);
                 $user->referral_code = "passenger-00" . $user->id;
-//                $user->fcm_token            = $request->fcm_token;
-//                $user->email                = $request->email;
-                $user->provider = $request->provider;
-                $user->social_uid = $request->social_uid;
-                $user->is_verified = 1;
-                $user->email_verified_at = date("Y-m-d h:i:s");
                 $user->save();
+
+                $message = 'Social User Registered Successfully';
 
             }
 
@@ -169,11 +171,11 @@ class AuthService
             Auth::loginUsingId($user->id, true);
             $token = Auth::user()->createToken('TOTOBookingApp')->plainTextToken;
             $data = $this->getUserData($user, $token);
-            $response = ['result' => 'success', 'data' => $data, 'message' => 'Social User Successfully Login'];
+            $response = ['result' => 'success', 'message' => $message,'code'=>200,'data' => $data];
 
         } catch (Exception $e) {
             DB::rollBack();
-            $response = ['result' => 'error', 'data' => $e];
+            $response = ['result' => 'error', 'message' =>'Error in Creating User: '.$e,'code'=>500];
             return $response;
         }
         return $response;
@@ -240,8 +242,8 @@ class AuthService
                 $user->save();
 
                 DB::commit();
-                $data       = $this->getUserData($user);
-                $response   = ['result' => 'success', 'data' => $data, 'message' => 'Password successfully update!'];
+                $data = $this->getUserData($user);
+                $response = ['result' => 'success', 'data' => $data, 'message' => 'Password successfully update!'];
 
             } else {
                 $response = ['result' => 'error', 'message' => "Invalid request try again."];
@@ -278,8 +280,8 @@ class AuthService
                 $user->password = Hash::make($request->password);
                 $user->save();
                 DB::commit();
-                $data       = $this->getUserData($user);
-                $response   = ['result' => 'success', 'data' => $data, 'message' => 'Password successfully update!'];
+                $data = $this->getUserData($user);
+                $response = ['result' => 'success', 'data' => $data, 'message' => 'Password successfully update!'];
 
             } else {
 
@@ -358,11 +360,11 @@ class AuthService
 
         if (isset($user)) {
             // Get Passenger Wallet
-            $passengerWallet    =    $user->wallet('Passenger-Wallet');
+            $passengerWallet = $user->wallet('Passenger-Wallet');
 
-            if(!isset($passengerWallet) || $passengerWallet == null) {
+            if (!isset($passengerWallet) || $passengerWallet == null) {
                 // Create Wallet For Passenger
-                $this->createUserWallet($user,'Passenger-Wallet');
+                $this->createUserWallet($user, 'Passenger-Wallet');
                 //Again Get Passenger Wallet
                 $passengerWallet = $user->wallet('Passenger-Wallet');
             }
@@ -380,8 +382,9 @@ class AuthService
                 'steps' => $user->steps,
                 'provider' => $user->provider,
                 'image' => $user->image,
-                'name' => $user->name,
-                'wallet_balance'=> $balance
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'wallet_balance' => $balance
             ];
 
             if (isset($accessToken) && $accessToken != null) {
@@ -396,7 +399,6 @@ class AuthService
 
 
     }
-
 
 
 }

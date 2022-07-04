@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API\Passenger\Auth;
 use App\Http\Controllers\Controller;
 
 //use App\Http\Requests\API\PassengerRegisterRequest;
+use App\Http\Requests\API\Passenger\RegisterRequest;
+use App\Http\Requests\API\Passenger\SocialRegisterRequest;
 use App\Models\User;
 use App\Services\API\Passenger\AuthService;
 use Illuminate\Http\Request;
@@ -43,7 +45,7 @@ class AuthController extends Controller
     {
         try {
 
-            $checkUser = $this->authService->userLoginCheck($request->mobile_no, $request->password, $request->user_type);
+            $checkUser = $this->authService->userLoginCheck($request->mobile_no, $request->user_type);
             //dd($checkUser);
             if ($checkUser['result'] == 'success') {
                 if ($checkUser['data']) {
@@ -67,23 +69,10 @@ class AuthController extends Controller
 
     }
 
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
         DB::beginTransaction();
         try {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|max:255',
-                'email' => 'required|email|unique:users',
-                'password' => 'required',
-                'user_type' => 'required',
-                'fcm_token' => 'required',
-                'mobile_no' => 'required|unique:users'
-                //'social_uid'    => 'required'
-            ]);
-            // validator error
-            if ($validator->fails()) {
-                return makeResponse('error', $validator->errors()->first(), 422);
-            }
 
             $createUser = $this->authService->createUser($request);
 
@@ -107,29 +96,18 @@ class AuthController extends Controller
     }
 
 
-    public function socialLoginMobile(Request $request)
+    public function socialLoginMobile(SocialRegisterRequest $request)
     {
 
         try {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|max:255',
-                'email' => 'required|email',
-                'user_type' => 'required',
-                'fcm_token' => 'required',
-                'provider' => 'required',
-                'social_uid' => 'required'
-            ]);
-            // validator error
-            if ($validator->fails()) {
-                return makeResponse('error', $validator->errors()->first(), 422);
-            }
+
 
             $responseFromService = $this->authService->socialLogin($request);
 
             if ($responseFromService && $responseFromService['result'] == "success") {
                 return makeResponse('success', $responseFromService['message'], 200, $responseFromService['data']);
             } else
-                return makeResponse('error', $responseFromService['message'], 401);
+                return makeResponse('error', $responseFromService['message'], $responseFromService['code']);
 
         } catch (\Exception $e) {
             return makeResponse('error', 'Error in Social Login: ' . $e, 500);
