@@ -140,18 +140,22 @@ class AuthService
             }
             else {
 
-                $checkEmail = User::where('email', $request->email)->first();
-                if($checkEmail)
+                if(isset($request->email) && $request->email)
                 {
-                    DB::rollBack();
-                    $response = ['result' => 'error','message'=>'Email Already Exist','code'=>401];
-                    return $response;
+                    $checkEmail = User::where('email', $request->email)->first();
+                    if($checkEmail)
+                    {
+                        DB::rollBack();
+                        $response = ['result' => 'error','message'=>'Email Already Exist','code'=>401];
+                        return $response;
 //                    return makeResponse('error', 'Email Already Exist', 401);
+                    }
                 }
+
 
                 $user = User::create([
                     'fcm_token' => $request->fcm_token,
-                    'email' => $request->email,
+                    'email' => isset($request->email) ? $request->email : null,
                     'user_type' => $request->user_type,
                     'steps' => 5,
                     'provider' => $request->provider,
