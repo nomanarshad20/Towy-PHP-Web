@@ -130,6 +130,8 @@ class AuthService
 
             if ($user) {
 
+                $user->first_name =  $request->first_name;
+                $user->last_name =  $request->first_name;
                 $user->email = isset($request->email) ? $request->email : null;
                 $user->social_uid = $request->social_uid;
                 $user->provider = $request->provider;
@@ -161,8 +163,8 @@ class AuthService
                     'provider' => $request->provider,
                     'social_uid' =>  $request->social_uid,
                     'is_verified' => 1,
-//                    'first_name' => $request->first_name,
-//                    'last_name' => $request->last_name
+                    'first_name' => $request->first_name,
+                    'last_name' => $request->last_name
                 ]);
                 $user->referral_code = "passenger-00" . $user->id;
                 $user->save();

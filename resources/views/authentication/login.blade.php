@@ -11,7 +11,7 @@
         <div class="page-content d-flex align-items-center justify-content-center">
 
             <div class="row w-100 mx-0 auth-page">
-                <div class="col-md-10 col-xl-10 mx-auto">
+                <div class="col-md-9 col-xl-9 mx-auto">
                     <div class="card">
                         <div class="row">
                             <div class="col-md-5 pe-md-0">
@@ -22,13 +22,16 @@
 
                             <div class="col-md-6 ps-md-0">
                                 <div class="auth-form-wrapper px-4 py-5">
-                                    <a href="#" class="noble-ui-logo d-block mb-2">ToTo<span>Booking</span></a>
+                                    <a href="#" class="noble-ui-logo d-block mb-2">TOWY
+                                        {{--                                        <span>Booking</span>--}}
+                                    </a>
                                     <h5 class="text-muted fw-normal mb-4">Welcome back! Log in to your account.</h5>
                                     <form class="forms-sample" id="loginForm">
                                         @csrf
                                         <div class="mb-3">
                                             <label for="userEmail" class="form-label">Email address</label>
-                                            <input type="email" id="email" name="email" class="form-control"  placeholder="Email">
+                                            <input type="email" id="email" name="email" class="form-control"
+                                                   placeholder="Email">
                                         </div>
                                         <div class="mb-3">
                                             <label for="userPassword" class="form-label">Password</label>
@@ -36,7 +39,8 @@
                                                    autocomplete="current-password" placeholder="Password">
                                         </div>
                                         <div class="form-check mb-3">
-                                            <input type="checkbox" class="form-check-input" name="remember_me" id="authCheck">
+                                            <input type="checkbox" class="form-check-input" name="remember_me"
+                                                   id="authCheck">
                                             <label class="form-check-label" for="authCheck">
                                                 Remember me
                                             </label>
@@ -51,7 +55,8 @@
                                             {{--                                                Login with twitter--}}
                                             {{--                                            </button>--}}
                                         </div>
-                                        <a href="{{route('forgetPasswordForm')}}" class="d-block mt-3 text-muted">Forgot Password?</a>
+                                        <a href="{{route('forgetPasswordForm')}}" class="d-block mt-3 text-muted">Forgot
+                                            Password?</a>
                                     </form>
                                 </div>
                             </div>
@@ -72,7 +77,7 @@
 
     <script>
 
-        $(document).ready(function(){
+        $(document).ready(function () {
 
             $('.loginBtn').click(function () {
 
@@ -101,15 +106,17 @@
                             $.unblockUI();
                             successMsg(response.message);
 
-                            setTimeout(function(){window.location.href = response.url;},1000);
+                            setTimeout(function () {
+                                window.location.href = response.url;
+                            }, 1000);
 
-                        }
-                        else if (response.result == 'error') {
+                        } else if (response.result == 'error') {
                             $.unblockUI();
                             errorMsg(response.message);
-                            if(response.url)
-                            {
-                                setTimeout(function(){window.location.href = response.url;},1000);
+                            if (response.url) {
+                                setTimeout(function () {
+                                    window.location.href = response.url;
+                                }, 1000);
 
                             }
                         }
