@@ -7,23 +7,35 @@ namespace App\Services\API\Socket;
 use App\Models\Booking;
 use App\Models\P2PBookingTracking;
 use App\Models\User;
+use App\Services\API\UpdateWalletService;
 use App\Traits\BookingResponseTrait;
+use App\Traits\CreateUserWalletTrait;
 use App\Traits\SendFirebaseNotificationTrait;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DriverStatusService
 {
-    use SendFirebaseNotificationTrait, BookingResponseTrait;
+    use SendFirebaseNotificationTrait, BookingResponseTrait, CreateUserWalletTrait;
+
+    public $walletService;
+
+    public function __construct(UpdateWalletService $walletService)
+    {
+        $this->walletService = $walletService;
+    }
 
     public function reachToPickUp($data, $socket, $io, $user)
     {
+        DB::beginTransaction();
         $findBooking = Booking::where('id', $data['booking_id'])
-            ->where('driver_id', $user->id)->where('driver_status', 0)
+            ->where('driver_id', $user->id)
+            ->where('driver_status', 0)
             ->where('ride_status', '=', 1)
             ->first();
 
         if (!$findBooking) {
-            $socket->emit('driverStatus', [
+            return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
                 'message' => 'Booking Record Not Found',
                 'data' => null
@@ -32,8 +44,10 @@ class DriverStatusService
 
 
         try {
-            $findBooking->driver_status = $data['driver_status'];
-            $findBooking->save();
+//            $findBooking->driver_status = $data['driver_status'];
+            $findBooking->update(['driver_status' => $data['driver_status']]);
+
+
             $calculatePickUpTime = Carbon::parse($findBooking->updated_at);
             $currentTime = Carbon::now();
             $findBooking->bookingDetail->update([
@@ -41,40 +55,47 @@ class DriverStatusService
                 'total_minutes_to_reach_pick_up_point' => $currentTime->diffInMinutes($calculatePickUpTime)
             ]);
 
+            $findBooking->push();
+
 
         } catch (\Exception $e) {
-            $io->to($user->socket_id)->emit('driverStatus', [
+            DB::rollBack();
+            return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
                 'message' => 'Error in Updating Driver Status: ' . $e,
                 'data' => null
             ]);
         }
-
-
-        $passengerSocketId = $findBooking->passenger->socket_id;
+        $passengerSocketId = $findBooking->passenger_id;
         $passengerFCMToken = $findBooking->passenger->fcm_token;
-
         $bookingResponse = $this->driverBookingResponse($findBooking);
 
         //driver reach location notification
         $notification_type = 2;
-        if ($user->fcm_token) {
+        if ($passengerFCMToken) {
+            DB::commit();
             $fcmToken = ['fcm_token' => $passengerFCMToken];
             $title = 'Driver Arrived';
             $message = 'Driver Reached to Your PickUp Location';
             $sendFCMNotification = $this->duringRideNotifications($fcmToken, $bookingResponse, $notification_type, $title, $message);
         }
 
-        $io->to($passengerSocketId)->emit('driverStatus', [
+        DB::commit();
+
+//        if ($passengerSocketId) {
+        $socket->emit($passengerSocketId . '-driverStatus', [
             'result' => 'success',
-            'message' => 'Driver Arrived At Your Pick Location',
-            'data' => $bookingResponse
+            'message' => 'Driver Arrived At Your Pick Up Location',
+            'data' => (object)$bookingResponse
         ]);
 
-        $io->to($data['socket_id'])->emit('driverStatus', [
+//        }
+
+
+        return $socket->emit($data['user_id'] . '-driverStatus', [
             'result' => 'success',
             'message' => 'Status Save Successfully',
-            'data' => $bookingResponse
+            'data' => (object)$bookingResponse
         ]);
 
 
@@ -90,14 +111,14 @@ class DriverStatusService
 //                'data' => null
 //            ]);
 //        }
-
+        DB::beginTransaction();
         $findBooking = Booking::where('id', $data['booking_id'])
             ->where('driver_id', $user->id)->where('driver_status', 1)
             ->where('ride_status', '=', 1)
             ->first();
 
         if (!$findBooking) {
-            $socket->emit('driverStatus', [
+            return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
                 'message' => 'Booking Record Not Found',
                 'data' => null
@@ -109,7 +130,8 @@ class DriverStatusService
             $findBooking->save();
 
         } catch (\Exception $e) {
-            $io->to($user->socket_id)->emit('driverStatus', [
+            DB::rollBack();
+            return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
                 'message' => 'Error in Updating Driver Status: ' . $e,
                 'data' => null
@@ -121,12 +143,15 @@ class DriverStatusService
             $pick_up_time = Carbon::parse($findBooking->bookingDetail->ride_pickup_time);
             $now = Carbon::now();
 
-            $findBooking->bookingDetail->ride_start_time = Carbon::now()->parse('Y-m-d H:i:s');
+            $findBooking->bookingDetail->ride_start_time = Carbon::now()->format('Y-m-d H:i:s');
             $findBooking->bookingDetail->driver_waiting_time = $now->diffInMinutes($pick_up_time);
 
             $findBooking->bookingDetail->save();
+
+            $findBooking->push();
         } catch (\Exception $e) {
-            $io->to($user->socket_id)->emit('driverStatus', [
+            DB::rollBack();
+            return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
                 'message' => 'Error in Saving Driver Waiting Time: ' . $e,
                 'data' => null
@@ -134,27 +159,32 @@ class DriverStatusService
         }
 
 
-        $passengerSocketId = $findBooking->passenger->socket_id;
+        $passengerSocketId = $findBooking->passenger_id;
         $passengerFCMToken = $findBooking->passenger->fcm_token;
 
         $bookingResponse = $this->driverBookingResponse($findBooking);
 
         //ride start notification
         $notification_type = 3;
-        if ($user->fcm_token) {
+        if ($passengerFCMToken) {
             $fcmToken = ['fcm_token' => $passengerFCMToken];
             $title = 'Ride Started';
             $message = 'Fasten Your Seat Belt Ride Is Started';
             $sendFCMNotification = $this->duringRideNotifications($fcmToken, $bookingResponse, $notification_type, $title, $message);
         }
 
-        $io->to($passengerFCMToken)->emit('driverStatus', [
+        DB::commit();
+
+//        if ($passengerSocketId) {
+        $socket->emit($passengerSocketId . '-driverStatus', [
             'result' => 'success',
-            'message' => 'Driver Arrived At Your Pick Location',
+            'message' => 'Driver Arrived At Your Pick Up Location',
             'data' => $bookingResponse
         ]);
+//        }
 
-        $io->to($data['socket_id'])->emit('driverStatus', [
+
+        return $socket->emit($data['user_id'] . '-driverStatus', [
             'result' => 'success',
             'message' => 'Status Save Successfully',
             'data' => $bookingResponse
@@ -164,21 +194,40 @@ class DriverStatusService
 
     public function completeRide($data, $socket, $io, $user)
     {
+        DB::beginTransaction();
+
         if (!isset($data['total_distance'])) {
-            $io->to($data['socket_id'])->emit('driverStatus', [
+            return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
                 'message' => 'Total Distance is a required field',
                 'data' => null
             ]);
         }
 
+        if (!isset($data['mobile_final_distance'])) {
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Mobile Final Distance is a required field',
+                'data' => null
+            ]);
+        }
+
+        if (!isset($data['mobile_initial_distance'])) {
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Mobile Initial Distance is a required field',
+                'data' => null
+            ]);
+        }
+
         $findBooking = Booking::where('id', $data['booking_id'])
             ->where('driver_id', $user->id)->where('driver_status', 2)
-            ->where('ride_status', '=', 1)
+            ->where('ride_status', 1)
             ->first();
 
         if (!$findBooking) {
-            $socket->emit('driverStatus', [
+
+            return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
                 'message' => 'Booking Record Not Found',
                 'data' => null
@@ -186,9 +235,10 @@ class DriverStatusService
         }
 
 
-        $totalDistance = 0;
-
+        $totalDistance = $initialDistance = $finalDistance = 0;
+        $fareType = 'mobile';
         $mobileDistance = $data['total_distance'];
+
 
         $p2pDistance = P2PBookingTracking::where('booking_id', $findBooking->id)->sum('distance');
         $p2pRideDistance = P2PBookingTracking::where('booking_id', $findBooking->id)->where('driver_status', '!=', 0)->sum('distance');
@@ -201,70 +251,235 @@ class DriverStatusService
 
             if ($diffInDistance >= 10) {
                 $totalDistance = $mobileDistance;
-            }
-            else{
+                $initialDistance = $data['mobile_initial_distance'];
+                $finalDistance = $data['mobile_final_distance'];
+                $fareType = 'mobile';
+            } else {
                 $googleDistance = $totalDistance + $p2pInitialDistance;
 
-                $differenceDistance =  $mobileDistance -  $googleDistance;
+                $differenceDistance = $mobileDistance - $googleDistance;
 
-                if($differenceDistance > 0)
-                {
+                if ($differenceDistance > 0) {
                     $totalDistance = $mobileDistance;
-                }
-                else{
+                    $initialDistance = $data['mobile_initial_distance'];
+                    $finalDistance = $data['mobile_final_distance'];
+                    $fareType = 'mobile';
+                } else {
                     $totalDistance = $googleDistance;
+                    $initialDistance = 0;
+                    $finalDistance = 0;
+                    $fareType = 'google';
                 }
 
             }
 
         }
 
-        $fare = $this->calculateFare($findBooking,$p2pDistance,$p2pInitialDistance,$p2pRideDistance,$totalDistance);
+
+        $fare = $this->calculateFare($findBooking, $p2pDistance, $p2pInitialDistance, $p2pRideDistance, $totalDistance,
+            $initialDistance, $finalDistance, $fareType);
+
 
         try {
+
+            //get passenger wallet
+
+            $wallet_balance = $this->passengerWalletBalance($findBooking->passenger_id);
+
+            if ($findBooking->payment_type == 'wallet') {
+                if ($wallet_balance > 0) {
+                    $findBooking->bookingDetail->update([
+                        'passenger_wallet_paid' => $wallet_balance
+                    ]);
+                }
+
+            }
+
+
             $findBooking->driver_status = $data['driver_status'];
             $findBooking->total_calculated_distance = $totalDistance;
-//            $findBooking->actual_fare = $fare['totalFare'];
+            $findBooking->actual_fare = $fare['total_fare'];
+            $findBooking->fine_amount = $fare['fine'];
             $findBooking->save();
+
+            $findBooking->bookingDetail->update([
+                'ride_end_time' => $fare['ride_end_time']->format('Y-m-d H:i:s'),
+                'total_ride_minutes' => $fare['totalRideTime'],
+                'p2p_before_pick_up_distance' => $p2pInitialDistance,
+                'p2p_after_pick_up_distance' => $p2pRideDistance,
+                'mobile_final_distance' => $data['mobile_final_distance'],
+                'mobile_initial_distance' => $data['mobile_initial_distance']
+            ]);
+
+
         } catch (\Exception $e) {
-            $io->to($user->socket_id)->emit('driverStatus', [
+            DB::rollBack();
+            return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
                 'message' => 'Error in Updating Driver Status: ' . $e,
                 'data' => null
             ]);
         }
-
-        $passengerSocketId = $findBooking->passenger->socket_id;
+        $findBooking->push();
+        $passengerSocketId = $findBooking->passenger_id;
         $passengerFCMToken = $findBooking->passenger->fcm_token;
 
         $bookingResponse = $this->driverBookingResponse($findBooking);
 
         //ride start notification
         $notification_type = 4;
-        if ($user->fcm_token) {
+        if ($passengerFCMToken) {
             $fcmToken = ['fcm_token' => $passengerFCMToken];
             $title = 'Ride is Completed';
             $message = 'Congratulations! You have Reached Your Destination.Hope you have enjoyed our services';
             $sendFCMNotification = $this->duringRideNotifications($fcmToken, $bookingResponse, $notification_type, $title, $message);
         }
 
-        $io->to($passengerFCMToken)->emit('driverStatus', [
+        DB::commit();
+
+//        if ($passengerSocketId) {
+        $socket->emit($passengerSocketId . '-driverStatus', [
             'result' => 'success',
-            'message' => 'Driver Arrived At Your Pick Location',
+            'message' => 'Congratulations! You have Reached Your Destination.Hope you have enjoyed our services',
             'data' => $bookingResponse
         ]);
+//        }
 
-        $io->to($data['socket_id'])->emit('driverStatus', [
+
+        return $socket->emit($data['user_id'] . '-driverStatus', [
             'result' => 'success',
-            'message' => 'Status Save Successfully',
+            'message' => 'Status Save Successfully.Please View The Receipt and Act Accordingly',
             'data' => $bookingResponse
         ]);
 
 
     }
 
+    public function collectFare($data, $socket, $io, $user)
+    {
+        DB::beginTransaction();
+        $findBooking = Booking::where('id', $data['booking_id'])
+            ->where('driver_id', $user->id)->where('driver_status', 3)
+            ->where('ride_status', '=', 1)
+            ->first();
 
-    public function calculateFare($findBooking,$p2pDistance,$p2pInitialDistance,$p2pRideDistance,$totalDistance)
+        if (!$findBooking) {
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Booking Record Not Found',
+                'data' => null
+            ]);
+        }
+
+        if (!isset($data['payment_type'])) {
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Payment Type is a required field',
+                'data' => null
+            ]);
+        }
+
+
+        $cashPaid = 0;
+        $extraCashPaid = 0;
+
+        if ($findBooking->payment_type == 'cash' || $data['payment_type'] == 'cash' || $data['payment_type'] == 'cash_wallet') {
+
+
+            if (!isset($data['total_cash_paid'])) {
+                return $socket->emit($data['user_id'] . '-driverStatus', [
+                    'result' => 'error',
+                    'message' => 'Total Cash Paid is a required field',
+                    'data' => null
+                ]);
+            }
+
+            if (!isset($data['extra_cash_paid'])) {
+                return $socket->emit($data['user_id'] . '-driverStatus', [
+                    'result' => 'error',
+                    'message' => 'Extra Cash Paid is a required field',
+                    'data' => null
+                ]);
+            }
+
+            $cashPaid = $data['total_cash_paid'];
+            $extraCashPaid = $data['extra_cash_paid'];
+
+        }
+
+        try {
+            $findBooking->driver_status = $data['driver_status'];;
+            $findBooking->ride_status = 4;
+            if ($findBooking->payment_type == 'cash_wallet' && $data['payment_type'] == 'cash_wallet') {
+                $findBooking->payment_type = 'cash_wallet';
+            }
+            $findBooking->save();
+
+            $findBooking->bookingDetail->update([
+                'passenger_total_cash_paid' => $cashPaid,
+                'passenger_extra_cash_paid' => $extraCashPaid,
+                'chat' => isset($data['chat_message']) ? json_encode($data['chat_messages']):null,
+                'route_json' => isset($data['route_json']) ? $data['route_json'] : null
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Error in Updating Record: ' . $e,
+                'data' => null
+            ]);
+        }
+
+
+        //updateWallet
+        $walletUpdate = $this->walletService->updateFareWallets($findBooking);
+
+        if ($walletUpdate['result'] == 'error') {
+            DB::rollBack();
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => $walletUpdate['result'],
+                'message' => $walletUpdate['message'],
+                'data' => null
+            ]);
+        }
+
+        $findBooking->push();
+        $passengerSocketId = $findBooking->passenger_id;
+        $passengerFCMToken = $findBooking->passenger->fcm_token;
+
+        $bookingResponse = $this->driverBookingResponse($findBooking);
+
+
+        //collect fare notification
+        $notification_type = 5;
+        if ($passengerFCMToken) {
+            $fcmToken = ['fcm_token' => $passengerFCMToken];
+            $title = 'Rating:';
+            $message = 'Give your value able feedback to our driver.';
+            $sendFCMNotification = $this->duringRideNotifications($fcmToken, $bookingResponse, $notification_type, $title, $message);
+        }
+
+        DB::commit();
+//        if ($passengerSocketId) {
+        $socket->emit($passengerSocketId . '-driverStatus', [
+            'result' => 'success',
+            'message' => 'Give Your Feedback to our driver',
+            'data' => (object)$bookingResponse
+        ]);
+//        }
+
+
+        return $socket->emit($data['user_id'] . '-driverStatus', [
+            'result' => 'success',
+            'message' => 'Ride is Complete. Provide Your Feedback to Passenger',
+            'data' => (object)$bookingResponse
+        ]);
+
+
+    }
+
+
+    public function calculateFare($findBooking, $p2pDistance, $p2pInitialDistance, $p2pRideDistance, $totalDistance, $mobile_initial_distance, $mobile_final_distance, $fareType)
     {
         $calculateWaitingTime = $totalTime = 0;
 
@@ -273,31 +488,64 @@ class DriverStatusService
         $allowedTime = $findBooking->bookingDetail->allowed_waiting_time;
 
         if ($allowedTime > $driverWaitingTime) {
-            $totalTime = $allowedTime - $driverWaitingTime;
-        } else {
-            $totalTime = $driverWaitingTime - $allowedTime;
+//            $totalTime = $allowedTime - $driverWaitingTime;
+//        } else {
+//            $totalTime = $driverWaitingTime - $allowedTime;
+
+            $waitingTimePrice = $findBooking->bookingDetail->waiting_price_per_min;
+            $calculateWaitingTime = (float)($waitingTimePrice * $totalTime);
         }
 
-        $waitingTimePrice = $findBooking->bookingDetail->waiting_price_per_min;
-        $calculateWaitingTime = (float)($waitingTimePrice * $totalTime);
 
         //calculate Pick Up Fare
         $pickUpTimeCalculation = $findBooking->bookingDetail->total_minutes_to_reach_pick_up_point * $findBooking->bookingDetail->initial_time_rate;
-        $pickUpDistanceCalculation = $findBooking->bookingDetail->p2pInitialDistance * $findBooking->bookingDetail->initial_distance_rate;
+        if ($fareType == 'google') {
+            $pickUpDistanceCalculation = $p2pInitialDistance * $findBooking->bookingDetail->initial_distance_rate;
+        } else {
+            $pickUpDistanceCalculation = $mobile_initial_distance * $findBooking->bookingDetail->initial_distance_rate;
+        }
+
         $totalInitialFare = $pickUpTimeCalculation + $pickUpDistanceCalculation;
 
+
+        if ($findBooking->bookingDetail->ride_end_time) {
+            $endTime = Carbon::parse($findBooking->bookingDetail->ride_end_time);
+        } else {
+            $endTime = Carbon::now();
+        }
+
+        $startTime = Carbon::parse($findBooking->bookingDetail->ride_start_time);
+
         //calculate Ride Fare
-        $totalRideTime =  $findBooking->bookingDetail->ride_start_time + $findBooking->bookingDetail->ride_end_time;
-        $totalRideTimeFare =  $totalRideTime * $findBooking->bookingDetail->vehicle_per_min_rate;
+        $totalRideTime = $endTime->diffInMinutes($startTime);
+        $totalRideTimeFare = $totalRideTime * $findBooking->bookingDetail->vehicle_per_min_rate;
         $totalDistanceFare = $totalDistance * $findBooking->bookingDetail->vehicle_per_km_rate;
 
 
-        $totalFare = (float) ($totalRideTimeFare + $totalDistanceFare + $totalInitialFare + $pickUpDistanceCalculation + $calculateWaitingTime + $findBooking->bookingDetail->vehicle_tax);
+        $totalFare = (float)($totalRideTimeFare + $totalDistanceFare + $totalInitialFare
+            + $pickUpDistanceCalculation + $calculateWaitingTime);
+
+
+        //find Tax
+
+        if (isset($findBooking->bookingDetail->vehicle_tax)) {
+            $tax = ($totalFare * $findBooking->bookingDetail->vehicle_tax) / 100;
+        } else {
+            $tax = 0;
+        }
+
+
+        //add Tax
+
+        $totalFare = $totalFare + $tax;
+
+        //get passenger wallet
+
+
+        $wallet_balance = $this->passengerWalletBalance($findBooking->passenger_id);
+
 
         //peak factor calculation here
-
-        $checkPassengerWallet = $findBooking->passenger->wallet('Passenger-Wallet');
-        $wallet_balance = $checkPassengerWallet->balance;
 
         if ($findBooking->bookingDetail->peak_factor_applied == 1) {
             $totalFare = $totalFare * $findBooking->bookingDetail->peak_factor_rate;
@@ -307,10 +555,27 @@ class DriverStatusService
             $totalFare = $totalFare + $wallet_balance;
         }
 
+        $totalCollectFare = 0;
+
+        if ($wallet_balance > 0 && $findBooking->payment_type == 'wallet') {
+            if ($wallet_balance > $totalFare) {
+                $totalCollectFare = $wallet_balance - $totalFare;
+            } else {
+                $totalCollectFare = $totalFare - $wallet_balance;
+            }
+
+        } else {
+            $totalCollectFare = $totalFare;
+        }
+
         $fare = [
-            'total_fare' => $totalFare,
+            'total_fare' => ceil($totalFare),
+            'totalCollectFare' => $totalCollectFare,
             'waiting_time_fare' => $calculateWaitingTime,
-            'distance_fare' => $totalDistanceFare + $totalRideTimeFare
+            'distance_fare' => $totalDistanceFare + $totalRideTimeFare,
+            'totalRideTime' => $totalRideTime,
+            'ride_end_time' => $endTime,
+            'fine' => $wallet_balance
         ];
 
         return $fare;

@@ -33,12 +33,12 @@ trait SendFirebaseNotificationTrait
         return true;
     }
 
-    public function duringRideNotifications($passengerFCM,$booking,$notification_type)
+    public function duringRideNotifications($passengerFCM,$booking,$notification_type,$title,$message)
     {
         $data = array();
         $data['notification_type']  = $notification_type;
-        $data ['title'] = 'Driver Arrived';
-        $data['body'] = 'Driver Reached to Your PickUp Location';
+        $data ['title'] = $title;
+        $data['body'] = $message;
         $data['data'] = (object)$booking;
 
         $this->sendPushNotification($passengerFCM,$data);
@@ -46,6 +46,31 @@ trait SendFirebaseNotificationTrait
         return true;
     }
 
+    public function voucherNotificaiton($fcm,$notification_type,$title,$message,$voucher)
+    {
+        $data = array();
+        $data['notification_type']  = $notification_type;
+        $data ['title'] = $title;
+        $data['body'] = $message;
+        $data['data'] = (object)$voucher;
+
+        $this->sendPushNotification($fcm,$data);
+
+        return true;
+    }
+
+    public function cancelRide($fcm,$notification_type,$title,$message)
+    {
+        $data = array();
+        $data['notification_type']  = $notification_type;
+        $data ['title'] = $title;
+        $data['body'] = $message;
+        $data['data'] = null;
+
+        $this->sendPushNotification($fcm,$data);
+
+        return true;
+    }
 
     public function sendPushNotification($fcm, $dataBody)
     {
@@ -73,6 +98,7 @@ trait SendFirebaseNotificationTrait
                 ])
             ]
         );
+
         $response = $request->getBody();
         $response = json_decode($response);
 

@@ -101,7 +101,6 @@ class AuthController extends Controller
 
         try {
 
-
             $responseFromService = $this->authService->socialLogin($request);
 
             if ($responseFromService && $responseFromService['result'] == "success") {

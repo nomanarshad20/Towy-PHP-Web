@@ -366,16 +366,18 @@ class AuthService
 
         if (isset($user)) {
             // Get Passenger Wallet
-            $passengerWallet = $user->wallet('Passenger-Wallet');
+            $balance    =   CreateUserWalletTrait::passengerWalletBalance($user->id);
 
-            if (!isset($passengerWallet) || $passengerWallet == null) {
-                // Create Wallet For Passenger
-                $this->createUserWallet($user, 'Passenger-Wallet');
-                //Again Get Passenger Wallet
-                $passengerWallet = $user->wallet('Passenger-Wallet');
+            $rating = 0;
+            if(isset(Auth::user()->rating)){
+                $rating = Auth::user()->rating->avg('rating');
+                if($rating == null)
+                {
+                    $rating = 0;
+                }
             }
 
-            $balance = $passengerWallet->balance ?? 0;
+//            $balance = $passengerWallet->balance ?? 0;
 
             $userArr = [
                 'user_id' => $user->id,
@@ -388,9 +390,9 @@ class AuthService
                 'steps' => $user->steps,
                 'provider' => $user->provider,
                 'image' => $user->image,
-                'first_name' => $user->first_name,
-                'last_name' => $user->last_name,
-                'wallet_balance' => $balance
+                'name' => $user->name,
+                'wallet_balance' => $balance,
+                'rating' => $rating
             ];
 
             if (isset($accessToken) && $accessToken != null) {

@@ -6,6 +6,7 @@ namespace App\Services\API\Driver;
 
 use App\Models\DriverCoordinate;
 use App\Models\DriversCoordinate;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 

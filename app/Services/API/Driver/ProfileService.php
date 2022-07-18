@@ -27,16 +27,20 @@ class ProfileService
             Auth::user()->driver->save();
             Auth::user()->save();
 
-            $data = [
-                'image' => Auth::user()->image,
-                'name' => Auth::user()->name,
-                'email' => Auth::user()->email,
-                'city' => Auth::user()->driver->city
-            ];
+//            $data = [
+//                'image' => Auth::user()->image,
+//                'name' => Auth::user()->name,
+//                'email' => Auth::user()->email,
+//                'city' => Auth::user()->driver->city
+//            ];
 
-            return makeResponse('success', 'Profile Updated Successfully', 200,$data);
+            $response = ['result'=>'success','message'=>'Profile Update Successfully','code'=>200];
+            return $response;
+//            return makeResponse('success', 'Profile Updated Successfully', 200,$data);
         } catch (\Exception $e) {
-            return makeResponse('error', 'Error in Updating Profile: ' . $e, 500);
+            $response = ['result'=>'error','message'=>'Error in Updating Profile: ' . $e,'code'=>500];
+            return $response;
+//            return makeResponse('error', 'Error in Updating Profile: ' . $e, 500);
         }
     }
 }

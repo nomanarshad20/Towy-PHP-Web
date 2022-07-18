@@ -58,13 +58,15 @@ class DriverController extends Controller
 
     public function driverLogout()
     {
-        try {
-            Auth::user()->driverCoordinate->update(['status' => 0]);
+        try{
+            Auth::user()->driverCoordinate->update(['status'=>0]);
             Auth::user()->tokens()->delete();
 
-            return makeResponse('success', 'Driver Logout Successfully', 200);
-        } catch (\Exception $e) {
-            return makeResponse('error', 'Error during driver logout: ' . $e, 200);
+            return makeResponse('success','Driver Logout Successfully',200);
+        }
+        catch (\Exception $e)
+        {
+            return makeResponse('error','Error during driver logout: '.$e,200);
 
         }
 
