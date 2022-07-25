@@ -13,6 +13,10 @@ use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\VehicleFareController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\PeakFactorController;
+use App\Http\Controllers\Admin\CancelReasonController;
+use App\Http\Controllers\Admin\VoucherCodeController;
+use App\Http\Controllers\Admin\BannerImageController;
+//use App\Http\Controllers\Admin\HtmlPagesContentController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -124,6 +128,14 @@ Route::namespace('Admin')->group(function () {
         Route::post('save-banner-image',[BannerImageController::class,'save'])->name('bannerImageSave');
         Route::post('delete-banner-image',[BannerImageController::class,'delete'])->name('bannerImageDelete');
         Route::get('banner-image-change-status',[BannerImageController::class,'changeStatus'])->name('bannerImageChangeStatus');
+
+        Route::get('cancel-reason-listing',[CancelReasonController::class,'index'])->name('cancelReasonListing');
+        Route::get('cancel-reason-create',[CancelReasonController::class,'create'])->name('cancelReasonCreate');
+        Route::post('cancel-reason-save',[CancelReasonController::class,'save'])->name('cancelReasonSave');
+        Route::get('cancel-reason-edit/{id}',[CancelReasonController::class,'edit'])->name('cancelReasonEdit');
+        Route::post('cancel-reason-update',[CancelReasonController::class,'update'])->name('cancelReasonUpdate');
+        Route::post('cancel-reason-delete',[CancelReasonController::class,'delete'])->name('cancelReasonDelete');
+
 
 //        Route::get('content-pages',[HtmlPagesContentController::class,'index'])->name('contentPages');
 //        Route::get('create-content-pages',[HtmlPagesContentController::class,'create'])->name('contentPagesCreate');
