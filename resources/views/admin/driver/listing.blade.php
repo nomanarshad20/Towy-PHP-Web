@@ -51,7 +51,7 @@
                                     <td>{{$user->name}}</td>
                                     <td>{{$user->email}}</td>
                                     <td>{{$user->mobile_no}}</td>
-                                    <td>{{$user->referral_code}}</td>
+                                    <td><a href="{{url('driver-portal/'.$user->id)}}">{{$user->referral_code}}</a></td>
                                     <td>{{$user->is_step == 4 ? 'Yes':'No'}}</td>
                                     <td>
                                         @if($user->is_verified == 1)

@@ -18,22 +18,18 @@ class FindDriversController extends Controller
     {
         try {
 
-            $gettingDrivers           = $this->fetchDrivers($request);
-
+            $gettingDrivers = $this->fetchDrivers($request);
 
             if (sizeof($gettingDrivers) > 0) {
-                $response = ['result' => 'success', 'data' => $gettingDrivers, 'message' => 'Nearest Drivers Find Successfully'];
+                $response = ['result' => 'success', 'data' => $gettingDrivers, 'message' => 'Nearest Drivers Find Successfully','code' => 200];
             } else {
-                $response = ['result' => 'error', 'data' => $request->all(), 'message' => 'Driver Not Found. Try Again Later', 'code' => 404];
+                $response = ['result' => 'error', 'data' => null, 'message' => 'Driver Not Found. Try Again Later', 'code' => 404];
             }
-
-            //return $response;
             return makeResponse($response['result'], $response['message'], $response['code'], $response['data']);
 
         } catch (\Exception $e) {
-            $response   = ['result' => 'error', 'message' => 'Error in find nearest drivers : ' . $e, 'code' => 500];
-//            return $response;
-            return makeResponse($response['result'], $response['message'], $response['code']);
+            $response = ['result' => 'error', 'message' => 'Error in find nearest drivers : ' . $e];
+            return makeResponse($response['result'], $response['message'], 500);
         }
     }
 }

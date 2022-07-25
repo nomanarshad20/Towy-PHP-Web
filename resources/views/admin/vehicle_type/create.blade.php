@@ -23,22 +23,19 @@
                     <form id="createForm">
                         @csrf
                         <div class="row">
-
                             <div class="col-sm-6">
                                 <div class="mb-3">
                                     <label class="form-label">Name</label>
-                                    <input type="text" name="name" class="form-control"
-                                           placeholder="Enter Name"
-                                           onkeypress="return isCharacterKey(event)">
+                                    <input type="text" name="name" class="form-control" placeholder="Enter Name">
                                 </div>
                             </div><!-- Col -->
+
 
                             <div class="col-sm-6">
                                 <div class="mb-3">
                                     <label class="form-label">Min Fare</label>
                                     <input type="text" name="min_fare" class="form-control"
-                                           placeholder="Enter Min Fare"
-                                           onkeypress="return isNumberKey(event)">
+                                           placeholder="Enter Min Fare" onkeypress="return isNumberKey(event)">
                                 </div>
                             </div><!-- Col -->
                             <div class="col-sm-6">
@@ -63,26 +60,6 @@
 
                             <div class="col-sm-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Initial Per Km Rate (Before PickUp)</label>
-                                    <input type="text" name="initial_distance_rate" class="form-control"
-                                           onkeypress="return isNumberKey(event)"
-                                           placeholder="Enter Initial Per Km Rate" autocomplete="chrome-off">
-                                </div>
-                            </div><!-- Col -->
-
-
-                            <div class="col-sm-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Initial Per Min Rate (Before PickUp)</label>
-                                    <input type="text" name="initial_time_rate" class="form-control"
-                                           placeholder="Enter Initial Per Min Rate" onkeypress="return isNumberKey(event)">
-
-
-                                </div>
-                            </div><!-- Col -->
-
-                            <div class="col-sm-6">
-                                <div class="mb-3">
                                     <label class="form-label">Waiting Price Per Min</label>
                                     <input type="text" name="waiting_price_per_min" class="form-control"
                                            placeholder="Enter Waiting Price Per Min"
@@ -99,6 +76,16 @@
                                     <input type="text" name="tax_rate" class="form-control"
                                            placeholder="Enter Tax (%)" onkeypress="return isNumberKey(event)">
 
+
+                                </div>
+                            </div><!-- Col -->
+
+
+                            <div class="col-sm-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Description</label>
+                                    <textarea name="description" class="form-control"
+                                              placeholder="Enter Description"></textarea>
 
                                 </div>
                             </div><!-- Col -->

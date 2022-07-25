@@ -110,10 +110,27 @@ Route::namespace('Admin')->group(function () {
         Route::post('peak-factor-update',[PeakFactorController::class,'update'])->name('peakFactorUpdate');
         Route::post('peak-factor-delete',[PeakFactorController::class,'delete'])->name('peakFactorDelete');
 
+        Route::get('voucher-code-listing',[VoucherCodeController::class,'index'])->name('voucherCodeListing');
+        Route::get('voucher-code-create',[VoucherCodeController::class,'create'])->name('voucherCodeCreate');
+        Route::post('voucher-code-save',[VoucherCodeController::class,'save'])->name('voucherCodeSave');
+        Route::get('voucher-code-edit/{id}',[VoucherCodeController::class,'edit'])->name('voucherCodeEdit');
+        Route::post('voucher-code-update',[VoucherCodeController::class,'update'])->name('voucherCodeUpdate');
+        Route::post('voucher-code-delete',[VoucherCodeController::class,'delete'])->name('voucherCodeDelete');
+        Route::get('send-voucher-code-passenger/{id}',[VoucherCodeController::class,'sendToPassengerView'])->name('voucherCodeSend');
+        Route::post('send-voucher-code-passenger',[VoucherCodeController::class,'send'])->name('voucherCodeSendPassenger');
 
+        Route::get('banner-image-listing',[BannerImageController::class,'index'])->name('bannerImageListing');
+        Route::get('create-banner-image',[BannerImageController::class,'create'])->name('bannerImageCreate');
+        Route::post('save-banner-image',[BannerImageController::class,'save'])->name('bannerImageSave');
+        Route::post('delete-banner-image',[BannerImageController::class,'delete'])->name('bannerImageDelete');
+        Route::get('banner-image-change-status',[BannerImageController::class,'changeStatus'])->name('bannerImageChangeStatus');
 
-
-
+//        Route::get('content-pages',[HtmlPagesContentController::class,'index'])->name('contentPages');
+//        Route::get('create-content-pages',[HtmlPagesContentController::class,'create'])->name('contentPagesCreate');
+//        Route::post('save-content-pages',[HtmlPagesContentController::class,'store'])->name('contentPagesSave');
+//        Route::get('edit-content-pages/{id}',[HtmlPagesContentController::class,'edit'])->name('contentPagesEdit');
+//        Route::post('update-content-pages',[HtmlPagesContentController::class,'update'])->name('contentPagesUpdate');
+//        Route::get('delete-content-pages/{id}',[HtmlPagesContentController::class,'destroy'])->name('contentPagesDelete');
 
 
     });

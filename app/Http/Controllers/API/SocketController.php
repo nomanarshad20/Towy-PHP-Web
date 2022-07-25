@@ -12,13 +12,12 @@ use App\Services\API\Socket\RideAcceptRejectService;
 use App\Traits\BookingResponseTrait;
 use App\Traits\CreateUserWalletTrait;
 use App\Traits\FindDistanceTraits;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class SocketController extends Controller
 {
 
-    use FindDistanceTraits, BookingResponseTrait;
+    use FindDistanceTraits, BookingResponseTrait, CreateUserWalletTrait;
 
     public $acceptRejectService;
     public $driverService;
@@ -157,9 +156,9 @@ class SocketController extends Controller
 
 
 //                    if ($passengerSocketId) {
-                    $socket->emit($data['user_id'] . '-driverCoordinate', [
+                    $socket->emit($checkForBooking->passenger_id . '-driverCoordinate', [
                         'result' => 'success',
-                        'message' => 'Driver Coordinate Save Successfully',
+                        'message' => 'Driver Coordinate Send Successfully',
                         'data' => [
                             "latitude" => $driver->latitude,
                             "longitude" => $driver->longitude,
@@ -170,7 +169,7 @@ class SocketController extends Controller
                     ]);
 
 
-                    $socket->emit($data['user_id'] . '-driverCoordinate',
+                   return $socket->emit($data['user_id'] . '-driverCoordinate',
                         [
                             'result' => 'success',
                             'message' => 'Driver Coordinate Save Successfully',
@@ -216,7 +215,7 @@ class SocketController extends Controller
 
         } catch (\Exception $e) {
 
-            return $socket->to($data['socket_id'])->emit('driverCoordinate',
+            return $socket->emit($data['user_id'] . '-driverCoordinate',
                 [
                     'result' => 'error',
                     'message' => 'Error in Saving Coordinate: ' . $e,

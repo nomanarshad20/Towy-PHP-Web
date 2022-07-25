@@ -47,4 +47,9 @@ class BookingController extends Controller
     {
         return $this->bookingService->delete($request);
     }
+
+    public function detail($id)
+    {
+        return $this->bookingService->detail($id);
+    }
 }

@@ -7,11 +7,13 @@ namespace App\Services\API\Socket;
 use App\Models\Booking;
 use App\Models\P2PBookingTracking;
 use App\Models\User;
+use App\Models\VoucherCodePassenger;
 use App\Services\API\UpdateWalletService;
 use App\Traits\BookingResponseTrait;
 use App\Traits\CreateUserWalletTrait;
 use App\Traits\SendFirebaseNotificationTrait;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class DriverStatusService
@@ -31,7 +33,7 @@ class DriverStatusService
         $findBooking = Booking::where('id', $data['booking_id'])
             ->where('driver_id', $user->id)
             ->where('driver_status', 0)
-            ->where('ride_status', '=', 1)
+            ->where('ride_status', 1)
             ->first();
 
         if (!$findBooking) {
@@ -70,18 +72,19 @@ class DriverStatusService
         $passengerFCMToken = $findBooking->passenger->fcm_token;
         $bookingResponse = $this->driverBookingResponse($findBooking);
 
+        DB::commit();
+
         //driver reach location notification
         $notification_type = 2;
         if ($passengerFCMToken) {
-            DB::commit();
-            $fcmToken = ['fcm_token' => $passengerFCMToken];
+//            $fcmToken = ['fcm_token' => $passengerFCMToken];
             $title = 'Driver Arrived';
             $message = 'Driver Reached to Your PickUp Location';
-            $sendFCMNotification = $this->duringRideNotifications($fcmToken, $bookingResponse, $notification_type, $title, $message);
+            $sendFCMNotification = $this->duringRideNotifications($passengerFCMToken, $bookingResponse, $notification_type, $title, $message);
         }
 
-        DB::commit();
 
+//        dd('here');
 //        if ($passengerSocketId) {
         $socket->emit($passengerSocketId . '-driverStatus', [
             'result' => 'success',
@@ -167,10 +170,10 @@ class DriverStatusService
         //ride start notification
         $notification_type = 3;
         if ($passengerFCMToken) {
-            $fcmToken = ['fcm_token' => $passengerFCMToken];
+//            $fcmToken = ['fcm_token' => $passengerFCMToken];
             $title = 'Ride Started';
             $message = 'Fasten Your Seat Belt Ride Is Started';
-            $sendFCMNotification = $this->duringRideNotifications($fcmToken, $bookingResponse, $notification_type, $title, $message);
+            $sendFCMNotification = $this->duringRideNotifications($passengerFCMToken, $bookingResponse, $notification_type, $title, $message);
         }
 
         DB::commit();
@@ -312,7 +315,8 @@ class DriverStatusService
             ]);
 
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             DB::rollBack();
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
@@ -320,6 +324,30 @@ class DriverStatusService
                 'data' => null
             ]);
         }
+
+        //change voucher status
+        try{
+            if($findBooking->bookingDetail->is_voucher == 1)
+            {
+                $voucher_detail = json_decode($findBooking->bookingDetail->voucher_detail);
+
+                $voucherId =$voucher_detail->voucher_id;
+
+                $find =  VoucherCodePassenger::where('passenger_id',$findBooking->passenger_id)
+                    ->where('voucher_code_id',$voucherId)->update(['is_used'=>1]);
+            }
+
+        }
+        catch (\Exception $e)
+        {
+            DB::rollBack();
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Error in Updating Voucher Status: ' . $e,
+                'data' => null
+            ]);
+        }
+
         $findBooking->push();
         $passengerSocketId = $findBooking->passenger_id;
         $passengerFCMToken = $findBooking->passenger->fcm_token;
@@ -329,10 +357,10 @@ class DriverStatusService
         //ride start notification
         $notification_type = 4;
         if ($passengerFCMToken) {
-            $fcmToken = ['fcm_token' => $passengerFCMToken];
+//            $fcmToken = ['fcm_token' => $passengerFCMToken];
             $title = 'Ride is Completed';
             $message = 'Congratulations! You have Reached Your Destination.Hope you have enjoyed our services';
-            $sendFCMNotification = $this->duringRideNotifications($fcmToken, $bookingResponse, $notification_type, $title, $message);
+            $sendFCMNotification = $this->duringRideNotifications($passengerFCMToken, $bookingResponse, $notification_type, $title, $message);
         }
 
         DB::commit();
@@ -413,12 +441,13 @@ class DriverStatusService
             if ($findBooking->payment_type == 'cash_wallet' && $data['payment_type'] == 'cash_wallet') {
                 $findBooking->payment_type = 'cash_wallet';
             }
+            $findBooking->chat = isset($data['chat_message']) ? json_encode($data['chat_messages']):null;
+
             $findBooking->save();
 
             $findBooking->bookingDetail->update([
                 'passenger_total_cash_paid' => $cashPaid,
                 'passenger_extra_cash_paid' => $extraCashPaid,
-                'chat' => isset($data['chat_message']) ? json_encode($data['chat_messages']):null,
                 'route_json' => isset($data['route_json']) ? $data['route_json'] : null
             ]);
         } catch (\Exception $e) {
@@ -453,10 +482,10 @@ class DriverStatusService
         //collect fare notification
         $notification_type = 5;
         if ($passengerFCMToken) {
-            $fcmToken = ['fcm_token' => $passengerFCMToken];
+//            $fcmToken = ['fcm_token' => $passengerFCMToken];
             $title = 'Rating:';
             $message = 'Give your value able feedback to our driver.';
-            $sendFCMNotification = $this->duringRideNotifications($fcmToken, $bookingResponse, $notification_type, $title, $message);
+            $sendFCMNotification = $this->duringRideNotifications($passengerFCMToken, $bookingResponse, $notification_type, $title, $message);
         }
 
         DB::commit();
@@ -553,6 +582,51 @@ class DriverStatusService
 
         if ($wallet_balance != 0 && $wallet_balance < 0) {
             $totalFare = $totalFare + $wallet_balance;
+        }
+
+        if($findBooking->bookingDetail->is_voucher == 1)
+        {
+            $discountAmount = 0;
+            $discountType = 'percentage';
+            $totalDiscountedPrice = 0;
+            $voucher_detail = json_decode($findBooking->bookingDetail->voucher_detail);
+            if(isset($voucher_detail->expiry_date))
+            {
+                $voucherExpiryDate = Carbon::parse($voucher_detail->expiry_date);
+                $currentDate = Carbon::now();
+                if($voucherExpiryDate < $currentDate)
+                {
+                    $discountAmount = 0;
+                }
+                else{
+                    if(isset($voucher_detail->discount_value))
+                    {
+                        $discountAmount = $voucher_detail->discount_value;
+                    }
+
+                }
+
+                if(isset($voucher_detail->discount_type))
+                {
+                    $discountType = $voucher_detail->discount_type;
+                }
+            }
+
+            if($discountAmount == 0)
+            {
+                $totalDiscountedPrice = 0;
+            }
+            else{
+                if($discountType == 'percentage')
+                {
+                    $totalDiscountedPrice = ($totalFare * $discountAmount)/100;
+                }
+
+            }
+
+
+            $totalFare =  $totalFare - $totalDiscountedPrice;
+
         }
 
         $totalCollectFare = 0;

@@ -12,7 +12,6 @@ use App\Models\VehicleType;
 use App\Traits\BookingResponseTrait;
 use App\Traits\FindDistanceTraits;
 use App\Traits\FindDriverTrait;
-
 //use App\Traits\UserWalletTraits;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -25,12 +24,12 @@ class RideService
     use FindDistanceTraits;
     use FindDriverTrait;
     use BookingResponseTrait;
-
     //use UserWalletTraits;
 
     public function saveBooking($request)
     {
         DB::beginTransaction();
+
 
         //finding distance
 //        try {
@@ -62,6 +61,8 @@ class RideService
         //savingData in Booking Table
         try {
 
+            $otpCode = mt_rand(1000, 9999);
+
             $pick_up_date = $pick_up_time = null;
             if ($request->booking_type == 'book_later') {
                 $pick_up_date = Carbon::parse($request->pick_up_date)->format('Y-m-d');
@@ -89,16 +90,20 @@ class RideService
                 'estimated_fare' => $request->estimated_fare,
                 'actual_fare' => 0,
                 'ride_status' => 0,
+                'otp' => $otpCode
             ];
 
-            if ($request->booking_id) {
+            if($request->booking_id)
+            {
                 $findBooking = Booking::find($request->booking_id);
-                if ($findBooking) {
+                if($findBooking)
+                {
                     $bookingTable = $findBooking;
 
                     $bookingTable->update($bookingArray);
                 }
-            } else {
+            }
+            else{
 
                 $bookingTable = Booking::create($bookingArray);
             }
@@ -106,24 +111,32 @@ class RideService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            $response = ['result' => 'error', 'message' => 'Error in Creating Booking Request: ' . $e, 'code' => 500];
+            $response = ['result' => 'error', 'message' =>  'Error in Creating Booking Request: ' . $e, 'code' => 500];
             return $response;
         }
 
         try {
 
-            $vehicleTypeRecord = VehicleType::find($request->vehicle_type_id);
+            $vehicleTypeRecord  = VehicleType::find($request->vehicle_type_id);
 
-            if ($vehicleTypeRecord) {
+            if($vehicleTypeRecord)
+            {
 
-                $setting = Setting::first();
+                $setting  = Setting::first();
                 $cancel_allowed_time = 0;
                 $cancel_ride_passenger_fine_amount = 0;
                 $cancel_ride_driver_fine_amount = 0;
-                if ($setting) {
+                if($setting)
+                {
                     $cancel_allowed_time = $setting->cancel_ride_time;
                     $cancel_ride_passenger_fine_amount = $setting->cancel_ride_passenger_fine_amount;
                     $cancel_ride_driver_fine_amount = $setting->cancel_ride_driver_fine_amount;
+                }
+
+                $voucher_detail =  null;
+                if($request->is_voucher == 1)
+                {
+                    $voucher_detail = json_encode($request->voucher_detail);
                 }
 
 
@@ -140,29 +153,36 @@ class RideService
                     'peak_factor_applied' => $request->peak_factor_applied,
                     'initial_distance_rate' => $vehicleTypeRecord->initial_distance_rate,
                     'initial_time_rate' => $vehicleTypeRecord->initial_time_rate,
-                    'peak_factor_rate' => isset($request->peak_factor_rate) ? $request->peak_factor_rate : null
+                    'peak_factor_rate' => isset($request->peak_factor_rate) ? $request->peak_factor_rate:null,
+                    'is_voucher' => $request->is_voucher,
+                    'voucher_detail' => null
+
                 ];
 
 
-                if ($bookingTable->bookingDetail) {
+                if($bookingTable->bookingDetail)
+                {
                     $bookingDetail = $bookingTable->bookingDetail;
 
                     $bookingDetail->update($bookingDetailArray);
 
-                } else {
+                }
+                else{
                     $bookingDetail = $bookingTable->bookingDetail()->create($bookingDetailArray);
                 }
 
                 $bookingTable->refresh();
 
-            } else {
+            }
+            else{
                 DB::rollBack();
-                $response = ['result' => "error", 'message' => 'Vehicle Type Not Found', 'code' => 500];
+                $response = ['result'=>"error",'message'=>'Vehicle Type Not Found','code'=>500];
                 return $response;
             }
 
 
             DB::commit();
+
 
 
             $bookingData = $this->driverBookingResponse($bookingTable);
@@ -173,7 +193,7 @@ class RideService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            $response = ['result' => 'error', 'message' => 'Error in Creating Booking Detail Request: ' . $e, 'code' => 500];
+            $response =  ['result' => 'error', 'message' => 'Error in Creating Booking Detail Request: ' . $e, 'code' => 500];
             return $response;
         }
 
@@ -191,7 +211,7 @@ class RideService
             if (sizeof($gettingDrivers) > 0) {
                 $response = ['result' => 'success', 'data' => $gettingDrivers, 'message' => 'Nearest Drivers Find Successfully'];
             } else {
-                $response = ['result' => 'error', 'data' => $booking, 'message' => 'Driver Not Found. Try Again Later', 'code' => 404];
+                $response = ['result' => 'error', 'data' => $booking, 'message' => 'Driver Not Found. Try Again Later','code'=>404];
             }
 
 
@@ -199,34 +219,40 @@ class RideService
 
         } catch (\Exception $e) {
 //            DB::rollBack();
-            $response = ['result' => 'error', 'data' => $booking, 'message' => 'Error in find nearest drivers : ' . $e, 'code' => 500];
+            $response = ['result' => 'error', 'data' => $booking, 'message' => 'Error in find nearest drivers : ' . $e,'code'=>500];
             return $response;
         }
     }
 
-    public function saveAvailableDrivers($driversList, $booking)
+    public function saveAvailableDrivers($driversList,$booking)
     {
 
-        try {
+        try{
             $firstDriver = null;
-            foreach ($driversList as $key => $driver) {
+            foreach ($driversList as $key => $driver)
+            {
 
-                if ($key == 0) {
+                if($key == 0)
+                {
                     $firstDriver = $driver;
                 }
 
 
-                AssignBookingDriver::create(['booking_id' => $booking['id'],
-                    'driver_id' => $driver['id']
+                AssignBookingDriver::create(['booking_id'=>$booking['id'],
+                    'driver_id'=>$driver['id']
                 ]);
             }
 
-            $response = ['result' => 'success', 'message' => 'Driver Save', 'code' => 200, 'data' => $firstDriver];
-            return $response;
-        } catch (\Exception $e) {
-            $response = ['result' => 'error', 'message' => 'Error in Saving Driver: ' . $e, 'code' => 500];
+            $response = ['result'=>'success','message'=>'Driver Save','code'=>200,'data'=>$firstDriver];
             return $response;
         }
+        catch (\Exception $e)
+        {
+            $response = ['result'=>'error','message'=>'Error in Saving Driver: '.$e,'code'=>500];
+            return $response;
+        }
+
+
 
 
     }

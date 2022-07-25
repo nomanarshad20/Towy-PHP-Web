@@ -5,7 +5,7 @@
 @endsection
 
 @section('style')
-    <link rel="stylesheet" href="{{asset('admin/css/jquery-ui.css')}}" >\
+    <link rel="stylesheet" href="{{asset('admin/css/jquery-ui.css')}}" >
     <link href="{{asset('admin/css/mdtimepicker.css')}}" rel="stylesheet">
 
 @endsection
@@ -35,13 +35,29 @@
                                     <select name="passenger_id" class="form-control">
                                         <option value="" disabled selected>Select</option>
                                         @foreach($passengers as $passenger)
-                                            <option value="{{$passenger->id}}">{{$passenger->name}}</option>
+                                            <option value="{{$passenger->id}}">{{$passenger->name .' ( '.$passenger->referral_code .' )'}}</option>
                                         @endforeach
 
                                     </select>
 
                                 </div>
                             </div><!-- Col -->
+
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Select Driver</label>
+                                    <select name="driver_id" class="form-control">
+                                        <option value="" disabled selected>Select</option>
+                                        @foreach($drivers as $driver)
+                                            <option value="{{$driver->id}}">{{$driver->name .' ( '.$driver->referral_code .' )'}}</option>
+                                        @endforeach
+
+                                    </select>
+
+                                </div>
+                            </div><!-- Col -->
+
+
 
 {{--                            <div class="col-sm-6">--}}
 {{--                                <div class="mb-3">--}}

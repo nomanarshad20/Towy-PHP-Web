@@ -15,6 +15,17 @@ use App\Http\Controllers\API\Driver\DriverCancelRideController;
 use App\Http\Controllers\API\CancelReasonController;
 use App\Http\Controllers\API\Passenger\PassengerCancelRideController;
 use App\Http\Controllers\API\Driver\DriverController;
+use App\Http\Controllers\API\FareDistributionsController;
+use App\Http\Controllers\API\Driver\BookingRatingController;
+use App\Http\Controllers\API\Passenger\BookingRatingController as PassengerRatingController;
+use App\Http\Controllers\API\Passenger\TripHistoryController;
+use App\Http\Controllers\API\Passenger\NotificationController;
+use App\Http\Controllers\API\Passenger\VoucherController;
+use App\Http\Controllers\API\Passenger\BannerImageController;
+use App\Http\Controllers\API\Passenger\SettingController;
+use App\Http\Controllers\API\Passenger\CurrentStatusController;
+//use App\Http\Controllers\API\PagesContentController;
+use App\Http\Controllers\API\UserController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -71,6 +82,16 @@ Route::group(['middleware' => ['json.response']], function () {
                 Route::post('passenger-update-password',[AuthController::class,'passwordUpdate']);
                 Route::post('passenger-cancel-ride',[PassengerCancelRideController::class,'cancelRide']);
 
+                Route::post('passenger-save-rating',[PassengerRatingController::class,'giveRating']);
+                Route::get('passenger-trip-history',[TripHistoryController::class,'history']);
+                Route::get('passenger-get-notifications',[NotificationController::class,'index']);
+                Route::get('passenger-apply-voucher',[VoucherController::class,'apply']);
+                Route::get('passenger-get-banner-images',[BannerImageController::class,'index']);
+                Route::get('passenger-get-help',[SettingController::class,'index']);
+                Route::get('get-passenger-status',[CurrentStatusController::class,'index']);
+                Route::get('get-active-vouchers',[VoucherController::class,'voucherList']);
+
+
             });
 
             Route::namespace('Driver')->group(function(){
@@ -94,11 +115,20 @@ Route::group(['middleware' => ['json.response']], function () {
                 Route::get('get-driver-current-status',[DriverController::class,'getCurrentStatus']);
                 Route::get('driver-logout',[DriverController::class,'driverLogout']);
 
+                Route::post('driver-save-rating',[BookingRatingController::class,'giveRating']);
+                Route::post('driver-portal',[FareDistributionsController::class,'driverWalletPortal']);
+
+
             });
 
             Route::get('get-cancel-reason',[CancelReasonController::class,'index']);
+//            Route::get('get-pages-content',[PagesContentController::class,'index']);
+            Route::get('save-user-type',[UserController::class,'saveUserType']);
+
 
         });
+
+
     });
 
 

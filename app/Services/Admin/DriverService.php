@@ -10,11 +10,15 @@ use App\Models\Franchise;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleType;
+use App\Traits\CreateUserWalletTrait;
+use App\Traits\DriverPortalTrait;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DriverService
 {
 
+    use CreateUserWalletTrait,DriverPortalTrait;
 
     public function index()
     {
@@ -266,8 +270,8 @@ class DriverService
         if ($data) {
             if ($request->image == 'profile_image') {
                 $data->image = null;
-
                 $data->save();
+
             } elseif ($request->image == 'registration_book') {
                 $data->driver->vehicle->registration_book = null;
 
@@ -286,4 +290,92 @@ class DriverService
     }
 
 
+    public function portal($id,$fromDate=null,$tillDate=null)
+    {
+        $ridesSummary       = [];
+        $previousAmount     = 0;
+
+        if(!isset($fromDate) && $fromDate == null){
+            $fromDate           = Carbon::today();
+        }
+        if(!isset($tillDate) && $tillDate == null){
+            $tillDate           = Carbon::now();
+        }
+
+        $userInfo               = User::where('id', $id)->first();
+
+        if(isset($userInfo) && $userInfo != null){
+            $firstDate          = Carbon::parse($fromDate);
+            $secondDate         = Carbon::parse($userInfo->created_at);
+
+            if ($firstDate->greaterThan($secondDate)) {
+                $preFromDate            = $secondDate;
+                $preTillDate            = $firstDate;
+
+                $preDriverCalculations  = DriverPortalTrait::driverPortalPreviousDetails($id, $preFromDate, $preTillDate);
+
+                if(isset($preDriverCalculations) && $preDriverCalculations['previous_final_total_amount'] != 0)
+                    $previousAmount     = $preDriverCalculations['previous_final_total_amount'];
+
+            }
+
+            if ($firstDate->lessThanOrEqualTo($secondDate))
+                $fromDate       = $secondDate;
+
+            $ridesSummary       = DriverPortalTrait::driverPortalDetails($id, $fromDate, $tillDate,$previousAmount);
+
+            return view('admin.driver.portal', compact('ridesSummary','userInfo'));
+
+        }else {
+            return Redirect()->back()->withErrors(['error', 'Invalid Request, Driver not found!']);
+        }
+    }
+
+    public function payOrReceivePartnerAmount($request)
+    {
+        try{
+            $amount         = $request->amount;
+            $partnerId      = $request->id;
+            $payReceiveFlag = $request->payReceiveFlag;
+            $payment_method = "cash_paid";
+            $driver_type    = "Public Partner";
+            $type           = "debit";
+            $description    = "Rs. " . $amount . " " . $payReceiveFlag . " to Partner";
+
+            $user           = User::with('driver')->where('id',$partnerId)->first();
+            if(isset($user) && $amount > 0) {
+                if ($amount > 0) {
+                    $data[] = [
+                        "driver_id"     => $user->id,
+                        "franchise_id"  => $user->driver->franchise_id
+                    ];
+                    if($payReceiveFlag == 'bonus'){
+
+                        $type               = "credit";
+                        $payment_method     = "bonus";
+                        $description        = "Received  Bonus Rs. " . $amount . " From Toto Admin.";
+                        // Update Partner Wallet
+                        $driverCalculations = CreateUserWalletTrait::driverWalletUpdate($data, 0, 0, 0, $amount, "credit", $payment_method, $description);
+
+                    }else{
+                        if ($payReceiveFlag == "received") {
+                            $type           = "credit";
+                            $payment_method = "cash_received";
+                            $description    = "Rs. " . $amount . " " . $payReceiveFlag . " from Partner";
+                        }
+
+                        $franchiseCalculations = CreateUserWalletTrait::franchiseWalletUpdate($data, 0, 0, 0, $amount, $type, $payment_method, $description);
+                    }
+
+                    return Redirect()->back()->with('success', 'Amount successfully Paid');
+                } else {
+                    return Redirect()->back()->withErrors(['error', 'Invalid Request, Driver not found!']);
+                }
+            }else{
+                return Redirect()->back()->withErrors(['error', 'Invalid Request, Driver not found! or Invalid Amount']);
+            }
+        } catch (\Exception $e) {
+            return Redirect()->back()->withErrors(['error', $e->getMessage()]);
+        }
+    }
 }

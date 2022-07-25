@@ -38,7 +38,7 @@
                                 <th>Booking Unique ID</th>
                                 <th>Passenger</th>
                                 <th>Driver</th>
-{{--                                <th>Vehicle Type</th>--}}
+                                {{--                                <th>Vehicle Type</th>--}}
                                 <th>Franchise ID</th>
                                 <th>Booking Type</th>
                                 <th>Pick Up Area</th>
@@ -51,10 +51,21 @@
                             @foreach($data as $booking)
                                 <tr>
                                     <td>{{$loop->iteration}}</td>
-                                    <td>{{$booking->booking_unique_id}}</td>
+                                    <td>
+                                        @if($booking->ride_status != 0  && $booking->ride_status != 1)
+                                            <a href="{{route('bookingDetail',['id'=>$booking->id])}}">
+                                                {{$booking->booking_unique_id}}
+                                            </a>
+                                        @else
+                                            <a href="javascript:void(0)">
+                                                {{$booking->booking_unique_id}}
+                                            </a>
+                                        @endif
+
+                                    </td>
                                     <td>{{isset($booking->passenger) ? $booking->passenger->name:'N/A'}}</td>
                                     <td>{{isset($booking->driver) ? $booking->driver->name:'N/A'}}</td>
-{{--                                    <td>{{$booking->vehicleType->name}}</td>--}}
+                                    {{--                                    <td>{{$booking->vehicleType->name}}</td>--}}
                                     <td>{{isset($booking->franchise) ? $booking->franchise->name:'N/A'}}</td>
                                     <td>{{$booking->booking_type}}</td>
                                     <td>{{$booking->pick_up_area}}</td>
@@ -85,10 +96,10 @@
                                            href="javascript:void(0)">
                                             <i data-feather="trash">Delete</i>
                                         </a>
-{{--                                        <a href="javascript:void(0)" data-id="{{$vehicle->id}}" title="Change Status"--}}
-{{--                                           class="changeStatus">--}}
-{{--                                            <i data-feather="refresh-ccw">Change Status</i>--}}
-{{--                                        </a>--}}
+                                        {{--                                        <a href="javascript:void(0)" data-id="{{$vehicle->id}}" title="Change Status"--}}
+                                        {{--                                           class="changeStatus">--}}
+                                        {{--                                            <i data-feather="refresh-ccw">Change Status</i>--}}
+                                        {{--                                        </a>--}}
                                     </td>
                                 </tr>
                             @endforeach

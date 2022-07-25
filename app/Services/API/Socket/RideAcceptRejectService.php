@@ -7,6 +7,7 @@ namespace App\Services\API\Socket;
 use App\Models\AssignBookingDriver;
 use App\Models\Booking;
 use App\Models\User;
+use App\Models\VoucherCodePassenger;
 use App\Traits\BookingResponseTrait;
 use App\Traits\SendFirebaseNotificationTrait;
 
@@ -81,6 +82,18 @@ class RideAcceptRejectService
                     $gettingCurrentUser->driverCoordinate->update(['status' => 1]);
                 }
 
+                // update voucher
+                if($findBooking->bookingDetail->is_voucher == 1)
+                {
+                    $voucher_detail = json_decode($findBooking->bookingDetail->voucher_detail);
+
+                    $voucherId = $voucher_detail->voucher_id;
+
+                    $find =  VoucherCodePassenger::where('passenger_id',$findBooking->passenger_id)
+                        ->where('voucher_code_id',$voucherId)->update(['is_used'=>1]);
+
+                }
+
                 $findBooking->save();
             }
             catch (\Exception $e) {
@@ -98,13 +111,13 @@ class RideAcceptRejectService
 
 
 //            if ($passengerSocketID) {
-            $socket->emit($findBooking->passenger_id.'-finalRideStatus',
-                [
-                    'result' => 'success',
-                    'message' => "Driver has Accepted Your Ride Request",
-                    'data' => $this->driverBookingResponse($findBooking)
-                ]
-            );
+                 $socket->emit($findBooking->passenger_id.'-finalRideStatus',
+                    [
+                        'result' => 'success',
+                        'message' => "Driver has Accepted Your Ride Request",
+                        'data' => $this->driverBookingResponse($findBooking)
+                    ]
+                );
 //            }
 
 
@@ -169,7 +182,7 @@ class RideAcceptRejectService
                 $driverSocketId = $driverRecord->id;
 
                 if ($driverSocketId) {
-                    $socket->emit($driverSocketId.'-finalRideStatus',
+                     $socket->emit($driverSocketId.'-finalRideStatus',
                         [
                             'result' => 'success',
                             'message' => "New Ride Request",
@@ -185,8 +198,21 @@ class RideAcceptRejectService
                         'data' => null
                     ]
                 );
-            } else {
+            }
+            else {
+                $passengerID = $findBooking->passenger_id;
+                $booking = $this->driverBookingResponse($findBooking);
+
+
                 if ($data['driver_action'] == 2) {
+                     $socket->emit($passengerID.'-finalRideStatus',
+                        [
+                            'result' => 'error',
+                            'message' => "No one has accepted your ride request",
+                            'data' => (object)$booking
+                        ]
+                    );
+
                     return  $socket->emit($data['user_id'].'-finalRideStatus',
                         [
                             'result' => 'error',
@@ -194,8 +220,18 @@ class RideAcceptRejectService
                             'data' => null
                         ]
                     );
-                } elseif ($data['driver_action'] == 0) {
-                    return $socket->emit($data['user_id'].'-finalRideStatus',
+                }
+                elseif ($data['driver_action'] == 0) {
+                    $socket->emit($passengerID.'-finalRideStatus',
+                        [
+                            'result' => 'error',
+                            'message' => "No one has accepted your ride request",
+                            'data' => (object)$booking
+                        ]
+                    );
+
+
+                    return  $socket->emit($data['user_id'].'-finalRideStatus',
                         [
                             'result' => 'error',
                             'message' => "You have rejected ride request",
@@ -203,6 +239,8 @@ class RideAcceptRejectService
                         ]
                     );
                 }
+
+
 
             }
         }

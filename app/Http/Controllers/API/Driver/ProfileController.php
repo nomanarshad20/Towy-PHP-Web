@@ -24,7 +24,8 @@ class ProfileController extends Controller
         if($request->password)
         {
             $this->validate($request,[
-                'password' => 'required|min:8'
+                'password' => 'required|min:8|confirmed',
+                'old_password' => 'required|min:8'
             ]);
         }
 
@@ -38,5 +39,6 @@ class ProfileController extends Controller
 
         $loginUserResponse = $this->authService->loginUserResponse();
 
-        return makeResponse('success','Profile Updated Successfully',200,$loginUserResponse);    }
+        return makeResponse('success','Profile Updated Successfully',200,$loginUserResponse);
+    }
 }

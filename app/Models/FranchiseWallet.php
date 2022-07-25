@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class FranchiseWallet extends Model
 {
     use HasFactory;
+
+    protected $table = 'franchise_wallets';
 }

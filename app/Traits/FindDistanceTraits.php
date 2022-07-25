@@ -37,11 +37,11 @@ trait FindDistanceTraits
         $findVehicleFares = VehicleType::get();
 
         $data = array();
-
         foreach ($findVehicleFares as $findVehicleFare) {
             if ($findVehicleFare) {
                 $peak_factor_applied = 0;
                 $estimatedFare = 0;
+
                 if ($distance) {
                     $estimatedFare = $findVehicleFare->per_km_rate * $distance;
                     if ($peakRate) {

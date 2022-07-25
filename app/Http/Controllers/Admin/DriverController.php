@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DriverCreateRequest;
 use App\Services\Admin\DriverService;
 use Illuminate\Http\Request;
-
+use Carbon\Carbon;
 class DriverController extends Controller
 {
 
@@ -34,7 +34,6 @@ class DriverController extends Controller
             'password' => 'required|min:8'
 
         ]);
-
 
         return $this->driverService->save($request);
     }
@@ -77,4 +76,27 @@ class DriverController extends Controller
         return $this->driverService->deleteImage($request);
     }
 
+    public function portal($id=null,Request $request)
+    {
+        if($id==null){
+            $id = $request->driverID;
+        }
+        if(isset($request->fromDate) && $request->fromDate != null ){
+            $fromDate = $request->fromDate;
+        }else{
+            $fromDate = Carbon::today();
+        }
+        if(isset($request->tillDate) && $request->tillDate != null ){
+            $tillDate = $request->tillDate;
+        }else{
+            $tillDate = Carbon::now();
+        }
+
+        return $this->driverService->portal($id,$fromDate,$tillDate);
+    }
+
+    public function payReceiveFromDriver(Request $request)
+    {
+        return $this->driverService->payOrReceivePartnerAmount($request);
+    }
 }

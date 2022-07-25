@@ -33,7 +33,21 @@
                                     <select name="passenger_id" class="form-control">
                                         <option value="" disabled selected>Select</option>
                                         @foreach($passengers as $passenger)
-                                            <option value="{{$passenger->id}}" {{$data->passenger_id == $passenger->id ? 'selected':''}}>{{$passenger->name}}</option>
+                                            <option value="{{$passenger->id}}" {{$data->passenger_id == $passenger->id ? 'selected':''}}>{{$passenger->name .' ( '.$passenger->referral_code .' )'}}</option>
+                                        @endforeach
+
+                                    </select>
+
+                                </div>
+                            </div><!-- Col -->
+
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Select Driver</label>
+                                    <select name="driver_id" class="form-control">
+                                        <option value="" disabled selected>Select</option>
+                                        @foreach($drivers as $driver)
+                                            <option value="{{$driver->id}}" {{$data->driver_id == $driver->id ? 'selected':''}}>{{$driver->name .' ( '.$driver->referral_code .' )'}}</option>
                                         @endforeach
 
                                     </select>

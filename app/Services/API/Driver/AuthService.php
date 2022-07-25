@@ -209,14 +209,14 @@ class AuthService
         }
 
         // Get Driver Wallet
-        $passengerWallet = Auth::user()->wallet('Driver-Wallet');
-
-        if (!isset($passengerWallet) || $passengerWallet == null) {
-            // Create New Wallet For Driver
-            $this->createUserWallet(Auth::user(), 'Driver-Wallet');
-            //Again Get Driver Wallet
-            $passengerWallet = Auth::user()->wallet('Driver-Wallet');
-        }
+//        $passengerWallet = Auth::user()->wallet('Driver-Wallet');
+//
+//        if (!isset($passengerWallet) || $passengerWallet == null) {
+//            // Create New Wallet For Driver
+//            $this->createUserWallet(Auth::user(), 'Driver-Wallet');
+//            //Again Get Driver Wallet
+//            $passengerWallet = Auth::user()->wallet('Driver-Wallet');
+//        }
 
         $driverStatus = null;
         if (isset(Auth::user()->driverCoordinate)) {
@@ -242,7 +242,16 @@ class AuthService
         }
 
 
-        $balance = $passengerWallet->balance ?? 0;
+        $balance    =   $this->driverWalletBalance(Auth::user()->id);
+
+        $rating = 0;
+        if(isset(Auth::user()->rating)){
+            $rating = Auth::user()->rating->avg('rating');
+            if($rating == null)
+            {
+                $rating = 0;
+            }
+        }
 
         $data = [
             'mobile_no' => Auth::user()->mobile_no,
@@ -261,9 +270,11 @@ class AuthService
             'image' => Auth::user()->image,
             'driver_wallet_balance' => $balance,
             'availability_status' => $driverStatus,
-            'vehicle_registration_number' => isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->registration_number : null,
             'name' => Auth::user()->name,
-            'rating' => 5,
+            'rating' => $rating,
+            'vehicle_registration_number' => isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->registration_number :null,
+            'email' => Auth::user()->email
+
         ];
 
         if ($token) {

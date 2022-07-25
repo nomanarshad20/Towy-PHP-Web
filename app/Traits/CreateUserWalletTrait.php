@@ -209,13 +209,13 @@ trait CreateUserWalletTrait
         $wallet                         = new DriverWalletModel;
         if(isset($data) && isset($data->id)) {
             if(isset($data->driver_id))
-                $wallet->driver_id          = $data->driver_id;
+            $wallet->driver_id          = $data->driver_id;
             if(isset($data->franchise_id))
-                $wallet->franchise_id       = $data->franchise_id;
+            $wallet->franchise_id       = $data->franchise_id;
             if(isset($data->id))
-                $wallet->booking_id         = $data->id;
+            $wallet->booking_id         = $data->id;
             if(isset($data->actual_fare))
-                $wallet->ride_total_amount  = $data->actual_fare;
+            $wallet->ride_total_amount  = $data->actual_fare;
         }
         if(isset($data) && isset($data[0]['driver_id'])){
             $wallet->driver_id          = $data[0]['driver_id'];
@@ -241,11 +241,11 @@ trait CreateUserWalletTrait
         $franchiseWallet                    = new FranchiseWallet;
         if(isset($data) && isset($data->id)) {
             if(isset($data->driver_id))
-                $franchiseWallet->driver_id     = $data->driver_id;
+            $franchiseWallet->driver_id     = $data->driver_id;
             if(isset($data->franchise_id))
-                $franchiseWallet->franchise_id  = $data->franchise_id;
+            $franchiseWallet->franchise_id  = $data->franchise_id;
             if(isset($data->id))
-                $franchiseWallet->booking_id    = $data->id;
+            $franchiseWallet->booking_id    = $data->id;
         }
         if(isset($data) && isset($data[0]['driver_id'])){
             $franchiseWallet->driver_id     = $data[0]['driver_id'];

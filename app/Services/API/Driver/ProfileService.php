@@ -5,7 +5,9 @@ namespace App\Services\API\Driver;
 
 
 use App\Helper\ImageUploadHelper;
+use App\Models\Driver;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileService
 {
@@ -19,12 +21,25 @@ class ProfileService
 
             Auth::user()->name = $request->name;
             Auth::user()->email = $request->email;
-            Auth::user()->driver->city = $request->city;
+
             if ($request->password) {
-                Auth::user()->password = bcrypt($request->password);
+                if(Hash::check($request->old_password,Auth::user()->password))
+                {
+                    Auth::user()->password = bcrypt($request->password);
+                }
+                else{
+                    $response = ['result'=>'error','message'=>'Old Password is Incorrect','code'=>500];
+                    return $response;
+                }
+
             }
 
-            Auth::user()->driver->save();
+            if($request->city)
+            {
+                Auth::user()->driver->city = $request->city;
+                Auth::user()->driver->save();
+            }
+
             Auth::user()->save();
 
 //            $data = [

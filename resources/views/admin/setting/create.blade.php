@@ -94,13 +94,64 @@
                                     >
                                 </div>
                             </div><!-- Col -->
-
-
-
-
-
-
                         </div><!-- Row -->
+
+                        <h6 class="card-title">Share</h6>
+
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Driver Share(%)</label>
+                                    <input type="text" name="driver_share" class="form-control"
+                                           placeholder="Enter Driver Share(%)"
+                                           onkeypress="return isNumberKey(event)"
+                                           value="{{isset($data->driver_share) ? $data->driver_share:''}}"
+                                    >
+                                </div>
+                            </div><!-- Col -->
+                            <div class="col-sm-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Franchise Share(%)</label>
+                                    <input type="text" name="franchise_share" class="form-control"
+                                           placeholder="Enter Franchise Share (%)"
+                                           onkeypress="return isNumberKey(event)"
+                                           value="{{isset($data->franchise_share) ? $data->franchise_share:''}}"
+                                    >
+                                </div>
+                            </div><!-- Col -->
+                            <div class="col-sm-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Tax Share(%)</label>
+                                    <input type="text" name="tax_share" class="form-control"
+                                           placeholder="Enter Tax Share (%)"
+                                           onkeypress="return isNumberKey(event)"
+                                           value="{{isset($data->tax_share) ? $data->tax_share:''}}"
+                                    >
+                                </div>
+                            </div><!-- Col -->
+                            <div class="col-sm-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Company Share(%)</label>
+                                    <input type="text" name="company_share" class="form-control"
+                                           placeholder="Enter Company Share (%)"
+                                           onkeypress="return isNumberKey(event)"
+                                           value="{{isset($data->company_share) ? $data->company_share:''}}"
+                                    >
+                                </div>
+                            </div><!-- Col -->
+                        </div>
+
+                        <h6 class="card-title">Help</h6>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Help Screen Message</label>
+                                    <textarea name="help" column="3" rows="4" class="form-control">{{isset($data->help) ? $data->help:null}}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+
 
 
                         <button type="button" class="btn btn-primary createBtn">

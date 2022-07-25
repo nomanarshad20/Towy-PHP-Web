@@ -9,6 +9,7 @@ use App\Models\BookingDetail;
 use App\Models\User;
 use App\Models\VehicleFareSetting;
 use App\Models\VehicleType;
+use App\Traits\CreateUserWalletTrait;
 use App\Traits\FindDistanceTraits;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -28,9 +29,10 @@ class BookingService
     {
         $passengers = User::where('user_type', 1)->where('is_verified', 1)->get();
         $franchises = User::where('user_type', 3)->where('is_verified', 1)->get();
+        $drivers = User::where('user_type',2)->where('is_verified',1)->get();
 //        $vehicleTypes = VehicleType::where('status', 1)->get();
 
-        return view('admin.booking.create', compact('passengers', 'franchises'));
+        return view('admin.booking.create', compact('passengers', 'franchises','drivers'));
     }
 
     public function save($request)
@@ -44,6 +46,7 @@ class BookingService
 
 
             $distanceInKm = str_replace(',', '', str_replace('km', '', $findingDistance['text']));
+            $distanceInKm = str_replace(',', '', str_replace('m', '', $findingDistance['text']));
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -69,6 +72,20 @@ class BookingService
             }
 
 
+            $otpCode = mt_rand(1000, 9999);
+
+            $driverId =  null;
+            $vehicleId = null;
+            $rideStatus = 0;
+
+            if($request->driver_id)
+            {
+                $driverId = $request->driver_id;
+                $findVehicle = User::find($driverId);
+                $vehicleId = $findVehicle->driver->vehicle_id;
+                $rideStatus = 1;
+            }
+
             $bookingTable = Booking::create([
                 'booking_unique_id' => uniqid('TOTO-'),
                 'passenger_id' => $request->passenger_id,
@@ -86,7 +103,10 @@ class BookingService
                 'payment_type' => 'cash',
                 'estimated_fare' => $gettingVehicleTypeRecords[0]['estimated_fare'],
                 'actual_fare' => 0,
-                'ride_status' => 0
+                'ride_status' => $rideStatus,
+                'otp' => $otpCode,
+                'driver_id' => $driverId,
+                'vehicle_id' => $vehicleId
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -146,6 +166,8 @@ class BookingService
 
 
                 $distanceInKm = str_replace(',', '', str_replace('km', '', $findingDistance['text']));
+                $distanceInKm = str_replace(',', '', str_replace('m', '', $findingDistance['text']));
+
 
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -160,6 +182,8 @@ class BookingService
                 return makeResponse('error', 'Error in Calculating Estimated Fare & Getting Vehicle Type Record: ' . $e, 500);
             }
 
+
+
             //savingData in Booking Table
             try {
 
@@ -169,6 +193,25 @@ class BookingService
                     $pick_up_time = Carbon::parse($request->pick_up_time)->format('H:i:s');
                 }
 
+                if($request->ride_status == 4)
+                {
+                    $is_passenger_rating_given = 1;
+                    $is_driver_rating_given = 1;
+                }
+                else{
+                    $is_passenger_rating_given = 1;
+                    $is_driver_rating_given = 1;
+                }
+
+                $driverId =  null;
+                $vehicleId = null;
+
+                if($request->driver_id)
+                {
+                    $driverId = $request->driver_id;
+                    $findVehicle = User::find($driverId);
+                    $vehicleId = $findVehicle->driver->vehicle_id;
+                }
 
                 $data->update([
                     'booking_unique_id' => uniqid('TOTO-'),
@@ -185,9 +228,14 @@ class BookingService
                     'drop_off_longitude' => $request->drop_off_lng,
                     'total_distance' => $distanceInKm,
                     'payment_type' => 'cash',
-                    'estimated_fare' => $gettingVehicleTypeRecords['estimated_fare'],
+                    'estimated_fare' => $gettingVehicleTypeRecords[0]['estimated_fare'],
                     'actual_fare' => 0,
-                    'ride_status' => $request->ride_status
+                    'ride_status' => $request->ride_status,
+                    'is_passenger_rating_given' => $is_passenger_rating_given,
+                    'is_driver_rating_given' => $is_driver_rating_given,
+                    'driver_id' => $driverId,
+                    'vehicle_id' => $vehicleId
+
                 ]);
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -196,11 +244,11 @@ class BookingService
 
             try {
                 $data->bookingDetail->update ([
-                    'waiting_price_per_min' => $gettingVehicleTypeRecords['waiting_price_per_min'],
-                    'vehicle_tax' => $gettingVehicleTypeRecords['tax_rate'],
-                    'vehicle_per_km_rate' => $gettingVehicleTypeRecords['per_km_rate'],
-                    'vehicle_per_min_rate' => $gettingVehicleTypeRecords['per_min_rate'],
-                    'min_vehicle_fare' => $gettingVehicleTypeRecords['min_fare']
+                    'waiting_price_per_min' => $gettingVehicleTypeRecords[0]['waiting_price_per_min'],
+                    'vehicle_tax' => $gettingVehicleTypeRecords[0]['tax_rate'],
+                    'vehicle_per_km_rate' => $gettingVehicleTypeRecords[0]['per_km_rate'],
+                    'vehicle_per_min_rate' => $gettingVehicleTypeRecords[0]['per_min_rate'],
+                    'min_vehicle_fare' => $gettingVehicleTypeRecords[0]['min_fare']
                 ]);
 
                 DB::commit();
@@ -238,4 +286,25 @@ class BookingService
             return makeResponse('error', 'Record Not Found', 404);
         }
     }
+
+    public function detail($id)
+    {
+        $data =  Booking::find($id);
+
+        if($data)
+        {
+            return view('admin.booking.detail',compact('data'));
+        }
+        else{
+            return redirect()->route('bookingListing')->with('error','Record Not Found');
+        }
+    }
+
+
+
+
+
+
+
+
 }
