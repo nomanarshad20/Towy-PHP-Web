@@ -67,6 +67,7 @@ Route::group(['middleware' => ['json.response']], function () {
             Route::namespace('Auth')->group(function () {
                 Route::post('driver-login', [DriverAuthController::class, 'login']);
                 Route::post('driver-register', [DriverAuthController::class, 'register']);
+                Route::post('send-otp',[DriverAuthController::class,'sendOtp']);
 
             });
         });

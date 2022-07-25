@@ -15,7 +15,7 @@ class AddCommentsUserTypeColumnUsersTable extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->integer('user_type')->after('remember_token')
-                ->comment('1=Passenger, 2=Driver, 3=Franchise,4= Service Provider')->nullable()->change();
+                ->comment('1=Passenger, 2=Driver, 3=Franchise,4= E-WorkShop')->nullable()->change();
         });
     }
 

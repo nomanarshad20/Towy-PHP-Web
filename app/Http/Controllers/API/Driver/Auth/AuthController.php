@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\API\Driver\DriverLoginRequest;
 use App\Http\Requests\API\Driver\DriverRegisterRequest;
 use App\Http\Requests\API\Driver\ResendOtpRequest;
+use App\Http\Requests\API\Driver\SendOTP;
 use App\Http\Requests\API\Driver\VerifyOtpRequest;
 use App\Models\User;
 use App\Services\API\Driver\AuthService;
@@ -113,5 +114,11 @@ class AuthController extends Controller
     public function resendOtp(ResendOtpRequest $request)
     {
         return $this->authService->resendOTP($request);
+    }
+
+    //function is to send otp on email
+    public function sendOtp(SendOTP $request)
+    {
+        return $this->authService->sendOTP($request);
     }
 }

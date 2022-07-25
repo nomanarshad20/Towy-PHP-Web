@@ -5,9 +5,13 @@ namespace App\Services\API\Driver;
 
 
 use App\Models\User;
+use App\Notifications\EmailVerificationNotification;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Traits\CreateUserWalletTrait;
+use Illuminate\Support\Facades\Notification;
+use Symfony\Component\Mime\Email;
 
 class AuthService
 {
@@ -27,35 +31,30 @@ class AuthService
 //            $otpCode = mt_rand(1000, 9999);
 
 
-            $checkType =  $this->checkType($request->login);
+            $checkType = $this->checkType($request->login);
 
             $mobile = $email = null;
 
-            if($checkType == 'mobile_no')
-            {
+            if ($checkType == 'mobile_no') {
                 $mobile = $request->login;
-                $email =  null;
+                $email = null;
 
-                $checkUser =  User::where('mobile_no',$mobile)->first();
-                if($checkUser)
-                {
-                    $response = ['result'=>'error','message'=>'This mobile number is already is in use','code'=>422];
+                $checkUser = User::where('mobile_no', $mobile)->first();
+                if ($checkUser) {
+                    $response = ['result' => 'error', 'message' => 'This mobile number is already is in use', 'code' => 422];
                     return $response;
                 }
-            }
-            elseif($checkType == 'email'){
+            } elseif ($checkType == 'email') {
                 $mobile = null;
-                $email =  $request->login;
+                $email = $request->login;
 
-                $checkUser =  User::where('email',$email)->first();
-                if($checkUser)
-                {
-                    $response = ['result'=>'error','message'=>'The email is already is in use','code'=>422];
+                $checkUser = User::where('email', $email)->first();
+                if ($checkUser) {
+                    $response = ['result' => 'error', 'message' => 'The email is already is in use', 'code' => 422];
                     return $response;
                 }
-            }
-            else{
-                $response = ['result'=>'error','message'=>'Please Enter Valid Mobile No or Email','code'=>422];
+            } else {
+                $response = ['result' => 'error', 'message' => 'Please Enter Valid Mobile No or Email', 'code' => 422];
                 return $response;
             }
 
@@ -86,7 +85,7 @@ class AuthService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            $response = ['result' => 'error', 'data' => $e,'code'=>500];
+            $response = ['result' => 'error', 'data' => $e, 'code' => 500];
         }
 
         return $response;
@@ -113,23 +112,18 @@ class AuthService
 
     public function checkUser($login, $password, $userType)
     {
-        $checkLoginType =  $this->checkType($login);
+        $checkLoginType = $this->checkType($login);
 
         if ($password) {
 
-            if($checkLoginType == 'mobile_no')
-            {
+            if ($checkLoginType == 'mobile_no') {
                 $credentials = ['mobile_no' => $login, 'password' => $password];
-            }
-            elseif($checkLoginType == 'email')
-            {
+            } elseif ($checkLoginType == 'email') {
                 $credentials = ['email' => $login, 'password' => $password];
-            }
-            else{
-                $response = ['result'=>'error','message'=>'Please Enter Valid Mobile No or Email','code'=>422];
+            } else {
+                $response = ['result' => 'error', 'message' => 'Please Enter Valid Mobile No or Email', 'code' => 422];
                 return $response;
             }
-
 
 
             if (Auth::attempt($credentials)) {
@@ -202,7 +196,7 @@ class AuthService
                     'license_front_side' => isset(Auth::user()->driver) ? Auth::user()->driver->license_front_side ? 1 : 0 : 0,
                     'license_back_side' => isset(Auth::user()->driver) ? Auth::user()->driver->license_back_side ? 1 : 0 : 0,
                     'image' => Auth::user()->image ? 1 : 0,
-                    'ssn' => Auth::user()->driver->ssn ? 1:0,
+                    'ssn' => Auth::user()->driver->ssn ? 1 : 0,
                     'registration_book' => isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->registration_book ? 1 : 0 : 0
                 ];
             }
@@ -242,13 +236,12 @@ class AuthService
         }
 
 
-        $balance    =   $this->driverWalletBalance(Auth::user()->id);
+        $balance = $this->driverWalletBalance(Auth::user()->id);
 
         $rating = 0;
-        if(isset(Auth::user()->rating)){
+        if (isset(Auth::user()->rating)) {
             $rating = Auth::user()->rating->avg('rating');
-            if($rating == null)
-            {
+            if ($rating == null) {
                 $rating = 0;
             }
         }
@@ -272,7 +265,7 @@ class AuthService
             'availability_status' => $driverStatus,
             'name' => Auth::user()->name,
             'rating' => $rating,
-            'vehicle_registration_number' => isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->registration_number :null,
+            'vehicle_registration_number' => isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->registration_number : null,
             'email' => Auth::user()->email
 
         ];
@@ -413,12 +406,41 @@ class AuthService
 
     public function checkType($login)
     {
-        if(is_numeric($login)){
+        if (is_numeric($login)) {
             return 'mobile_no';
-        }
-        elseif (filter_var($login, FILTER_VALIDATE_EMAIL)) {
+        } elseif (filter_var($login, FILTER_VALIDATE_EMAIL)) {
             return 'email';
         }
+    }
+
+    public function sendOTP($request)
+    {
+
+        DB::beginTransaction();
+//        $user = User::where('id', $request->user_id)->first();
+
+//        if (!$user) {
+//            DB::rollBack();
+//            return makeResponse('error', 'User ID does not Exist', 401);
+//        }
+
+
+        $otpCode = mt_rand(1000, 9999);
+
+//        $user->otp = $otpCode;
+//        $user->save();
+        $data = [
+
+            'otp' => $otpCode,
+            'email' => $request->login,
+        ];
+
+        Notification::route('mail', $request->login)->notify(new EmailVerificationNotification($data));
+
+
+//        DB::commit();
+        return makeResponse('success', 'OTP Code is Send on your email address', '200', $data);
+
     }
 
 }
