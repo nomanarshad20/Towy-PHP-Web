@@ -66,7 +66,7 @@ class RideService
             $pick_up_date = $pick_up_time = null;
             if ($request->booking_type == 'book_later') {
                 $pick_up_date = Carbon::parse($request->pick_up_date)->format('Y-m-d');
-                $pick_up_time = Carbon::parse($request->pick_up_time)->format('H:i:S');
+                $pick_up_time = Carbon::parse($request->pick_up_time)->format('H:i:s');
             }
 
 
