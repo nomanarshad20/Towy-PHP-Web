@@ -317,20 +317,20 @@ class AuthService
 
     public function verifyOtp($request)
     {
-        $findUser = User::where('id', $request->user_id)->where('otp', $request->otp)
+        $findUser = User::where('email', $request->email)->where('otp', $request->otp)
             ->first();
 
         if (!$findUser) {
             DB::rollBack();
 //            $response = ['result'=>'error','messasge'=>'Invalid OTP Code'];
 //            return $response;
-            return makeResponse('error', 'Invalid OTP Code', 404);
+            return makeResponse('error', 'Invalid OTP Code', 401);
 
         }
 
         $findUser->otp = null;
 
-        $findUser->steps = 1;
+//        $findUser->steps = 1;
 
         $findUser->save();
 
@@ -343,11 +343,11 @@ class AuthService
     public function resendOtp($request)
     {
         DB::beginTransaction();
-        $user = User::where('id', $request->user_id)->first();
+        $user = User::where('email', $request->email)->first();
 
         if (!$user) {
             DB::rollBack();
-            return makeResponse('error', 'User ID does not Exist', 401);
+            return makeResponse('error', 'Email does not Exist', 401);
         }
 
 
@@ -357,12 +357,15 @@ class AuthService
         $user->save();
         $data = [
 
-            'confirmation_code' => $otpCode,
+            'otp' => $otpCode,
             'email' => $user->email,
         ];
 
+        Notification::send($user, new ResetPasswordNotification($data));
+
+
         DB::commit();
-        return makeResponse('success', 'OTP Code is Send to your Registered Mobile Number', '200', $data);
+        return makeResponse('success', 'OTP Code is Send to your Email Address', '200', $data);
     }
 
     public function checkUserState($user)

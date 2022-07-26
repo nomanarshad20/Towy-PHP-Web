@@ -26,6 +26,7 @@ use App\Http\Controllers\API\Passenger\SettingController;
 use App\Http\Controllers\API\Passenger\CurrentStatusController;
 //use App\Http\Controllers\API\PagesContentController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\Driver\Auth\ForgotPasswordController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -68,7 +69,10 @@ Route::group(['middleware' => ['json.response']], function () {
                 Route::post('driver-login', [DriverAuthController::class, 'login']);
                 Route::post('driver-register', [DriverAuthController::class, 'register']);
                 Route::post('send-otp',[DriverAuthController::class,'sendOtp']);
+                Route::post('reset-password',[ForgotPasswordController::class,'resetPassword']);
 
+                Route::post('driver-verify-otp',[DriverAuthController::class,'verifyOtp']);
+                Route::post('driver-resend-otp',[DriverAuthController::class,'resendOtp']);
             });
         });
 

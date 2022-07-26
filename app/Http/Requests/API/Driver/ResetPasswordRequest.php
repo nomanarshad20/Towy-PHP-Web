@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class VerifyOtpRequest extends FormRequest
+class ResetPasswordRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,8 +26,9 @@ class VerifyOtpRequest extends FormRequest
     public function rules()
     {
         return [
-            'otp' => 'required',
-            'email' => 'required'
+            'password' => 'required|min:8|confirmed',
+            'login'  => 'required'
+
         ];
     }
 

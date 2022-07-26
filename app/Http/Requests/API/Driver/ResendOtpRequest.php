@@ -26,7 +26,7 @@ class ResendOtpRequest extends FormRequest
     public function rules()
     {
         return [
-            'user_id' => 'required'
+            'email' => 'required'
         ];
     }
 
