@@ -144,13 +144,13 @@
                             <div class="col-md-6 stretch-card grid-margin grid-margin-md-0">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h6 class="card-title">CNIC Front Image</h6>
+                                        <h6 class="card-title">Drivers License</h6>
                                         <input type="file" accept="image/jpg, image/png, image/jpeg"
                                                @if(isset($data->driver))
-                                                {{ $data->driver->cnic_front_side ?  'data-default-file='.asset($data->driver->cnic_front_side):'' }}
+                                                {{ $data->driver->drivers_license ?  'data-default-file='.asset($data->driver->drivers_license):'' }}
                                                @endif
                                                id="cnic_front_side"
-                                               name="cnic_front_image" accept="" class="myDropify"/>
+                                               name="drivers_license" accept="" class="myDropify"/>
 
                                     </div>
                                 </div>
@@ -159,13 +159,13 @@
                             <div class="col-md-6 stretch-card grid-margin grid-margin-md-0">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h6 class="card-title">CNIC Back Image</h6>
+                                        <h6 class="card-title">Vehicle Insurance</h6>
                                         <input type="file" accept="image/jpg, image/png, image/jpeg"
                                                @if(isset($data->driver))
-                                               {{ $data->driver->cnic_back_side ?  'data-default-file='.asset($data->driver->cnic_back_side):'' }}
+                                               {{ $data->driver->vehicle_insurance ?  'data-default-file='.asset($data->driver->vehicle_insurance):'' }}
                                                @endif
                                                id="cnic_back_side"
-                                               name="cnic_back_image" class="myDropify"/>
+                                               name="vehicle_insurance" class="myDropify"/>
 
                                     </div>
                                 </div>
@@ -174,32 +174,18 @@
                             <div class="col-md-6 stretch-card grid-margin grid-margin-md-0">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h6 class="card-title">License Front Image</h6>
+                                        <h6 class="card-title">Vehicle Inspection</h6>
                                         <input type="file" accept="image/jpg, image/png, image/jpeg"
                                                @if(isset($data->driver))
-                                               {{ $data->driver->license_front_side ?  'data-default-file='.asset($data->driver->license_front_side):'' }}
+                                               {{ $data->driver->vehicle_inspection ?  'data-default-file='.asset($data->driver->vehicle_inspection):'' }}
                                                @endif
                                                id="license_front_side"
-                                               name="license_front_image" class="myDropify"/>
+                                               name="vehicle_inspection" class="myDropify"/>
 
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-md-6 stretch-card grid-margin grid-margin-md-0">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">License Back Image</h6>
-                                        <input type="file"
-                                               @if(isset($data->driver))
-                                               {{ $data->driver->license_back_side ?  'data-default-file='.asset($data->driver->license_back_side):'' }}
-                                               @endif
-                                               class="myDropify" accept="image/jpg, image/png, image/jpeg"
-                                               id="license_back_side" name="license_back_image"/>
-
-                                    </div>
-                                </div>
-                            </div>
 
                             <div class="col-md-6 stretch-card grid-margin grid-margin-md-0">
                                 <div class="card">

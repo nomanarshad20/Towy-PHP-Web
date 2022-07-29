@@ -191,10 +191,9 @@ class AuthService
             if (Auth::user()->steps == 2) {
 
                 $driverDocumentStatus = [
-                    'cnic_front_side' => isset(Auth::user()->driver) ? Auth::user()->driver->cnic_front_side ? 1 : 0 : 0,
-                    'cnic_back_side' => isset(Auth::user()->driver) ? Auth::user()->driver->cnic_back_side ? 1 : 0 : 0,
-                    'license_front_side' => isset(Auth::user()->driver) ? Auth::user()->driver->license_front_side ? 1 : 0 : 0,
-                    'license_back_side' => isset(Auth::user()->driver) ? Auth::user()->driver->license_back_side ? 1 : 0 : 0,
+                    'vehicle_insurance' => isset(Auth::user()->driver) ? Auth::user()->driver->vehicle_insurance ? 1 : 0 : 0,
+                    'vehicle_inspection' => isset(Auth::user()->driver) ? Auth::user()->driver->vehicle_inspection ? 1 : 0 : 0,
+                    'drivers_license' => isset(Auth::user()->driver) ? Auth::user()->driver->drivers_license ? 1 : 0 : 0,
                     'image' => Auth::user()->image ? 1 : 0,
                     'ssn' => Auth::user()->driver->ssn ? 1 : 0,
                     'registration_book' => isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->registration_book ? 1 : 0 : 0
