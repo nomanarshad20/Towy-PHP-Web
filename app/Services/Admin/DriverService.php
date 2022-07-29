@@ -28,10 +28,10 @@ class DriverService
 
     public function create()
     {
-        $franchises = User::where('user_type', 3)->where('is_verified', 1)->get();
-//        $vehicleTypes =  VehicleType::where('status',1)->get();
+//        $franchises = User::where('user_type', 3)->where('is_verified', 1)->get();
+        $vehicleTypes =  VehicleType::where('status',1)->get();
 
-        return view('admin.driver.create', compact('franchises'));
+        return view('admin.driver.create', compact('vehicleTypes'));
     }
 
     public function save($request)
@@ -39,7 +39,9 @@ class DriverService
         DB::beginTransaction();
 
         try {
-            $user = User::create(['name' => $request->name, 'email' => $request->email,
+            $user = User::create(['first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
                 'password' => bcrypt($request->password),
                 'mobile_no' => $request->mobile_no, 'user_type' => 2,
 
@@ -54,7 +56,7 @@ class DriverService
 
         try {
             $vehicle = Vehicle::create(['name' => $request->vehicle_name,
-                'model' => $request->model,'vehicle_type_id'=>1,
+                'model' => $request->model,'vehicle_type_id'=>$request->vehicle_type_id,
                 'model_year' => $request->model_year,
                 'registration_number' => $request->registration_number]);
 
@@ -67,7 +69,7 @@ class DriverService
 
             $driver = Driver::create(['city' => $request->city,
                 'franchise_id' => $request->franchise_id,
-                'vehicle_type_id'=>1,
+                'vehicle_type_id'=>$request->vehicle_type_id,
                 'vehicle_id' => $vehicle->id, 'user_id' => $user->id]);
 
 
@@ -125,7 +127,9 @@ class DriverService
 
         if ($data && $data->user_type == 2) {
             try {
-                $data->update(['name' => $request->name, 'email' => $request->email,
+                $data->update(['first_name' => $request->first_name,
+                    'last_name' => $request->last_name,
+                    'email' => $request->email,
                     'mobile_no' => $request->mobile_no, 'user_type' => 2,
                 ]);
 
@@ -164,26 +168,23 @@ class DriverService
             }
 
             try {
-                if ($request->has('cnic_front_image')) {
-                    $image = ImageUploadHelper::uploadImage($request->cnic_front_image, 'upload/driver/' . $request->id . '/');
-                    $data->driver->cnic_front_side = $image;
+                if ($request->has(' vehicle_inspection')) {
+                    $image = ImageUploadHelper::uploadImage($request->vehicle_inspection, 'upload/driver/' . $request->id . '/');
+                    $data->driver->vehicle_inspection = $image;
 
                 }
 
-                if ($request->has('cnic_back_image')) {
-                    $image = ImageUploadHelper::uploadImage($request->cnic_back_image, 'upload/driver/' . $request->id . '/');
-                    $data->driver->cnic_back_side = $image;
+                if ($request->has('vehicle_insurance')) {
+                    $image = ImageUploadHelper::uploadImage($request->vehicle_insurance, 'upload/driver/' . $request->id . '/');
+                    $data->driver->vehicle_insurance = $image;
                 }
 
-                if ($request->has('license_front_image')) {
-                    $image = ImageUploadHelper::uploadImage($request->license_front_image, 'upload/driver/' . $request->id . '/');
-                    $data->driver->license_front_side = $image;
+                if ($request->has('drivers_license')) {
+                    $image = ImageUploadHelper::uploadImage($request->drivers_license, 'upload/driver/' . $request->id . '/');
+                    $data->driver->drivers_license = $image;
                 }
 
-                if ($request->has('license_back_image')) {
-                    $image = ImageUploadHelper::uploadImage($request->license_back_image, 'upload/driver/' . $request->id . '/');
-                    $data->driver->license_back_side = $image;
-                }
+
 
                 if ($request->has('registration_book')) {
                     $image = ImageUploadHelper::uploadImage($request->registration_book, 'upload/vehicle/' . $data->driver->vehicle->id . '/');

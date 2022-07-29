@@ -27,10 +27,18 @@
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Name</label>
-                                    <input type="text" name="name" class="form-control" placeholder="Enter Name">
+                                    <label class="form-label">First Name</label>
+                                    <input type="text" name="first_name" class="form-control" placeholder="Enter First Name">
                                 </div>
                             </div><!-- Col -->
+
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Last Name</label>
+                                    <input type="text" name="last_name" class="form-control" placeholder="Enter Last Name">
+                                </div>
+                            </div><!-- Col -->
+
                             <div class="col-sm-6">
                                 <div class="mb-3">
                                     <label class="form-label">Email</label>
@@ -54,17 +62,17 @@
                                 </div>
                             </div><!-- Col -->
 
-                            <div class="col-sm-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Franchise</label>
-                                    <select name="franchise_id" class="form-control">
-                                        <option value="" selected disabled>Select</option>
-                                        @foreach($franchises as $franchise)
-                                            <option value="{{$franchise->id}}">{{$franchise->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div><!-- Col -->
+{{--                            <div class="col-sm-6">--}}
+{{--                                <div class="mb-3">--}}
+{{--                                    <label class="form-label">Franchise</label>--}}
+{{--                                    <select name="franchise_id" class="form-control">--}}
+{{--                                        <option value="" selected disabled>Select</option>--}}
+{{--                                        @foreach($franchises as $franchise)--}}
+{{--                                            <option value="{{$franchise->id}}">{{$franchise->name}}</option>--}}
+{{--                                        @endforeach--}}
+{{--                                    </select>--}}
+{{--                                </div>--}}
+{{--                            </div><!-- Col -->--}}
 
                             <div class="col-sm-6">
                                 <div class="mb-3">
@@ -80,19 +88,17 @@
                         <h6 class="card-title">Vehicle Information</h6>
 
                         <div class="row">
-{{--                            <div class="col-sm-6">--}}
-{{--                                <div class="mb-3">--}}
-{{--                                    <label class="form-label">Vehicle Type</label>--}}
-{{--                                    <select class="form-control" name="vehicle_type_id">--}}
-{{--                                        <option value="" selected disabled>Select</option>--}}
-{{--                                        @foreach($vehicleTypes as $vehicleType)--}}
-{{--                                            <option value="{{$vehicleType->id}}" >{{$vehicleType->name}}</option>--}}
-{{--                                        @endforeach--}}
-{{--                                    </select>--}}
-
-
-{{--                                </div>--}}
-{{--                            </div><!-- Col -->--}}
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Vehicle Type</label>
+                                    <select class="form-control" name="vehicle_type_id">
+                                        <option value="" selected disabled>Select</option>
+                                        @foreach($vehicleTypes as $vehicleType)
+                                            <option value="{{$vehicleType->id}}" >{{$vehicleType->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div><!-- Col -->
 
 
                             <div class="col-sm-6">

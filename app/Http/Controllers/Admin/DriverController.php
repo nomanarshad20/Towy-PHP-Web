@@ -49,10 +49,9 @@ class DriverController extends Controller
         $this->validate($request,[
 
             'password' => 'nullable|min:8',
-            'cnic_front_image' => 'mimes:jpg,jpeg,png',
-            'cnic_back_image' => 'mimes:jpg,jpeg,png',
-            'license_front_image' => 'mimes:jpg,jpeg,png',
-            'license_back_image' => 'mimes:jpg,jpeg,png',
+            'vehicle_inspection' => 'mimes:jpg,jpeg,png',
+            'vehicle_insurance' => 'mimes:jpg,jpeg,png',
+            'drivers_license' => 'mimes:jpg,jpeg,png',
             'profile_image' => 'mimes:jpg,jpeg,png',
             'registration_book' => 'mimes:jpg,jpeg,png',
         ]);
