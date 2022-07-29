@@ -55,21 +55,21 @@ class DriverInformationController extends Controller
 
     public function saveDocument(SaveDriverDocument $request)
     {
-        if ($request->cnic_front_side) {
-            $this->driverService->saveCNICFrontSide($request->cnic_front_side);
+        if ($request->drivers_license) {
+            $this->driverService->drivers_license($request->drivers_license);
         }
 
-        if ($request->cnic_back_side) {
-            $this->driverService->saveCNICBackSide($request->cnic_back_side);
+        if ($request->vehicle_insurance) {
+            $this->driverService->vehicle_insurance($request->vehicle_insurance);
         }
 
-        if ($request->license_front_side) {
-            $this->driverService->saveLicenseFrontSide($request->license_front_side);
+        if ($request->vehicle_inspection) {
+            $this->driverService->vehicle_inspection($request->vehicle_inspection);
         }
 
-        if ($request->license_back_side) {
-            $this->driverService->saveLicenseBackSide($request->license_back_side);
-        }
+//        if ($request->license_back_side) {
+//            $this->driverService->saveLicenseBackSide($request->license_back_side);
+//        }
 
         if ($request->image) {
             $this->driverService->savePhoto($request->image);

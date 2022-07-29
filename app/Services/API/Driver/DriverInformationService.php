@@ -84,24 +84,24 @@ class DriverInformationService
         }
     }
 
-    public function saveCNICFrontSide($cnic_front_side)
+    public function drivers_license($drivers_license)
     {
-        if ($cnic_front_side) {
-            $image = ImageUploadHelper::uploadImage($cnic_front_side, 'upload/driver/' . Auth::user()->id . '/');
+        if ($drivers_license) {
+            $image = ImageUploadHelper::uploadImage($drivers_license, 'upload/driver/' . Auth::user()->id . '/');
 
 
-            Auth::user()->driver->cnic_front_side = $image;
+            Auth::user()->driver->drivers_license = $image;
 
-            if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
-                && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
-                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
-                && Auth::user()->image) {
-                Auth::user()->steps = 4;
-            }
+//            if (Auth::user()->driver->drivers_license && Auth::user()->driver->vehicle_insurance
+//                && Auth::user()->driver->vehicle_inspection
+//                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
+//                && Auth::user()->image) {
+//                Auth::user()->steps = 4;
+//            }
 
 
             Auth::user()->driver->save();
-            Auth::user()->save();
+//            Auth::user()->save();
 
 
         }
@@ -109,62 +109,60 @@ class DriverInformationService
 
     }
 
-    public function saveCNICBackSide($cnic_back_side)
+    public function vehicle_insurance($vehicle_insurance)
     {
-        if ($cnic_back_side) {
-            $image = ImageUploadHelper::uploadImage($cnic_back_side, 'upload/driver/' . Auth::user()->id . '/');
+        if ($vehicle_insurance) {
+            $image = ImageUploadHelper::uploadImage($vehicle_insurance, 'upload/driver/' . Auth::user()->id . '/');
 
-            Auth::user()->driver->cnic_back_side = $image;
+            Auth::user()->driver->vehicle_insurance = $image;
 
+//            if (Auth::user()->driver->drivers_license && Auth::user()->driver->vehicle_insurance
+//                && Auth::user()->driver->vehicle_inspection
+//                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
+//                && Auth::user()->image) {
+//                Auth::user()->steps = 4;
+//            }
+            Auth::user()->driver->save();
+//            Auth::user()->save();
+        }
+    }
+
+    public function vehicle_inspection($vehicle_inspection)
+    {
+        if ($vehicle_inspection) {
+            $image = ImageUploadHelper::uploadImage($vehicle_inspection, 'upload/driver/' . Auth::user()->id . '/');
+
+            Auth::user()->driver->vehicle_inspection = $image;
+
+//            if (Auth::user()->driver->drivers_license && Auth::user()->driver->vehicle_insurance
+//                && Auth::user()->driver->vehicle_inspection
+//                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
+//                && Auth::user()->image) {
+//                Auth::user()->steps = 4;
+//            }
+            Auth::user()->driver->save();
+//            Auth::user()->save();
+        }
+    }
+
+//    public function saveLicenseBackSide($license_back_side)
+//    {
+//        if ($license_back_side) {
+//            $image = ImageUploadHelper::uploadImage($license_back_side, 'upload/driver/' . Auth::user()->id . '/');
+//
+//            Auth::user()->driver->license_back_side = $image;
+//
 //            if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
 //                && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
 //                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
 //                && Auth::user()->image) {
 //                Auth::user()->steps = 4;
 //            }
-            Auth::user()->driver->save();
-
+//            Auth::user()->driver->save();
+//
 //            Auth::user()->save();
-        }
-    }
-
-    public function saveLicenseFrontSide($license_front_side)
-    {
-        if ($license_front_side) {
-            $image = ImageUploadHelper::uploadImage($license_front_side, 'upload/driver/' . Auth::user()->id . '/');
-
-            Auth::user()->driver->license_front_side = $image;
-
-//            if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
-//                && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
-//                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
-//                && Auth::user()->image) {
-//                Auth::user()->steps = 4;
-//            }
-            Auth::user()->driver->save();
-
-//            Auth::user()->save();
-        }
-    }
-
-    public function saveLicenseBackSide($license_back_side)
-    {
-        if ($license_back_side) {
-            $image = ImageUploadHelper::uploadImage($license_back_side, 'upload/driver/' . Auth::user()->id . '/');
-
-            Auth::user()->driver->license_back_side = $image;
-
-            if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
-                && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
-                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
-                && Auth::user()->image) {
-                Auth::user()->steps = 4;
-            }
-            Auth::user()->driver->save();
-
-            Auth::user()->save();
-        }
-    }
+//        }
+//    }
 
     public function savePhoto($image)
     {
@@ -173,13 +171,13 @@ class DriverInformationService
 
             Auth::user()->image = $image;
 
-            if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
-                && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
-                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
-                && Auth::user()->image) {
-                Auth::user()->steps = 4;
-            }
-
+//            if (Auth::user()->driver->drivers_license && Auth::user()->driver->vehicle_insurance
+//                && Auth::user()->driver->vehicle_inspection
+//                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
+//                && Auth::user()->image) {
+//                Auth::user()->steps = 4;
+//            }
+//
             Auth::user()->save();
         }
     }
@@ -205,8 +203,8 @@ class DriverInformationService
             Auth::user()->driver->save();
 
 
-//            if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
-//                && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
+//            if (Auth::user()->driver->drivers_license && Auth::user()->driver->vehicle_insurance
+//                && Auth::user()->driver->vehicle_inspection
 //                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
 //                && Auth::user()->image) {
 //                Auth::user()->steps = 4;
@@ -230,9 +228,9 @@ class DriverInformationService
     {
         try {
 
-            if (Auth::user()->driver->cnic_front_side && Auth::user()->driver->cnic_back_side
-            && Auth::user()->driver->license_front_side && Auth::user()->driver->license_back_side
-            && isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->registration_book : false
+            if (Auth::user()->driver->drivers_license && Auth::user()->driver->vehicle_insurance
+                && Auth::user()->driver->vehicle_inspection
+                && isset(Auth::user()->driver->vehicle) && Auth::user()->driver->vehicle->registration_book
                 && Auth::user()->image) {
                 Auth::user()->steps = 4;
             }
