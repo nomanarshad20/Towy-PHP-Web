@@ -280,7 +280,7 @@ class DriverInformationService
         }
 
         try {
-            Auth::user()->steps = 2;
+            Auth::user()->steps = 3;
             Auth::user()->save();
             DB::commit();
             $response = ['result' => 'success', 'message' => 'Vehicle Type Save Successfully', 'code' => 200];

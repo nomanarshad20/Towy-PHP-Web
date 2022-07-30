@@ -26,10 +26,9 @@ class SaveDriverDocument extends FormRequest
     public function rules()
     {
         return [
-            'cnic_front_side' => 'mimes:jpg,jpeg,png',
-            'cnic_back_side' => 'mimes:jpg,jpeg,png',
-            'license_front_side' => 'mimes:jpg,jpeg,png',
-            'license_back_side' => 'mimes:jpg,jpeg,png',
+            'drivers_license' => 'mimes:jpg,jpeg,png',
+            'vehicle_insurance' => 'mimes:jpg,jpeg,png',
+            'vehicle_inspection' => 'mimes:jpg,jpeg,png',
             'image' => 'mimes:jpg,jpeg,png',
         ];
     }
