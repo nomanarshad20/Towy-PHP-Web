@@ -168,7 +168,7 @@ class DriverService
             }
 
             try {
-                if ($request->has(' vehicle_inspection')) {
+                if ($request->has('vehicle_inspection')) {
                     $image = ImageUploadHelper::uploadImage($request->vehicle_inspection, 'upload/driver/' . $request->id . '/');
                     $data->driver->vehicle_inspection = $image;
 

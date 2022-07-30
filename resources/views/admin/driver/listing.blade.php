@@ -35,7 +35,8 @@
                             <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Name</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
                                 <th>Email</th>
                                 <th>Mobile No</th>
                                 <th>Referral Code</th>
@@ -48,7 +49,8 @@
                             @foreach($data as $user)
                                 <tr>
                                     <td>{{$loop->iteration}}</td>
-                                    <td>{{$user->name}}</td>
+                                    <td>{{$user->first_name}}</td>
+                                    <td>{{$user->last_name}}</td>
                                     <td>{{$user->email}}</td>
                                     <td>{{$user->mobile_no}}</td>
                                     <td><a href="{{url('driver-portal/'.$user->id)}}">{{$user->referral_code}}</a></td>
