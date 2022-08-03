@@ -252,7 +252,7 @@ class DriverInformationService
 
     public function getVehicleType()
     {
-        $data = VehicleType::select('id', 'name')->where('status', 1)->get();
+        $data = VehicleType::select('id', 'name', 'image','description')->where('status', 1)->get();
 //        $vehicleTypeArray =  array();
 //        foreach($data as $vehicleType)
 //        {

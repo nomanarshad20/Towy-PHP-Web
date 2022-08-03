@@ -31,7 +31,8 @@ class CreateVehicleType extends FormRequest
             'tax_rate' => 'required',
             'waiting_price_per_min' => 'required',
             'initial_distance_rate' => 'required',
-            'initial_time_rate' => 'required'
+            'initial_time_rate' => 'required',
+            'image' => 'mimes:jpg,jpeg,png'
         ];
     }
 }

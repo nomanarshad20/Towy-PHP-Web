@@ -4,6 +4,7 @@
 namespace App\Services\Admin;
 
 
+use App\Helper\ImageUploadHelper;
 use App\Models\VehicleType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -28,7 +29,13 @@ class VehicleTypeService
     {
         DB::beginTransaction();
         try {
-            VehicleType::create($request->except('_token')+['created_by'=>Auth::user()->id]);
+            $saveImage = null;
+            if ($request->has('image')) {
+                $image = ImageUploadHelper::uploadImage($request->image, 'upload/vehicle-type/');
+                $saveImage = $image;
+            }
+
+            VehicleType::create($request->except('_token','image')+['created_by'=>Auth::user()->id,'image'=>$saveImage]);
             DB::commit();
             return makeResponse('success', 'Vehicle Type Created Successfully', 200);
         } catch (\Exception $e) {
@@ -55,7 +62,14 @@ class VehicleTypeService
         {
             DB::beginTransaction();
             try {
-                $data->update($request->except('_token'));
+                $saveImage = $data->image;
+                if ($request->has('image')) {
+                    $image = ImageUploadHelper::uploadImage($request->image, 'upload/vehicle-type/');
+                    $saveImage = $image;
+                }
+
+
+                $data->update($request->except('_token','image')+['image'=>$saveImage]);
                 DB::commit();
                 return makeResponse('success', 'Vehicle Type Updated Successfully', 200);
             } catch (\Exception $e) {
@@ -109,6 +123,25 @@ class VehicleTypeService
             return makeResponse('error','Record Not Found',404);
 
         }
+
+    }
+
+    public function deleteImage($request)
+    {
+        $data = VehicleType::find($request->id);
+
+        if ($data) {
+            $data->image = null;
+
+            $data->save();
+
+
+            return makeResponse('success', 'Image Removed Successfully', 200);
+
+        } else {
+            return makeResponse('error', 'Record Not Found', 404);
+        }
+
 
     }
 }

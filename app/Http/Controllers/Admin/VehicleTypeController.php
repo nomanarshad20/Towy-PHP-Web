@@ -51,4 +51,9 @@ class VehicleTypeController extends Controller
     {
         return $this->vehicleTypeService->changeStatus($request);
     }
+
+    public function deleteImage(Request $request)
+    {
+        return $this->vehicleTypeService->deleteImage($request);
+    }
 }

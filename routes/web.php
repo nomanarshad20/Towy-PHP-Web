@@ -93,6 +93,7 @@ Route::namespace('Admin')->group(function () {
         Route::post('vehicle-type-update',[VehicleTypeController::class,'update'])->name('vehicleTypeUpdate');
         Route::post('vehicle-type-delete',[VehicleTypeController::class,'delete'])->name('vehicleTypeDelete');
         Route::get('vehicle-type-change-status',[VehicleTypeController::class,'changeStatus'])->name('vehicleTypeChangeStatus');
+        Route::get('vehicle-type-delete-image',[VehicleTypeController::class,'deleteImage'])->name('vehicleTypeDeleteImage');
 
         Route::get('booking-listing',[BookingController::class,'index'])->name('bookingListing');
         Route::get('booking-create',[BookingController::class,'create'])->name('bookingCreate');

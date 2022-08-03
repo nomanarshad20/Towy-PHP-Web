@@ -58,6 +58,28 @@
                                 </div>
                             </div><!-- Col -->
 
+
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Initial Per Km Rate</label>
+                                    <input type="text" name="initial_distance_rate" class="form-control"
+                                           onkeypress="return isNumberKey(event)"
+                                           placeholder="Enter Initial Per Km Rate" autocomplete="chrome-off">
+                                </div>
+                            </div><!-- Col -->
+
+
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Initial Per Min Rate</label>
+                                    <input type="text" name="initial_time_rate" class="form-control"
+                                           placeholder="Enter Initial Per Min Rate" onkeypress="return isNumberKey(event)">
+
+
+                                </div>
+                            </div><!-- Col -->
+
+
                             <div class="col-sm-6">
                                 <div class="mb-3">
                                     <label class="form-label">Waiting Price Per Min</label>
@@ -91,6 +113,19 @@
                             </div><!-- Col -->
 
 
+                            <div class="col-md-6 stretch-card grid-margin grid-margin-md-0">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Image</h6>
+                                        <input type="file" accept="image/jpg, image/png, image/jpeg"
+                                               id="image"
+                                               name="image" class="myDropify"/>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
                         </div><!-- Row -->
 
 
@@ -108,10 +143,15 @@
 
 @section('script')
 
+    <script src="{{asset('admin/js/dropify.min.js')}}"></script>
+
+    <script src="{{asset('admin/js/dropify.js')}}"></script>
 
 
     <script>
         $(document).ready(function () {
+
+
 
             $('.createBtn').click(function () {
 
