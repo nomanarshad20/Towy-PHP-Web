@@ -350,7 +350,7 @@ class AuthService
         }
 
 
-        $otpCode = mt_rand(1000, 9999);
+        $otpCode = mt_rand(100000, 999999);
 
         $user->otp = $otpCode;
         $user->save();
@@ -417,7 +417,6 @@ class AuthService
 
     public function sendOTP($request)
     {
-
         DB::beginTransaction();
 //        $user = User::where('id', $request->user_id)->first();
 
@@ -427,7 +426,7 @@ class AuthService
 //        }
 
 
-        $otpCode = mt_rand(1000, 9999);
+        $otpCode = mt_rand(100000, 999999);
 
 //        $user->otp = $otpCode;
 //        $user->save();
