@@ -6,7 +6,6 @@ namespace App\Traits;
 
 use App\Models\BookingRating;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 
 trait BookingResponseTrait
 {
@@ -64,10 +63,10 @@ trait BookingResponseTrait
             'created_ago' => Carbon::parse($booking->created_at)->diffForHumans(),
             'booking_detail_id' => $booking->bookingDetail->id,
             'waiting_price_per_min' => $booking->bookingDetail->waiting_price_per_min,
-            'vehicle_tax' => $booking->bookingDetail->tax_rate,
-            'vehicle_per_km_rate' => $booking->bookingDetail->per_km_rate,
-            'vehicle_per_min_rate' => $booking->bookingDetail->per_min_rate,
-            'min_vehicle_fare' => $booking->bookingDetail->min_fare,
+            'vehicle_tax' => $booking->bookingDetail->vehicle_tax,
+            'vehicle_per_km_rate' => $booking->bookingDetail->vehicle_per_km_rate,
+            'vehicle_per_min_rate' => $booking->bookingDetail->vehicle_per_min_rate,
+            'min_vehicle_fare' => $booking->bookingDetail->min_vehicle_fare,
             'passenger_name' => isset($booking->passenger) ? $booking->passenger->name : null,
             'driver_name' => isset($booking->driver) ? $booking->driver->name : null,
             'driver_status' => (int)$booking->driver_status,
@@ -75,7 +74,7 @@ trait BookingResponseTrait
 
             'peak_factor_rate' => $booking->bookingDetail->peak_factor_rate,
             'driver_waiting_time' => $booking->bookingDetail->driver_waiting_time,
-            'ride_pick_up_time' => $booking->bookingDetail->ride_pick_up_time,
+            'ride_pick_up_time' => $booking->bookingDetail->ride_pickup_time,
             'ride_start_time' => $booking->bookingDetail->ride_start_time,
             'ride_end_time' => $booking->bookingDetail->ride_end_time,
             'total_minutes_to_reach_pick_up_point' => $booking->bookingDetail->total_minutes_to_reach_pick_up_point,

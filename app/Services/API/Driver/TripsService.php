@@ -12,12 +12,13 @@ use Illuminate\Support\Facades\Auth;
 
 class TripsService
 {
+
     use BookingResponseTrait;
     public function upcomingTrip()
     {
         $bookings = Booking::where('driver_id',Auth::user()->id)
             ->where('booking_type','book_later')
-            ->where('ride_status',1)->get();
+            ->where('ride_status',1)->orderBy('id','desc')->get();
 
         $upcomingBookingArray = array();
         foreach($bookings as $booking)
@@ -40,7 +41,7 @@ class TripsService
 //
 //            ];
 
-            $upcomingBookingArray[] = $this->driverBookingResponse($booking);
+            $upcomingBookingArray[] = $this->driverTripHistoryResponse($booking);
 
         }
 
@@ -52,7 +53,7 @@ class TripsService
     public function pastTrip()
     {
         $bookings = Booking::where('driver_id',Auth::user()->id)
-            ->where('ride_status',4)->get();
+            ->whereIn('ride_status',[2,3,4,5])->orderBy('id','desc')->get();
 
         $pastBookingArray = array();
         foreach($bookings as $booking)
@@ -73,7 +74,7 @@ class TripsService
 //                'vehicle_model_year' => isset($booking->vehicle) ? $booking->vehicle->model_year:'',
 //                'actual_fare' => $booking->actual_fare
 //            ];
-            $pastBookingArray[] = $this->driverBookingResponse($booking);
+            $pastBookingArray[] = $this->driverTripHistoryResponse($booking);
         }
 
         return $pastBookingArray;

@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Models\VoucherCodePassenger;
 use App\Traits\BookingResponseTrait;
 use App\Traits\SendFirebaseNotificationTrait;
+use Carbon\Carbon;
+use Psy\Input\CodeArgument;
 
 class RideAcceptRejectService
 {
@@ -111,13 +113,13 @@ class RideAcceptRejectService
 
 
 //            if ($passengerSocketID) {
-                 $socket->emit($findBooking->passenger_id.'-finalRideStatus',
-                    [
-                        'result' => 'success',
-                        'message' => "Driver has Accepted Your Ride Request",
-                        'data' => $this->driverBookingResponse($findBooking)
-                    ]
-                );
+            $socket->emit($findBooking->passenger_id.'-finalRideStatus',
+                [
+                    'result' => 'success',
+                    'message' => "Driver has Accepted Your Ride Request",
+                    'data' => $this->driverBookingResponse($findBooking)
+                ]
+            );
 //            }
 
 
@@ -159,17 +161,21 @@ class RideAcceptRejectService
 
             $gettingCurrentUser->driverCoordinate->update(['status' => 1]);
 
-            $findNextDriver = AssignBookingDriver::where('booking_id', $findBooking->id)
-                ->whereNull('status')
-                ->where('driver_id', '!=', $gettingCurrentUser->id)
-                ->orderBy('id', 'asc')
-                ->first();
+//            $findNextDriver = AssignBookingDriver::where('booking_id', $findBooking->id)
+//                ->whereNull('status')
+//                ->where('driver_id', '!=', $gettingCurrentUser->id)
+//                ->orderBy('id', 'asc')
+//                ->first();
+
+            $findNextDriver = $this->findNextDriver($findBooking,$gettingCurrentUser);
 
 
             if ($findNextDriver) {
                 $driverRecord = User::find($findNextDriver->driver_id);
 
                 $driverRecord->driverCoordinate->update(['status' => 3]);
+
+                $findNextDriver->update(['ride_send_time',Carbon::now()->format('Y-m-d H:i:s')]);
 
                 $booking = $this->driverBookingResponse($findBooking);
 
@@ -182,7 +188,7 @@ class RideAcceptRejectService
                 $driverSocketId = $driverRecord->id;
 
                 if ($driverSocketId) {
-                     $socket->emit($driverSocketId.'-finalRideStatus',
+                    $socket->emit($driverSocketId.'-finalRideStatus',
                         [
                             'result' => 'success',
                             'message' => "New Ride Request",
@@ -201,11 +207,15 @@ class RideAcceptRejectService
             }
             else {
                 $passengerID = $findBooking->passenger_id;
+
+                $findBooking->ride_status = 6;
+                $findBooking->save();
+
                 $booking = $this->driverBookingResponse($findBooking);
 
 
                 if ($data['driver_action'] == 2) {
-                     $socket->emit($passengerID.'-finalRideStatus',
+                    $socket->emit($passengerID.'-finalRideStatus',
                         [
                             'result' => 'error',
                             'message' => "No one has accepted your ride request",
@@ -240,11 +250,36 @@ class RideAcceptRejectService
                     );
                 }
 
-
-
             }
         }
 
+    }
+
+    public function findNextDriver($findBooking,$gettingCurrentUser)
+    {
+        $findNextDriver = AssignBookingDriver::where('booking_id', $findBooking->id)
+            ->whereNull('status')
+            ->where('driver_id', '!=', $gettingCurrentUser->id)
+            ->orderBy('id', 'asc')
+            ->first();
+
+        if($findNextDriver)
+        {
+            $driverRecord = User::find($findNextDriver->driver_id);
+
+            if($driverRecord->driverCoordinate->status == 1)
+            {
+                return $findNextDriver;
+            }
+            else{
+                $findNextDriver->delete();
+
+                return $this->findNextDriver($findBooking,$driverRecord->driver_id);
+            }
+        }
+        else{
+            return $findNextDriver;
+        }
 
     }
 }

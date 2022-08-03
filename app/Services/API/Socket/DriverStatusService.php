@@ -47,10 +47,12 @@ class DriverStatusService
 
         try {
 //            $findBooking->driver_status = $data['driver_status'];
+            $calculatePickUpTime = Carbon::parse($findBooking->updated_at);
+
             $findBooking->update(['driver_status' => $data['driver_status']]);
 
 
-            $calculatePickUpTime = Carbon::parse($findBooking->updated_at);
+//            $calculatePickUpTime = Carbon::parse($findBooking->updated_at);
             $currentTime = Carbon::now();
             $findBooking->bookingDetail->update([
                 'ride_pickup_time' => Carbon::now()->format('Y-m-d H:i:s'),
@@ -247,39 +249,52 @@ class DriverStatusService
         $p2pRideDistance = P2PBookingTracking::where('booking_id', $findBooking->id)->where('driver_status', '!=', 0)->sum('distance');
         $p2pInitialDistance = P2PBookingTracking::where('booking_id', $findBooking->id)->where('driver_status', 0)->sum('distance');
 
+        $p2pDistance = round($p2pDistance,2);
+        $p2pRideDistance =  round($p2pRideDistance,2);
+        $p2pInitialDistance =  round($p2pInitialDistance,2);
 
-        if ($mobileDistance > $p2pDistance) {
+        $totalDistance = $mobileDistance;
+        $initialDistance = $data['mobile_initial_distance'];
+        $finalDistance = $data['mobile_final_distance'];
+        $fareType = 'mobile';
 
-            $diffInDistance = $mobileDistance - $p2pDistance;
+//        if ($mobileDistance > $p2pDistance) {
+//            $diffInDistance = $mobileDistance - $p2pDistance;
+//            if ($diffInDistance >= 10) {
+//                $totalDistance = $mobileDistance;
+//                $initialDistance = $data['mobile_initial_distance'];
+//                $finalDistance = $data['mobile_final_distance'];
+//                $fareType = 'mobile';
+//            }
+//            else {
+//                $googleDistance = $p2pInitialDistance + $findBooking->total_distance;
+//
+//                $differenceDistance = $mobileDistance - $googleDistance;
+//
+//                if ($differenceDistance > 0) {
+//                    $totalDistance = $mobileDistance;
+//                    $initialDistance = $data['mobile_initial_distance'];
+//                    $finalDistance = $data['mobile_final_distance'];
+//                    $fareType = 'mobile';
+//                }
+//                else {
+//                    $totalDistance = $googleDistance;
+//                    $initialDistance = $p2pInitialDistance;
+//                    $finalDistance = $findBooking->total_distance;
+//                    $fareType = 'google';
+//                }
+//
+//            }
+//        }
+//        else{
+//            $totalDistance = $mobileDistance;
+//            $initialDistance = $data['mobile_initial_distance'];
+//            $finalDistance = $data['mobile_final_distance'];
+//            $fareType = 'mobile';
+//        }
 
-            if ($diffInDistance >= 10) {
-                $totalDistance = $mobileDistance;
-                $initialDistance = $data['mobile_initial_distance'];
-                $finalDistance = $data['mobile_final_distance'];
-                $fareType = 'mobile';
-            } else {
-                $googleDistance = $totalDistance + $p2pInitialDistance;
-
-                $differenceDistance = $mobileDistance - $googleDistance;
-
-                if ($differenceDistance > 0) {
-                    $totalDistance = $mobileDistance;
-                    $initialDistance = $data['mobile_initial_distance'];
-                    $finalDistance = $data['mobile_final_distance'];
-                    $fareType = 'mobile';
-                } else {
-                    $totalDistance = $googleDistance;
-                    $initialDistance = 0;
-                    $finalDistance = 0;
-                    $fareType = 'google';
-                }
-
-            }
-
-        }
-
-
-        $fare = $this->calculateFare($findBooking, $p2pDistance, $p2pInitialDistance, $p2pRideDistance, $totalDistance,
+        $fare = $this->calculateFare($findBooking, $p2pDistance, $p2pInitialDistance,
+            $p2pRideDistance, $totalDistance,
             $initialDistance, $finalDistance, $fareType);
 
 
@@ -530,7 +545,8 @@ class DriverStatusService
         $pickUpTimeCalculation = $findBooking->bookingDetail->total_minutes_to_reach_pick_up_point * $findBooking->bookingDetail->initial_time_rate;
         if ($fareType == 'google') {
             $pickUpDistanceCalculation = $p2pInitialDistance * $findBooking->bookingDetail->initial_distance_rate;
-        } else {
+        }
+        else {
             $pickUpDistanceCalculation = $mobile_initial_distance * $findBooking->bookingDetail->initial_distance_rate;
         }
 
@@ -548,25 +564,16 @@ class DriverStatusService
         //calculate Ride Fare
         $totalRideTime = $endTime->diffInMinutes($startTime);
         $totalRideTimeFare = $totalRideTime * $findBooking->bookingDetail->vehicle_per_min_rate;
-        $totalDistanceFare = $totalDistance * $findBooking->bookingDetail->vehicle_per_km_rate;
+        //mobile final distance will be final distance pickup to dropoff its just a name
+        $totalDistanceFare = $mobile_final_distance * $findBooking->bookingDetail->vehicle_per_km_rate;
 
+
+//        $totalFare = (float)($totalRideTimeFare + $totalDistanceFare + $totalInitialFare
+//            + $pickUpDistanceCalculation + $calculateWaitingTime);
 
         $totalFare = (float)($totalRideTimeFare + $totalDistanceFare + $totalInitialFare
-            + $pickUpDistanceCalculation + $calculateWaitingTime);
+            + $calculateWaitingTime);
 
-
-        //find Tax
-
-        if (isset($findBooking->bookingDetail->vehicle_tax)) {
-            $tax = ($totalFare * $findBooking->bookingDetail->vehicle_tax) / 100;
-        } else {
-            $tax = 0;
-        }
-
-
-        //add Tax
-
-        $totalFare = $totalFare + $tax;
 
         //get passenger wallet
 
@@ -628,6 +635,21 @@ class DriverStatusService
             $totalFare =  $totalFare - $totalDiscountedPrice;
 
         }
+
+        $totalFare =  $totalFare + $findBooking->bookingDetail->min_vehicle_fare;
+
+        //find Tax
+
+        if (isset($findBooking->bookingDetail->vehicle_tax)) {
+            $tax = ($totalFare * $findBooking->bookingDetail->vehicle_tax) / 100;
+        } else {
+            $tax = 0;
+        }
+
+        //add Tax
+
+        $totalFare = $totalFare + $tax;
+
 
         $totalCollectFare = 0;
 

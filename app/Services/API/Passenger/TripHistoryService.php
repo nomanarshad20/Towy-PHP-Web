@@ -16,7 +16,7 @@ class TripHistoryService
     {
         $bookings = Booking::where('passenger_id',Auth::user()->id)
             ->where('booking_type','book_later')
-            ->where('ride_status',1)->get();
+            ->where('ride_status',0)->orderBy('id','desc')->get();
 
         $upcomingBookingArray = array();
         foreach($bookings as $booking)
@@ -51,7 +51,7 @@ class TripHistoryService
     public function pastTrip()
     {
         $bookings = Booking::where('passenger_id',Auth::user()->id)
-            ->whereIn('ride_status',[2,3,4,5])
+            ->whereIn('ride_status',[2,3,4,5])->orderBy('id','desc')
             ->get();
 
         $pastBookingArray = array();
