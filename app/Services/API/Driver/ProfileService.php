@@ -19,7 +19,8 @@ class ProfileService
                 Auth::user()->image = $image;
             }
 
-            Auth::user()->name = $request->name;
+            Auth::user()->first_name = $request->first_name;
+            Auth::user()->last_name = $request->last_name;
             Auth::user()->email = $request->email;
 
             if ($request->password) {
@@ -42,12 +43,6 @@ class ProfileService
 
             Auth::user()->save();
 
-//            $data = [
-//                'image' => Auth::user()->image,
-//                'name' => Auth::user()->name,
-//                'email' => Auth::user()->email,
-//                'city' => Auth::user()->driver->city
-//            ];
 
             $response = ['result'=>'success','message'=>'Profile Update Successfully','code'=>200];
             return $response;

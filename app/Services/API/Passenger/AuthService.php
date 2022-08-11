@@ -3,6 +3,7 @@
 
 namespace App\Services\API\Passenger;
 
+use App\Helper\ImageUploadHelper;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -130,8 +131,8 @@ class AuthService
 
             if ($user) {
 
-                $user->first_name =  $request->first_name;
-                $user->last_name =  $request->first_name;
+                $user->first_name = $request->first_name;
+                $user->last_name = $request->first_name;
                 $user->email = isset($request->email) ? $request->email : null;
                 $user->social_uid = $request->social_uid;
                 $user->provider = $request->provider;
@@ -139,16 +140,13 @@ class AuthService
                 $user->save();
 
                 $message = "Login Successfully";
-            }
-            else {
+            } else {
 
-                if(isset($request->email) && $request->email)
-                {
+                if (isset($request->email) && $request->email) {
                     $checkEmail = User::where('email', $request->email)->first();
-                    if($checkEmail)
-                    {
+                    if ($checkEmail) {
                         DB::rollBack();
-                        $response = ['result' => 'error','message'=>'Email Already Exist','code'=>401];
+                        $response = ['result' => 'error', 'message' => 'Email Already Exist', 'code' => 401];
                         return $response;
 //                    return makeResponse('error', 'Email Already Exist', 401);
                     }
@@ -161,7 +159,7 @@ class AuthService
                     'user_type' => $request->user_type,
                     'steps' => 5,
                     'provider' => $request->provider,
-                    'social_uid' =>  $request->social_uid,
+                    'social_uid' => $request->social_uid,
                     'is_verified' => 1,
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name
@@ -177,11 +175,11 @@ class AuthService
             Auth::loginUsingId($user->id, true);
             $token = Auth::user()->createToken('TOTOBookingApp')->plainTextToken;
             $data = $this->getUserData($user, $token);
-            $response = ['result' => 'success', 'message' => $message,'code'=>200,'data' => $data];
+            $response = ['result' => 'success', 'message' => $message, 'code' => 200, 'data' => $data];
 
         } catch (Exception $e) {
             DB::rollBack();
-            $response = ['result' => 'error', 'message' =>'Error in Creating User: '.$e,'code'=>500];
+            $response = ['result' => 'error', 'message' => 'Error in Creating User: ' . $e, 'code' => 500];
             return $response;
         }
         return $response;
@@ -312,41 +310,37 @@ class AuthService
         DB::beginTransaction();
 
         try {
-            /*$validator = Validator::make($request->all(), [
-                'user_id' => 'required',
-                'name' => 'nullable|max:255',
-                //'email' => 'nullable|email|unique:users',
-                //'mobile_no' => 'nullable|unique:users',
-            ]);
 
-            if ($validator->fails()) {
-                $response = ['result' => 'error', 'message' => $validator->errors()->first()];
-                return $response;
-            }*/
 
-            if (Auth::check()) {
-                $user = Auth::user();
-            } else {
-                $response = ['result' => 'error', 'message' => "Invalid token, try again."];
-            }
+//            if (Auth::check()) {
+//                $user = Auth::user();
+//            } else {
+//                $response = ['result' => 'error', 'message' => "Invalid token, try again."];
+//            }
             //dd($user);
-            if (isset($user)) {
 
-                if (isset($request->name))
-                    $user->name = $request->name;
-
-                $user->save();
-
-                DB::commit();
-
-                $data = $this->getUserData($user);
-
-                $response = ['result' => 'success', 'data' => $data, 'message' => 'User Info updated Successfully'];
-
-            } else {
-
-                $response = ['result' => 'error', 'message' => "Invalid User, Try Again with valid user info."];
+            if ($request->first_name) {
+                Auth::user()->first_name = $request->first_name;
             }
+
+            if ($request->last_name) {
+                Auth::user()->last_name = $request->last_name;
+            }
+
+            if($request->has('image'))
+            {
+                $image = ImageUploadHelper::uploadImage($request->image, 'upload/passenger/' . Auth::user()->id . '/');
+                Auth::user()->image =  $image;
+            }
+
+
+            Auth::user()->save();
+
+            DB::commit();
+
+            $data = $this->getUserData(Auth::user());
+
+            $response = ['result' => 'success', 'data' => $data, 'message' => 'User Info updated Successfully'];
 
 
         } catch (Exception $e) {
@@ -366,13 +360,12 @@ class AuthService
 
         if (isset($user)) {
             // Get Passenger Wallet
-            $balance    =   CreateUserWalletTrait::passengerWalletBalance($user->id);
+            $balance = CreateUserWalletTrait::passengerWalletBalance($user->id);
 
             $rating = 0;
-            if(isset(Auth::user()->rating)){
+            if (isset(Auth::user()->rating)) {
                 $rating = Auth::user()->rating->avg('rating');
-                if($rating == null)
-                {
+                if ($rating == null) {
                     $rating = 0;
                 }
             }

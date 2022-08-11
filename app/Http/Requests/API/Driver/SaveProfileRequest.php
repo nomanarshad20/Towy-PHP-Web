@@ -26,7 +26,8 @@ class SaveProfileRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required',
+            'first_name' => 'required',
+            'last_name' => 'required',
             'image' => 'mimes:jpg,jpeg,png',
             'email' => 'required|email',
         ];
