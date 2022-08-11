@@ -265,7 +265,9 @@ class AuthService
             'name' => Auth::user()->name,
             'rating' => $rating,
             'vehicle_registration_number' => isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->registration_number : null,
-            'email' => Auth::user()->email
+            'email' => Auth::user()->email,
+            'first_name' => Auth::user()->first_name,
+            'last_name' => Auth::user()->last_name,
 
         ];
 

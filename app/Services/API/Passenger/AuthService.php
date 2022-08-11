@@ -383,7 +383,8 @@ class AuthService
                 'steps' => $user->steps,
                 'provider' => $user->provider,
                 'image' => $user->image,
-                'name' => $user->name,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
                 'wallet_balance' => $balance,
                 'rating' => $rating
             ];
