@@ -30,7 +30,7 @@ class CancelReasonService
         }
         catch (\Exception $e)
         {
-            return makeResponse('error','Error in Creation Cancel Reason: '.$e,500);
+            return makeResponse('error','Error in Creation Cancel Reason: '.$e,200);
         }
     }
 
@@ -57,7 +57,7 @@ class CancelReasonService
             return makeResponse('success','Record Updated Successfully',200);
         }
         else{
-            return makeResponse('error','Record Not Found',500);
+            return makeResponse('error','Record Not Found',200);
         }
     }
 
@@ -74,13 +74,13 @@ class CancelReasonService
             }
             catch (\Exception $e)
             {
-                return makeResponse('error','Error in Record Deletion: '.$e,500);
+                return makeResponse('error','Error in Record Deletion: '.$e,200);
 
             }
 
         }
         else{
-            return makeResponse('error','Record Not Found',500);
+            return makeResponse('error','Record Not Found',200);
         }
     }
 }

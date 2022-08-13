@@ -37,7 +37,7 @@ class SettingService
 
             if(!$data)
             {
-                return makeResponse('error','No Record Found',404);
+                return makeResponse('error','No Record Found',200);
             }
 
             $data->update($settingArray);

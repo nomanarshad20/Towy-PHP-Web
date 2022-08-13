@@ -27,10 +27,20 @@
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Name</label>
-                                    <input type="text" name="name" class="form-control" placeholder="Enter Name">
+                                    <label class="form-label">First Name</label>
+                                    <input type="text" name="first_name" class="form-control"
+                                           placeholder="Enter First Name">
                                 </div>
                             </div><!-- Col -->
+
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Last Name</label>
+                                    <input type="text" name="last_name" class="form-control"
+                                           placeholder="Enter Last Name">
+                                </div>
+                            </div><!-- Col -->
+
                             <div class="col-sm-6">
                                 <div class="mb-3">
                                     <label class="form-label">Email</label>

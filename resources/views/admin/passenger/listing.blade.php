@@ -1,7 +1,7 @@
 @extends('layouts.admin.index')
 
 @section('title')
-    Franchise Listing
+    Passenger Listing
 @endsection
 
 @section('style')
@@ -21,7 +21,7 @@
 @section('body')
     <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
         <div>
-            <h4 class="mb-3 mb-md-0">Franchise Listing</h4>
+            <h4 class="mb-3 mb-md-0">Passenger Listing</h4>
         </div>
     </div>
 
@@ -35,12 +35,10 @@
                             <thead>
                             <tr>
                                 <th>#</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
+                                <th>Name</th>
                                 <th>Email</th>
                                 <th>Mobile No</th>
                                 <th>Referral Code</th>
-                                <th>Location</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -49,13 +47,11 @@
                             @foreach($data as $user)
                                 <tr>
                                     <td>{{$loop->iteration}}</td>
-                                    <td>{{$user->first_name}}</td>
-                                    <td>{{$user->last_name}}</td>
+                                    <td>{{$user->name}}</td>
                                     <td>{{$user->email}}</td>
                                     <td>{{$user->mobile_no}}</td>
                                     <td>{{$user->referral_code}}</td>
 
-                                    <td>{{$user->franchise ? $user->franchise->address:'N/A'}}</td>
                                     <td>
                                         @if($user->is_verified == 1)
                                             <span class="badge bg-success">Verified</span>
@@ -64,7 +60,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a title="Edit" href="{{route('franchiseEdit',['id'=>$user->id])}}">
+                                        <a title="Edit" href="{{route('passengerEdit',['id'=>$user->id])}}">
                                             <i data-feather="edit">Edit</i>
                                         </a>
                                         <a data-id="{{$user->id}}" title="Delete" class="deleteRecord"
@@ -86,7 +82,7 @@
         </div>
     </div>
 
-    @include('admin.franchise.modal.delete_modal')
+    @include('admin.passenger.modal.delete_modal')
 @endsection
 
 
@@ -133,7 +129,7 @@
                 $.ajax({
 
                     type: 'POST',
-                    url: '{{route("franchiseDelete")}}',
+                    url: '{{route("passengerDelete")}}',
                     data: data,
 
                     success: function (response, status) {
@@ -180,7 +176,7 @@
                 $.ajax({
 
                     type: 'GET',
-                    url: '{{route("franchiseChangeStatus")}}',
+                    url: '{{route("passengerChangeStatus")}}',
                     data: {'id': data},
 
                     success: function (response, status) {

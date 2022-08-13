@@ -40,7 +40,7 @@ class VehicleTypeService
             return makeResponse('success', 'Vehicle Type Created Successfully', 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            return makeResponse('error', 'Error in Creating Vehicle Type: ' . $e, 500);
+            return makeResponse('error', 'Error in Creating Vehicle Type: ' . $e, 200);
         }
     }
 
@@ -74,11 +74,11 @@ class VehicleTypeService
                 return makeResponse('success', 'Vehicle Type Updated Successfully', 200);
             } catch (\Exception $e) {
                 DB::rollBack();
-                return makeResponse('error', 'Error in Updating Vehicle Type: ' . $e, 500);
+                return makeResponse('error', 'Error in Updating Vehicle Type: ' . $e, 200);
             }
         }
         else{
-            return makeResponse('error', 'Record Not Found', 404);
+            return makeResponse('error', 'Record Not Found', 200);
         }
 
 
@@ -94,7 +94,7 @@ class VehicleTypeService
            return makeResponse('success','Vehicle Type Deleted Successfully',200);
         }
         else{
-            return makeResponse('error','Record Not Found',404);
+            return makeResponse('error','Record Not Found',200);
 
         }
     }
@@ -115,12 +115,12 @@ class VehicleTypeService
                 return makeResponse('success', 'Status Change Successfully', 200);
 
             } catch (\Exception $e) {
-                return makeResponse('error', 'Error in Change Status: ' . $e, 500);
+                return makeResponse('error', 'Error in Change Status: ' . $e, 200);
 
             }
         }
         else{
-            return makeResponse('error','Record Not Found',404);
+            return makeResponse('error','Record Not Found',200);
 
         }
 
@@ -139,7 +139,7 @@ class VehicleTypeService
             return makeResponse('success', 'Image Removed Successfully', 200);
 
         } else {
-            return makeResponse('error', 'Record Not Found', 404);
+            return makeResponse('error', 'Record Not Found', 200);
         }
 
 

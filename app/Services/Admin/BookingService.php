@@ -50,7 +50,7 @@ class BookingService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return makeResponse('error', 'Error in Finding Distance: ' . $e, 500);
+            return makeResponse('error', 'Error in Finding Distance: ' . $e, 200);
         }
 
         //calculating estimated fare and getting vehicle type record
@@ -58,7 +58,7 @@ class BookingService
             $gettingVehicleTypeRecords = $this->gettingVehicleTypeRecords(trim($distanceInKm));
         } catch (\Exception $e) {
             DB::rollBack();
-            return makeResponse('error', 'Error in Calculating Estimated Fare & Getting Vehicle Type Record: ' . $e, 500);
+            return makeResponse('error', 'Error in Calculating Estimated Fare & Getting Vehicle Type Record: ' . $e, 200);
         }
 
 
@@ -110,7 +110,7 @@ class BookingService
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return makeResponse('error', 'Error in Creating Booking Request: ' . $e, 500);
+            return makeResponse('error', 'Error in Creating Booking Request: ' . $e, 200);
         }
 
         try {
@@ -129,7 +129,7 @@ class BookingService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return makeResponse('error', 'Error in Creating Booking Detail Request: ' . $e, 500);
+            return makeResponse('error', 'Error in Creating Booking Detail Request: ' . $e, 200);
         }
 
     }
@@ -171,7 +171,7 @@ class BookingService
 
             } catch (\Exception $e) {
                 DB::rollBack();
-                return makeResponse('error', 'Error in Finding Distance: ' . $e, 500);
+                return makeResponse('error', 'Error in Finding Distance: ' . $e, 200);
             }
 
             //calculating estimated fare and getting vehicle type record
@@ -179,7 +179,7 @@ class BookingService
                 $gettingVehicleTypeRecords = $this->gettingVehicleTypeRecords(trim($distanceInKm));
             } catch (\Exception $e) {
                 DB::rollBack();
-                return makeResponse('error', 'Error in Calculating Estimated Fare & Getting Vehicle Type Record: ' . $e, 500);
+                return makeResponse('error', 'Error in Calculating Estimated Fare & Getting Vehicle Type Record: ' . $e, 200);
             }
 
 
@@ -239,7 +239,7 @@ class BookingService
                 ]);
             } catch (\Exception $e) {
                 DB::rollBack();
-                return makeResponse('error', 'Error in Updating Booking Request: ' . $e, 500);
+                return makeResponse('error', 'Error in Updating Booking Request: ' . $e, 200);
             }
 
             try {
@@ -257,11 +257,11 @@ class BookingService
 
             } catch (\Exception $e) {
                 DB::rollBack();
-                return makeResponse('error', 'Error in Updating Booking Detail Request: ' . $e, 500);
+                return makeResponse('error', 'Error in Updating Booking Detail Request: ' . $e, 200);
             }
         }
         else{
-            return makeResponse('error', 'Record Not Found', 404);
+            return makeResponse('error', 'Record Not Found', 200);
         }
     }
 
@@ -278,12 +278,12 @@ class BookingService
             }
             catch (\Exception $e)
             {
-                return makeResponse('error', 'Error in Delete Booking Record: '.$e, 500);
+                return makeResponse('error', 'Error in Delete Booking Record: '.$e, 200);
 
             }
         }
         else{
-            return makeResponse('error', 'Record Not Found', 404);
+            return makeResponse('error', 'Record Not Found', 200);
         }
     }
 

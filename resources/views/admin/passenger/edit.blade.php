@@ -1,7 +1,7 @@
 @extends('layouts.admin.index')
 
 @section('title')
-    Franchise Edit
+    Passenger Edit
 @endsection
 
 @section('style')
@@ -15,7 +15,7 @@
 
     <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
         <div>
-            <h4 class="mb-3 mb-md-0">Franchise Edit</h4>
+            <h4 class="mb-3 mb-md-0">Passenger Edit</h4>
         </div>
     </div>
 
@@ -23,33 +23,36 @@
         <div class="col-md-12 stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="card-title">Franchise Information</h6>
+                    <h6 class="card-title">Passenger Information</h6>
                     <form id="updateForm">
                         @csrf
                         <input type="hidden" name="id" value="{{$data->id}}">
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Name</label>
-                                    <input type="text" name="first_name" class="form-control"
+                                    <label class="form-label">First Name</label>
+                                    <input type="text" name="first_name"
                                            value="{{$data->first_name}}"
-                                           placeholder="Enter First Name">
+                                           class="form-control" placeholder="Enter Name">
                                 </div>
                             </div><!-- Col -->
 
                             <div class="col-sm-6">
                                 <div class="mb-3">
                                     <label class="form-label">Last Name</label>
-                                    <input type="text" name="last_name" class="form-control"
-                                           placeholder="Enter Last Name" value="{{$data->last_name}}">
+                                    <input type="text" name="last_name"
+                                           value="{{$data->last_name}}"
+                                           class="form-control" placeholder="Enter Name">
                                 </div>
                             </div><!-- Col -->
 
                             <div class="col-sm-6">
                                 <div class="mb-3">
                                     <label class="form-label">Email</label>
-                                    <input type="email" name="email" class="form-control" autocomplete="chrome-off"
-                                           placeholder="Enter Email" value="{{$data->email}}">
+                                    <input type="email" name="email"
+                                           value="{{$data->email}}"
+                                           class="form-control" autocomplete="chrome-off"
+                                           placeholder="Enter Email">
                                 </div>
                             </div><!-- Col -->
 
@@ -58,7 +61,7 @@
                                     <label class="form-label">Mobile No</label>
                                     <input type="text" name="mobile_no" class="form-control"
                                            value="{{$data->mobile_no}}"
-                                           placeholder="Enter Mobile No">
+                                           placeholder="Enter Mobile No" onkeypress="return isNumberKey(event)">
                                 </div>
                             </div><!-- Col -->
                             <div class="col-sm-6">
@@ -66,20 +69,6 @@
                                     <label class="form-label">Password</label>
                                     <input type="password" name="password" class="form-control"
                                            placeholder="Enter Password" autocomplete="chrome-off">
-                                </div>
-                            </div><!-- Col -->
-
-
-
-                            <div class="col-sm-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Location</label>
-                                    <input type="text" name="address" class="form-control pickup_location"
-                                           id="locationSearch" value="{{$data->franchise ? $data->franchise->address:''}}"
-                                           placeholder="Enter Location">
-                                    <input type="hidden" name="lat" id="lat" value="{{$data->franchise ? $data->franchise->lat:''}}">
-                                    <input type="hidden" name="lng" id="lng"  value="{{$data->franchise ? $data->franchise->lng:''}}">
-
                                 </div>
                             </div><!-- Col -->
 
@@ -92,7 +81,7 @@
                             Update
                         </button>
 
-                        <a href="{{route('franchiseListing')}}">
+                        <a href="{{route('passengerListing')}}">
                             <button type="button" class="btn btn-danger">
                                 Cancel
                             </button>
@@ -118,10 +107,6 @@
 @section('script')
 
 
-    <script src="https://maps.googleapis.com/maps/api/js?key={{env('GOOGLE_MAP')}}&js?sensor=false&libraries=places&extn=.js"></script>
-
-    @include('admin.franchise.script.autocomplete_script')
-
     <script>
         $(document).ready(function () {
 
@@ -143,7 +128,7 @@
                 $.ajax({
 
                     type: 'POST',
-                    url: '{{route("franchiseUpdate")}}',
+                    url: '{{route("passengerUpdate")}}',
                     data: data,
                     cache: false,
                     contentType: false,
@@ -155,7 +140,7 @@
                             successMsg(response.message);
 
                             setTimeout(function () {
-                                window.location.href = '{{route('franchiseListing')}}';
+                                window.location.href = '{{route('passengerListing')}}';
                             }, 1000);
 
                         } else if (response.result == 'error') {

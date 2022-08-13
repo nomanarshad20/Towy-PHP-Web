@@ -50,7 +50,7 @@ class DriverService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return makeResponse('error', 'Error in Creating User: ' . $e, 500);
+            return makeResponse('error', 'Error in Creating User: ' . $e, 200);
         }
 
 
@@ -62,7 +62,7 @@ class DriverService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return makeResponse('error', 'Error in Creating Vehicle: ' . $e, 500);
+            return makeResponse('error', 'Error in Creating Vehicle: ' . $e, 200);
         }
 
         try {
@@ -81,7 +81,7 @@ class DriverService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return makeResponse('error', 'Error in Creating Driver: ' . $e, 500);
+            return makeResponse('error', 'Error in Creating Driver: ' . $e, 200);
         }
 
 
@@ -113,14 +113,14 @@ class DriverService
             ->first();
 
         if ($checkForEmail) {
-            return makeResponse('error', 'Email Already Exist', 500);
+            return makeResponse('error', 'Email Already Exist', 200);
         }
 
         $checkForMobilePhone = User::where('mobile_no', $request->mobile_no)->where('id', '!=', $request->id)
             ->first();
 
         if ($checkForMobilePhone) {
-            return makeResponse('error', 'Mobile No Already Exist', 500);
+            return makeResponse('error', 'Mobile No Already Exist', 200);
         }
 
         $data = User::find($request->id);
@@ -138,7 +138,7 @@ class DriverService
                 }
             } catch (\Exception $e) {
                 DB::rollBack();
-                return makeResponse('error', 'Error in Creating User: ' . $e, 500);
+                return makeResponse('error', 'Error in Creating User: ' . $e, 200);
             }
 
 
@@ -150,7 +150,7 @@ class DriverService
 
             } catch (\Exception $e) {
                 DB::rollBack();
-                return makeResponse('error', 'Error in Creating Vehicle: ' . $e, 500);
+                return makeResponse('error', 'Error in Creating Vehicle: ' . $e, 200);
             }
 
             try {
@@ -164,7 +164,7 @@ class DriverService
 
             } catch (\Exception $e) {
                 DB::rollBack();
-                return makeResponse('error', 'Error in Creating Driver: ' . $e, 500);
+                return makeResponse('error', 'Error in Creating Driver: ' . $e, 200);
             }
 
             try {
@@ -206,14 +206,14 @@ class DriverService
                 $data->driver->vehicle->save();
 
             } catch (\Exception $e) {
-                return makeResponse('error', 'Error in Saving Documents: ' . $e, 500);
+                return makeResponse('error', 'Error in Saving Documents: ' . $e, 200);
             }
 
             DB::commit();
             return makeResponse('success', 'Driver Information Save Successfully', 200,);
 
         } else {
-            return makeResponse('error', 'Record Not Found', 500);
+            return makeResponse('error', 'Record Not Found', 200);
 
         }
 
@@ -237,11 +237,11 @@ class DriverService
                 return makeResponse('success', 'Status Change Successfully', 200);
 
             } catch (\Exception $e) {
-                return makeResponse('error', 'Error in Change Status: ' . $e, 500);
+                return makeResponse('error', 'Error in Change Status: ' . $e, 200);
 
             }
         } else {
-            return makeResponse('error', 'Record Not Found', 404);
+            return makeResponse('error', 'Record Not Found', 200);
         }
     }
 
@@ -257,10 +257,10 @@ class DriverService
                 return makeResponse('success', 'Driver Deleted Successfully', 200);
 
             } catch (\Exception $e) {
-                return makeResponse('error', 'Error in Deleting Driver: ' . $e, 500);
+                return makeResponse('error', 'Error in Deleting Driver: ' . $e, 200);
             }
         } else {
-            return makeResponse('error', 'Record Not Found', 404);
+            return makeResponse('error', 'Record Not Found', 200);
         }
     }
 
@@ -284,7 +284,7 @@ class DriverService
             return makeResponse('success', 'Image Removed Successfully', 200);
 
         } else {
-            return makeResponse('error', 'Record Not Found', 404);
+            return makeResponse('error', 'Record Not Found', 200);
         }
 
 

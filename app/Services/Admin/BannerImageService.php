@@ -31,7 +31,7 @@ class BannerImageService
         }
         catch (\Exception $e)
         {
-            return makeResponse('error','Error in Image Upload: '.$e,500);
+            return makeResponse('error','Error in Image Upload: '.$e,200);
         }
 
     }
@@ -46,7 +46,7 @@ class BannerImageService
             return makeResponse('success','Image Deleted Successfully',200);
         }
         else{
-            return makeResponse('error','Record Not Found',500);
+            return makeResponse('error','Record Not Found',200);
         }
     }
 
@@ -68,7 +68,7 @@ class BannerImageService
             return makeResponse('success','Status Change Successfully',200);
         }
         else{
-            return makeResponse('error','Record Not Found',500);
+            return makeResponse('error','Record Not Found',200);
         }
     }
 

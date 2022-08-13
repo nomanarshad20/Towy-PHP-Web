@@ -36,7 +36,7 @@ class VoucherCodeService
         try {
             $check = VoucherCode::where('voucher_code', $request->voucher_code)->first();
             if ($check) {
-                return makeResponse('error', 'Voucher Code Must be Unique', 422);
+                return makeResponse('error', 'Voucher Code Must be Unique', 200);
             }
 
             $date = Carbon::parse($request->expiry_date)->format('Y-m-d');
@@ -45,7 +45,7 @@ class VoucherCodeService
                 'discount_value' => $request->discount_value, 'discount_type' => $request->discount_type]);
             return makeResponse('success', 'Voucher Code Created Successfully', 200);
         } catch (\Exception $e) {
-            return makeResponse('error', 'Error in Creating Voucher Code: ' . $e, 500);
+            return makeResponse('error', 'Error in Creating Voucher Code: ' . $e, 200);
         }
     }
 
@@ -73,7 +73,7 @@ class VoucherCodeService
                     ->where('id', '!=', $request->id)
                     ->first();
                 if ($check) {
-                    return makeResponse('error', 'Voucher Code Must be Unique', 422);
+                    return makeResponse('error', 'Voucher Code Must be Unique', 200);
                 }
 
                 $date = Carbon::parse($request->expiry_date)->format('Y-m-d');
@@ -84,11 +84,11 @@ class VoucherCodeService
 
                 return makeResponse('success', 'Voucher Code Updated Successfully', 200);
             } catch (\Exception $e) {
-                return makeResponse('error', 'Error in Updating Voucher Code: ' . $e, 500);
+                return makeResponse('error', 'Error in Updating Voucher Code: ' . $e, 200);
             }
 
         } else {
-            return makeResponse('error', 'Record Not Found', 500);
+            return makeResponse('error', 'Record Not Found', 200);
         }
     }
 
@@ -101,10 +101,10 @@ class VoucherCodeService
 
                 return makeResponse('success', 'Voucher Code Deleted Successfully', 200);
             } catch (\Exception $e) {
-                return makeResponse('error', 'Error in Deleting Voucher Code: ' . $e, 500);
+                return makeResponse('error', 'Error in Deleting Voucher Code: ' . $e, 200);
             }
         } else {
-            return makeResponse('error', 'Record Not Found', 500);
+            return makeResponse('error', 'Record Not Found', 200);
         }
     }
 
@@ -134,7 +134,7 @@ class VoucherCodeService
 
             return view('admin.voucher_code.send_passenger',compact('data','passengers','alreadySelectedPassengers'));
         } else {
-            return makeResponse('error', 'Record Not Found', 500);
+            return makeResponse('error', 'Record Not Found', 200);
         }
     }
 
@@ -145,7 +145,7 @@ class VoucherCodeService
 
         if(!$data)
         {
-            return makeResponse('error','Record Not Found',404);
+            return makeResponse('error','Record Not Found',200);
         }
 
         $voucherPassengers = VoucherCodePassenger::where('voucher_code_id',$data->id)
@@ -190,7 +190,7 @@ class VoucherCodeService
         catch (\Exception $e)
         {
             DB::rollBack();
-            return makeResponse('error','Error in Creating Exception: '.$e,500);
+            return makeResponse('error','Error in Creating Exception: '.$e,200);
         }
 
         DB::commit();

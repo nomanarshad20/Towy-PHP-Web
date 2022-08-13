@@ -28,7 +28,9 @@ class FranchiseService
     {
         DB::beginTransaction();
         try {
-            $user = User::create(['name' => $request->name, 'mobile_no' => $request->mobile_no,
+            $user = User::create(['first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'mobile_no' => $request->mobile_no,
                 'email' => $request->email, 'password' => bcrypt($request->password), 'user_type' => 3
             ]);
 
@@ -46,7 +48,7 @@ class FranchiseService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return makeResponse('error', 'Error in Creating Franchise: ' . $e, 500);
+            return makeResponse('error', 'Error in Creating Franchise: ' . $e, 200);
         }
 
         try {
@@ -55,7 +57,7 @@ class FranchiseService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return makeResponse('error', 'Error in Creating Franchise: ' . $e, 500);
+            return makeResponse('error', 'Error in Creating Franchise: ' . $e, 200);
         }
 
         DB::commit();
@@ -86,19 +88,20 @@ class FranchiseService
             ->first();
 
         if ($checkForEmail) {
-            return makeResponse('error', 'Email Already Exist', 500);
+            return makeResponse('error', 'Email Already Exist', 200);
         }
 
         $checkForMobilePhone = User::where('mobile_no', $request->mobile_no)->where('id', '!=', $request->id)
             ->first();
 
         if ($checkForMobilePhone) {
-            return makeResponse('error', 'Mobile No Already Exist', 500);
+            return makeResponse('error', 'Mobile No Already Exist', 200);
         }
 
 
         try {
-            $user = $data->update(['name' => $request->name, 'mobile_no' => $request->mobile_no,
+            $user = $data->update(['first_name' => $request->first_name,
+                'last_name' => $request->last_name, 'mobile_no' => $request->mobile_no,
                 'email' => $request->email]);
 
             if ($request->password) {
@@ -106,7 +109,7 @@ class FranchiseService
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            return makeResponse('error', 'Error in Updating Franchise: ' . $e, 500);
+            return makeResponse('error', 'Error in Updating Franchise: ' . $e, 200);
         }
 
         try {
@@ -125,7 +128,7 @@ class FranchiseService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return makeResponse('error', 'Error in Updating Franchise: ' . $e, 500);
+            return makeResponse('error', 'Error in Updating Franchise: ' . $e, 200);
         }
         DB::commit();
         return makeResponse('success', 'Franchise Updated Successfully', 200);
@@ -145,10 +148,10 @@ class FranchiseService
                 return makeResponse('success', 'Franchise Deleted Successfully', 200);
 
             } catch (\Exception $e) {
-                return makeResponse('error', 'Error in Deleting Franchise: ' . $e, 500);
+                return makeResponse('error', 'Error in Deleting Franchise: ' . $e, 200);
             }
         } else {
-            return makeResponse('error', 'Record Not Found', 404);
+            return makeResponse('error', 'Record Not Found', 200);
         }
     }
 
@@ -168,11 +171,11 @@ class FranchiseService
                 return makeResponse('success', 'Status Change Successfully', 200);
 
             } catch (\Exception $e) {
-                return makeResponse('error', 'Error in Change Status: ' . $e, 500);
+                return makeResponse('error', 'Error in Change Status: ' . $e, 200);
 
             }
         } else {
-            return makeResponse('error', 'Record Not Found', 404);
+            return makeResponse('error', 'Record Not Found', 200);
         }
     }
 }

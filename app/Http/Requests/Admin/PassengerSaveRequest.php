@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class FranchiseCreateRequest extends FormRequest
+class PassengerSaveRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,17 +26,8 @@ class FranchiseCreateRequest extends FormRequest
         return [
             'first_name' => 'required',
             'last_name' => 'required',
-            'lat' => 'required',
-            'lng' => 'required'
-
-        ];
-    }
-
-    public function messages()
-    {
-        return [
-            'lat.required' => 'Please Select Address Google Map Suggestion',
-            'lng.required' => 'Please Select Address Google Map Suggestion'
+            'email' => 'required|email',
+            'mobile_no' => 'required'
         ];
     }
 }

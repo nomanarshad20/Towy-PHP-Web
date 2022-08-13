@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\PeakFactorController;
 use App\Http\Controllers\Admin\CancelReasonController;
 use App\Http\Controllers\Admin\VoucherCodeController;
 use App\Http\Controllers\Admin\BannerImageController;
+use App\Http\Controllers\Admin\PassengerController;
 //use App\Http\Controllers\Admin\HtmlPagesContentController;
 /*
 |--------------------------------------------------------------------------
@@ -66,6 +67,15 @@ Route::namespace('Admin')->group(function () {
         Route::post('driver-delete',[DriverController::class,'delete'])->name('driverDelete');
         Route::get('driver-change-status',[DriverController::class,'changeStatus'])->name('driverChangeStatus');
         Route::get('driver-delete-image',[DriverController::class,'deleteImage'])->name('driverDeleteImage');
+
+        Route::get('passenger-listing',[PassengerController::class,'index'])->name('passengerListing');
+        Route::get('passenger-create',[PassengerController::class,'create'])->name('passengerCreate');
+        Route::post('passenger-save',[PassengerController::class,'save'])->name('passengerSave');
+        Route::get('passenger-edit/{id}',[PassengerController::class,'edit'])->name('passengerEdit');
+        Route::post('passenger-update',[PassengerController::class,'update'])->name('passengerUpdate');
+        Route::post('passenger-delete',[PassengerController::class,'delete'])->name('passengerDelete');
+        Route::get('passenger-change-status',[PassengerController::class,'changeStatus'])->name('passengerChangeStatus');
+        Route::get('passenger-delete-image',[PassengerController::class,'deleteImage'])->name('passengerDeleteImage');
 
         Route::get('franchise-listing',[FranchiseController::class,'index'])->name('franchiseListing');
         Route::get('franchise-create',[FranchiseController::class,'create'])->name('franchiseCreate');

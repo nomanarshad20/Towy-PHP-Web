@@ -29,7 +29,7 @@ class PeakService
         }
         catch (\Exception $e)
         {
-            return makeResponse('error','Error in Saving Data: '.$e,500);
+            return makeResponse('error','Error in Saving Data: '.$e,200);
         }
     }
 
@@ -59,11 +59,11 @@ class PeakService
             }
             catch (\Exception $e)
             {
-                return makeResponse('error','Error in Updating Data: '.$e,500);
+                return makeResponse('error','Error in Updating Data: '.$e,200);
             }
         }
         else{
-            return makeResponse('error','Record Not Found',404);
+            return makeResponse('error','Record Not Found',200);
         }
 
     }
@@ -78,7 +78,7 @@ class PeakService
             return makeResponse('success','Record Deleted Successfully',200);
         }
         else{
-            return makeResponse('error','Record Not Found',404);
+            return makeResponse('error','Record Not Found',200);
         }
     }
 }

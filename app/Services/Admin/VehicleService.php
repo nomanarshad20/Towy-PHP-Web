@@ -44,7 +44,7 @@ class VehicleService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return makeResponse('error', 'Error in Creating Vehicle: ' . $e, 500);
+            return makeResponse('error', 'Error in Creating Vehicle: ' . $e, 200);
         }
 
         if ($request->driver_id) {
@@ -52,12 +52,12 @@ class VehicleService
                 $checkDriver = Driver::where('user_id', $request->driver_id)->whereNotNull('vehicle_id')->first();
                 if ($checkDriver) {
                     DB::rollBack();
-                    return makeResponse('error', 'Vehicle already assigned to that Driver', 500);
+                    return makeResponse('error', 'Vehicle already assigned to that Driver', 200);
                 }
                 $saveDriver = Driver::where('user_id', $request->driver_id)->update(['vehicle_id' => $vehicle->id]);
             } catch (\Exception $e) {
                 DB::rollBack();
-                return makeResponse('error', 'Error in Attaching Vehicle With Driver: ' . $e, 500);
+                return makeResponse('error', 'Error in Attaching Vehicle With Driver: ' . $e, 200);
             }
         }
 
@@ -107,7 +107,7 @@ class VehicleService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return makeResponse('error', 'Error in Updating Vehicle: ' . $e, 500);
+            return makeResponse('error', 'Error in Updating Vehicle: ' . $e, 200);
         }
 
         if ($request->driver_id) {
@@ -117,12 +117,12 @@ class VehicleService
                     ->first();
                 if ($checkDriver && $checkDriver->vehicle_id != null) {
                     DB::rollBack();
-                    return makeResponse('error', 'Vehicle already assigned to that Driver', 500);
+                    return makeResponse('error', 'Vehicle already assigned to that Driver', 200);
                 }
                 $saveDriver = Driver::where('user_id', $request->driver_id)->update(['vehicle_id' => $data->id]);
             } catch (\Exception $e) {
                 DB::rollBack();
-                return makeResponse('error', 'Error in Attaching Vehicle With Driver: ' . $e, 500);
+                return makeResponse('error', 'Error in Attaching Vehicle With Driver: ' . $e, 200);
             }
         }
 
@@ -144,10 +144,10 @@ class VehicleService
                 return makeResponse('success', 'Vehicle Deleted Successfully', 200);
 
             } catch (\Exception $e) {
-                return makeResponse('error', 'Error in Deleting Vehicle: ' . $e, 500);
+                return makeResponse('error', 'Error in Deleting Vehicle: ' . $e, 200);
             }
         } else {
-            return makeResponse('error', 'Record Not Found', 404);
+            return makeResponse('error', 'Record Not Found', 200);
         }
     }
 
@@ -165,7 +165,7 @@ class VehicleService
             return makeResponse('success', 'Image Removed Successfully', 200);
 
         } else {
-            return makeResponse('error', 'Record Not Found', 404);
+            return makeResponse('error', 'Record Not Found', 200);
         }
 
 

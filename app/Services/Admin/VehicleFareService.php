@@ -53,7 +53,7 @@ class VehicleFareService
         }
         catch (\Exception $e)
         {
-            return makeResponse('error','Error in Saving Record: '.$e,500);
+            return makeResponse('error','Error in Saving Record: '.$e,200);
         }
 
 
