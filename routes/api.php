@@ -27,6 +27,7 @@ use App\Http\Controllers\API\Passenger\CurrentStatusController;
 //use App\Http\Controllers\API\PagesContentController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\Driver\Auth\ForgotPasswordController;
+use App\Http\Controllers\API\Passenger\StripeController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -95,6 +96,8 @@ Route::group(['middleware' => ['json.response']], function () {
                 Route::get('passenger-get-help',[SettingController::class,'index']);
                 Route::get('get-passenger-status',[CurrentStatusController::class,'index']);
                 Route::get('get-active-vouchers',[VoucherController::class,'voucherList']);
+
+                Route::post('passenger-create-stripe-customer',[StripeController::class,'createCustomer']);
 
 
             });

@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class SocialRegisterRequest extends FormRequest
+class StripeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,13 +26,11 @@ class SocialRegisterRequest extends FormRequest
     public function rules()
     {
         return [
-//            'first_name' => 'required',
-//            'last_name' => 'required',
-            'email' => 'required|email',
-            'user_type' => 'required',
-            'fcm_token' => 'required',
-            'provider' => 'required',
-            'social_uid' => 'required'
+            'name' => 'required',
+            'number' => 'required',
+            'cvc' => 'required',
+            'expiry_month' => 'required',
+            'expiry_year' => 'required',
         ];
     }
 

@@ -14,7 +14,7 @@ use App\Notifications\ForgotPasswordNotificationAdmin;
 class User extends Authenticatable
 {
     use LaratrustUserTrait;
-    use HasApiTokens, HasFactory, Notifiable, HasWallets;
+    use HasApiTokens, HasFactory, Notifiable;
 //    use HasApiTokens, HasFactory, Notifiable;
 
 

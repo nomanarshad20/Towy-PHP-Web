@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\API\Passenger;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class CreateRatingRequest extends FormRequest
 {
@@ -28,5 +30,12 @@ class CreateRatingRequest extends FormRequest
             'booking_id' => 'required',
             'driver_id' => 'required'
         ];
+    }
+
+    public function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            makeResponse('error', $validator->errors()->first(),422)
+        );
     }
 }

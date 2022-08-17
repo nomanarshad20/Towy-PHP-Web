@@ -35,11 +35,6 @@ class CreateRideController extends Controller
 
             DB::beginTransaction();
 
-
-//            if (Auth::user()->user_type != 1)
-//                return makeResponse('error', 'Invalid User Type,Only Passenger Can Make A Booking Request', 422);
-
-
             $bookingData = $this->rideService->saveBooking($request);
 
 
