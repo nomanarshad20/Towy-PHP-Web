@@ -40,7 +40,7 @@ trait FindDriverTrait
 
 
         $available_drivers = DriversCoordinate::select('users.id', 'users.name', 'users.fcm_token',
-            'users.is_verified','drivers_coordinates.latitude','drivers_coordinates.longitude')
+            'users.is_verified', 'drivers_coordinates.latitude', 'drivers_coordinates.longitude')
             ->selectRaw("{$haveClause} AS distance")
             ->leftJoin('users', 'drivers_coordinates.driver_id', '=', 'users.id')
             ->leftJoin('drivers', 'drivers_coordinates.driver_id', '=', 'drivers.user_id')
@@ -92,5 +92,15 @@ trait FindDriverTrait
 
 
         return $haveClause;
+    }
+
+    public function findDistanceFormula($currentLat, $currentLng, $previousLat, $previousLng)
+    {
+        $theta = $previousLng - $currentLng;
+        $dist = sin(deg2rad($previousLat)) * sin(deg2rad($currentLat)) + cos(deg2rad($previousLat)) * cos(deg2rad($currentLat)) * cos(deg2rad($theta));
+        $dist = acos($dist);
+        $dist = rad2deg($dist);
+        $miles = $dist * 60 * 1.1515;
+        return ($miles * 1.609344) * 1000; //meter return
     }
 }

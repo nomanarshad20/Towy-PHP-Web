@@ -249,9 +249,9 @@ class DriverStatusService
         $p2pRideDistance = P2PBookingTracking::where('booking_id', $findBooking->id)->where('driver_status', '!=', 0)->sum('distance');
         $p2pInitialDistance = P2PBookingTracking::where('booking_id', $findBooking->id)->where('driver_status', 0)->sum('distance');
 
-        $p2pDistance = round($p2pDistance,2);
-        $p2pRideDistance =  round($p2pRideDistance,2);
-        $p2pInitialDistance =  round($p2pInitialDistance,2);
+        $p2pDistance = round($p2pDistance, 2);
+        $p2pRideDistance = round($p2pRideDistance, 2);
+        $p2pInitialDistance = round($p2pInitialDistance, 2);
 
         $totalDistance = $mobileDistance;
         $initialDistance = $data['mobile_initial_distance'];
@@ -330,8 +330,7 @@ class DriverStatusService
             ]);
 
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
@@ -341,20 +340,17 @@ class DriverStatusService
         }
 
         //change voucher status
-        try{
-            if($findBooking->bookingDetail->is_voucher == 1)
-            {
+        try {
+            if ($findBooking->bookingDetail->is_voucher == 1) {
                 $voucher_detail = json_decode($findBooking->bookingDetail->voucher_detail);
 
-                $voucherId =$voucher_detail->voucher_id;
+                $voucherId = $voucher_detail->voucher_id;
 
-                $find =  VoucherCodePassenger::where('passenger_id',$findBooking->passenger_id)
-                    ->where('voucher_code_id',$voucherId)->update(['is_used'=>1]);
+                $find = VoucherCodePassenger::where('passenger_id', $findBooking->passenger_id)
+                    ->where('voucher_code_id', $voucherId)->update(['is_used' => 1]);
             }
 
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
@@ -456,7 +452,7 @@ class DriverStatusService
             if ($findBooking->payment_type == 'cash_wallet' && $data['payment_type'] == 'cash_wallet') {
                 $findBooking->payment_type = 'cash_wallet';
             }
-            $findBooking->chat = isset($data['chat_message']) ? json_encode($data['chat_messages']):null;
+            $findBooking->chat = isset($data['chat_message']) ? json_encode($data['chat_messages']) : null;
 
             $findBooking->save();
 
@@ -531,13 +527,18 @@ class DriverStatusService
         $driverWaitingTime = $findBooking->bookingDetail->driver_waiting_time;
         $allowedTime = $findBooking->bookingDetail->allowed_waiting_time;
 
-        if ($allowedTime > $driverWaitingTime) {
-//            $totalTime = $allowedTime - $driverWaitingTime;
-//        } else {
-//            $totalTime = $driverWaitingTime - $allowedTime;
-
+        if ($allowedTime) {
+            if ($allowedTime < $driverWaitingTime) {
+                $totalTime = $driverWaitingTime;
+            }
             $waitingTimePrice = $findBooking->bookingDetail->waiting_price_per_min;
             $calculateWaitingTime = (float)($waitingTimePrice * $totalTime);
+
+
+        } else {
+
+            $waitingTimePrice = $findBooking->bookingDetail->waiting_price_per_min;
+            $calculateWaitingTime = (float)($waitingTimePrice * $driverWaitingTime);
         }
 
 
@@ -545,8 +546,7 @@ class DriverStatusService
         $pickUpTimeCalculation = $findBooking->bookingDetail->total_minutes_to_reach_pick_up_point * $findBooking->bookingDetail->initial_time_rate;
         if ($fareType == 'google') {
             $pickUpDistanceCalculation = $p2pInitialDistance * $findBooking->bookingDetail->initial_distance_rate;
-        }
-        else {
+        } else {
             $pickUpDistanceCalculation = $mobile_initial_distance * $findBooking->bookingDetail->initial_distance_rate;
         }
 
@@ -591,52 +591,43 @@ class DriverStatusService
             $totalFare = $totalFare + $wallet_balance;
         }
 
-        if($findBooking->bookingDetail->is_voucher == 1)
-        {
+        if ($findBooking->bookingDetail->is_voucher == 1) {
             $discountAmount = 0;
             $discountType = 'percentage';
             $totalDiscountedPrice = 0;
             $voucher_detail = json_decode($findBooking->bookingDetail->voucher_detail);
-            if(isset($voucher_detail->expiry_date))
-            {
+            if (isset($voucher_detail->expiry_date)) {
                 $voucherExpiryDate = Carbon::parse($voucher_detail->expiry_date);
                 $currentDate = Carbon::now();
-                if($voucherExpiryDate < $currentDate)
-                {
+                if ($voucherExpiryDate < $currentDate) {
                     $discountAmount = 0;
-                }
-                else{
-                    if(isset($voucher_detail->discount_value))
-                    {
+                } else {
+                    if (isset($voucher_detail->discount_value)) {
                         $discountAmount = $voucher_detail->discount_value;
                     }
 
                 }
 
-                if(isset($voucher_detail->discount_type))
-                {
+                if (isset($voucher_detail->discount_type)) {
                     $discountType = $voucher_detail->discount_type;
                 }
             }
 
-            if($discountAmount == 0)
-            {
+            if ($discountAmount == 0) {
                 $totalDiscountedPrice = 0;
-            }
-            else{
-                if($discountType == 'percentage')
-                {
-                    $totalDiscountedPrice = ($totalFare * $discountAmount)/100;
+            } else {
+                if ($discountType == 'percentage') {
+                    $totalDiscountedPrice = ($totalFare * $discountAmount) / 100;
                 }
 
             }
 
 
-            $totalFare =  $totalFare - $totalDiscountedPrice;
+            $totalFare = $totalFare - $totalDiscountedPrice;
 
         }
 
-        $totalFare =  $totalFare + $findBooking->bookingDetail->min_vehicle_fare;
+        $totalFare = $totalFare + $findBooking->bookingDetail->min_vehicle_fare;
 
         //find Tax
 
@@ -677,6 +668,5 @@ class DriverStatusService
         return $fare;
 
     }
-
 
 }

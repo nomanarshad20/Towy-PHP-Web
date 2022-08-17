@@ -74,15 +74,18 @@ class RideAcceptRejectService
             try {
                 $findBooking->vehicle_id = $gettingCurrentUser->driver->vehicle_id;
                 $findBooking->driver_id = $gettingCurrentUser->id;
+                if(isset($gettingCurrentUser->franchise_id))
+                    $findBooking->franchise_id = $gettingCurrentUser->franchise_id;
                 $findBooking->ride_status = 1;
+//                $findBooking->driver_status = 0;
 
 
-                if ($findBooking->booking_type == 'book_now') {
-                    $gettingCurrentUser->driverCoordinate->update(['status' => 2]);
-                    $findBooking->driver_status = 0;
-                } else {
-                    $gettingCurrentUser->driverCoordinate->update(['status' => 1]);
-                }
+//                if ($findBooking->booking_type == 'book_now') {
+                $gettingCurrentUser->driverCoordinate->update(['status' => 2]);
+                $findBooking->driver_status = 0;
+//                } else {
+//                    $gettingCurrentUser->driverCoordinate->update(['status' => 1]);
+//                }
 
                 // update voucher
                 if($findBooking->bookingDetail->is_voucher == 1)
@@ -139,6 +142,16 @@ class RideAcceptRejectService
                 $notification_type = 1;
 
                 $sendNotificationToPassenger = $this->rideAcceptNotification($passengerFCMToken, $findBooking, $notification_type);
+            }
+
+            $driverFCMToken = $findBooking->driver->fcm_token;
+
+            if ($driverFCMToken) {
+                $notification_type = 15;
+                $title = 'Accept Ride';
+                $message = 'You have accept the ride request by passenger';
+
+                $sendNotificationToDriver = $this->driverRideAcceptRejectNotification($driverFCMToken, $this->driverBookingResponse($findBooking), $notification_type,$title,$message);
             }
 
             try {
@@ -215,6 +228,17 @@ class RideAcceptRejectService
 
 
                 if ($data['driver_action'] == 2) {
+
+                    $driverFCMToken = $gettingCurrentUser->fcm_token;
+
+                    if ($driverFCMToken) {
+                        $notification_type = 15;
+                        $title = 'Ignore Ride Request';
+                        $message = 'You have ignored the ride request by passenger';
+
+                        $sendNotificationToDriver = $this->driverRideAcceptRejectNotification($driverFCMToken, $booking, $notification_type, $title, $message);
+                    }
+
                     $socket->emit($passengerID.'-finalRideStatus',
                         [
                             'result' => 'error',
@@ -232,6 +256,19 @@ class RideAcceptRejectService
                     );
                 }
                 elseif ($data['driver_action'] == 0) {
+
+                    $driverFCMToken = $gettingCurrentUser->fcm_token;
+
+                    if ($driverFCMToken) {
+                        $notification_type = 15;
+                        $title = 'Reject Ride Request';
+                        $message = 'You have reject the ride request by passenger';
+
+                        $sendNotificationToDriver = $this->driverRideAcceptRejectNotification($driverFCMToken, $booking, $notification_type, $title, $message);
+                    }
+
+
+
                     $socket->emit($passengerID.'-finalRideStatus',
                         [
                             'result' => 'error',

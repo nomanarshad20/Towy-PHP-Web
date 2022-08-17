@@ -12,6 +12,7 @@ use App\Services\API\Socket\RideAcceptRejectService;
 use App\Traits\BookingResponseTrait;
 use App\Traits\CreateUserWalletTrait;
 use App\Traits\FindDistanceTraits;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class SocketController extends Controller
@@ -120,6 +121,8 @@ class SocketController extends Controller
             $driver = DriversCoordinate::where("driver_id", $data['user_id'])
                 ->first();
 
+            $distance = 21;
+
 
             if (isset($data['booking_id']) && $data['booking_id'] != 0) {
 
@@ -130,76 +133,144 @@ class SocketController extends Controller
 
                 if ($checkForBooking) {
 
-                    $calculateDistance = $this->getDistance($data['latitude'], $data['longitude'],
-                        $driver->latitude,
-                        $driver->longitude);
+                    if ($data['latitude'] == $driver->latitude && $data['longitude'] == $driver->longitude) {
+                        return $socket->emit($data['user_id'] . '-driverCoordinate',
+                            [
+                                'result' => 'success',
+                                'message' => 'Driver Coordinate Same So Not Save',
+                                'data' => [
+                                    "latitude" => $driver->latitude,
+                                    "longitude" => $driver->longitude,
+                                    "city" => $driver->city,
+                                    "area_name" => $driver->area_name,
+                                    "bearing" => $driver->bearing
+                                ],
 
-                    $distanceInKm = str_replace(',', '', str_replace('km', '', $calculateDistance['text']));
-                    $distanceInKm = str_replace(',', '', str_replace('m', '', $distanceInKm));
+                            ]);
+                    }
+
+                    $haveClause = $this->findDistanceFormula($data['latitude'], $data['longitude'], $driver->latitude, $driver->longitude);
+
+                    $distance = $haveClause;
+
+                    if ($distance > 20) {
+
+                        P2PBookingTracking::create(['booking_id' => $checkForBooking->id,
+                            'driver_id' => $checkForBooking->driver_id,
+                            'latitude' => $data['latitude'], 'longitude' => $data['longitude'],
+                            'distance' => trim($distance),
+                            'driver_status' => $checkForBooking->driver_status
+                        ]);
+
+                        //saving driver current lat and lng
+                        $driver->latitude = $data['latitude'];
+                        $driver->longitude = $data['longitude'];
+                        $driver->area_name = $data['area_name'];
+                        $driver->city = $data['city'];
+                        $driver->bearing = $data['bearing'];
+                        $driver->status = 2;
+                        $driver->save();
 
 
-                    P2PBookingTracking::create(['booking_id' => $checkForBooking->id,
-                        'driver_id' => $checkForBooking->driver_id,
-                        'latitude' => $data['latitude'], 'longitude' => $data['longitude'],
-                        'distance' => trim($distanceInKm),
-                        'driver_status' => $checkForBooking->driver_status
-                    ]);
+//                    if ($passengerSocketId) {
+                        $socket->emit($checkForBooking->passenger_id . '-driverCoordinate', [
+                            'result' => 'success',
+                            'message' => 'Driver Coordinate Send Successfully',
+                            'data' => [
+                                "latitude" => $driver->latitude,
+                                "longitude" => $driver->longitude,
+                                "city" => $driver->city,
+                                "area_name" => $driver->area_name,
+                                "bearing" => $driver->bearing,
+                                'distance' => $distance
 
+                            ],
+                        ]);
+
+
+                        return $socket->emit($data['user_id'] . '-driverCoordinate',
+                            [
+                                'result' => 'success',
+                                'message' => 'Driver Coordinate Save Successfully',
+                                'data' => [
+                                    "latitude" => $driver->latitude,
+                                    "longitude" => $driver->longitude,
+                                    "city" => $driver->city,
+                                    "area_name" => $driver->area_name,
+                                    "bearing" => $driver->bearing,
+                                    'distance' => $distance
+
+                                ],
+
+                            ]);
+                    }
+
+                }
+
+
+            }
+            else {
+                $distance = 21;
+                if (!isset($driver)) {
+                    $driver = new DriversCoordinate;
+                    $driver->driver_id = $data['user_id'];
+
+                }
+                else {
+                    $distance = 0;
+                    if ($data['latitude'] == $driver->latitude && $data['longitude'] == $driver->longitude) {
+                        return $socket->emit($data['user_id'] . '-driverCoordinate',
+                            [
+                                'result' => 'success',
+                                'message' => 'Driver Coordinate Same So Not Save',
+                                'data' => [
+                                    "latitude" => $driver->latitude,
+                                    "longitude" => $driver->longitude,
+                                    "city" => $driver->city,
+                                    "area_name" => $driver->area_name,
+                                    "bearing" => $driver->bearing,
+                                    'distance' => $distance
+
+                                ],
+
+                            ]);
+                    }
+
+                    $haveClause = $this->findDistanceFormula($data['latitude'], $data['longitude'], $driver->latitude, $driver->longitude);
+                    $distance = $haveClause;
+                }
+
+
+                if ($distance > 20) {
                     //saving driver current lat and lng
                     $driver->latitude = $data['latitude'];
                     $driver->longitude = $data['longitude'];
                     $driver->area_name = $data['area_name'];
                     $driver->city = $data['city'];
                     $driver->bearing = $data['bearing'];
-                    $driver->status = 2;
                     $driver->save();
-
-
-//                    if ($passengerSocketId) {
-                    $socket->emit($checkForBooking->passenger_id . '-driverCoordinate', [
-                        'result' => 'success',
-                        'message' => 'Driver Coordinate Send Successfully',
-                        'data' => [
-                            "latitude" => $driver->latitude,
-                            "longitude" => $driver->longitude,
-                            "city" => $driver->city,
-                            "area_name" => $driver->area_name,
-                            "bearing" => $driver->bearing
-                        ],
-                    ]);
-
-
-                   return $socket->emit($data['user_id'] . '-driverCoordinate',
+                }
+                else {
+                    return $socket->emit($data['user_id'] . '-driverCoordinate',
                         [
                             'result' => 'success',
-                            'message' => 'Driver Coordinate Save Successfully',
+                            'message' => 'Driver Coordinate Not Save because distance is less than 20 meter',
                             'data' => [
                                 "latitude" => $driver->latitude,
                                 "longitude" => $driver->longitude,
                                 "city" => $driver->city,
                                 "area_name" => $driver->area_name,
-                                "bearing" => $driver->bearing
+                                "bearing" => $driver->bearing,
+                                'distance' => $distance
                             ],
 
                         ]);
                 }
 
             }
-            else {
-                if (!isset($driver)) {
-                    $driver = new DriversCoordinate;
-                }
-                //saving driver current lat and lng
-                $driver->latitude = $data['latitude'];
-                $driver->longitude = $data['longitude'];
-                $driver->area_name = $data['area_name'];
-                $driver->city = $data['city'];
-                $driver->bearing = $data['bearing'];
-                $driver->save();
-            }
 
 
-            $socket->emit($data['user_id'] . '-driverCoordinate',
+            return $socket->emit($data['user_id'] . '-driverCoordinate',
                 [
                     'result' => 'success',
                     'message' => 'Driver Coordinate Save Successfully',
@@ -208,12 +279,14 @@ class SocketController extends Controller
                         "longitude" => $driver->longitude,
                         "city" => $driver->city,
                         "area_name" => $driver->area_name,
-                        "bearing" => $driver->bearing
+                        "bearing" => $driver->bearing,
+                        'distance' => $distance
                     ],
 
                 ]);
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
 
             return $socket->emit($data['user_id'] . '-driverCoordinate',
                 [
@@ -374,12 +447,10 @@ class SocketController extends Controller
         }
 
 
-        if($data['payment_type'] == 'cash')
-        {
+        if ($data['payment_type'] == 'cash') {
             $findBooking->payment_type = 'cash_wallet';
             $findBooking->save();
-        }
-        elseif($data['payment_type'] == 'wallet') {
+        } elseif ($data['payment_type'] == 'wallet') {
 
             $wallet_balance = $this->passengerWalletBalance($findBooking->passenger_id);
 
