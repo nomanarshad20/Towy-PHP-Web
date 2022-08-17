@@ -91,7 +91,7 @@ Route::group(['middleware' => ['json.response']], function () {
                 Route::get('passenger-trip-history',[TripHistoryController::class,'history']);
                 Route::get('passenger-get-notifications',[NotificationController::class,'index']);
                 Route::get('passenger-apply-voucher',[VoucherController::class,'apply']);
-                Route::get('passenger-get-banner-images',[BannerImageController::class,'index']);
+                Route::get('passenger-dashboard',[BannerImageController::class,'index']);
                 Route::get('passenger-get-help',[SettingController::class,'index']);
                 Route::get('get-passenger-status',[CurrentStatusController::class,'index']);
                 Route::get('get-active-vouchers',[VoucherController::class,'voucherList']);

@@ -5,19 +5,23 @@ namespace App\Services\API\Passenger;
 
 
 use App\Models\BannerImage;
+use App\Models\VehicleType;
 
 class BannerImageService
 {
     public function index()
     {
-        $data = BannerImage::select('image')->where('status',1)->get();
+        $bannerImages = BannerImage::select('image')->where('status',1)->get();
 
-        if(sizeof($data) > 0)
-        {
-            return makeResponse('success','Banner Image Created Successfully',200,$data);
-        }
-        else{
-            return makeResponse('error','Record Not Found',500);
-        }
+        $vehicleTypes = VehicleType::select('name','image')->where('status',1)->get();
+
+        $data =  [
+            'banner_image' => $bannerImages,
+            'vehicle_types' => $vehicleTypes
+        ];
+
+
+        return makeResponse('success','Record Fetch Successfully',200,$data);
+
     }
 }
