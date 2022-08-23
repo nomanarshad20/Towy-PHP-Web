@@ -39,7 +39,7 @@ trait FindDriverTrait
         $haveClause = $this->distanceFormula($lat, $lng);
 
 
-        $available_drivers = DriversCoordinate::select('users.id', 'users.name', 'users.fcm_token',
+        $available_drivers = DriversCoordinate::select('users.id', 'users.first_name', 'users.last_name', 'users.fcm_token',
             'users.is_verified', 'drivers_coordinates.latitude', 'drivers_coordinates.longitude')
             ->selectRaw("{$haveClause} AS distance")
             ->leftJoin('users', 'drivers_coordinates.driver_id', '=', 'users.id')
@@ -62,7 +62,8 @@ trait FindDriverTrait
 
                 $driversList[] = array(
                     "id" => $public_driver->id,
-                    "name" => $public_driver->name,
+                    "first_name" => $public_driver->first_name,
+                    "last_name" => $public_driver->last_name,
                     "distance" => $public_driver->distance,
                     'booking_id' => $booking_id,
                     'fcm_token' => $public_driver->fcm_token,

@@ -17,6 +17,14 @@ class CancelService
     use CalculateCancelPercentageAmountTrait;
     use SendFirebaseNotificationTrait;
 
+    public $stripeService;
+
+    public function __construct(StripeService $stripeService)
+    {
+        $this->stripeService =  $stripeService;
+    }
+
+
     public function cancelService($request)
     {
         $findBooking = Booking::with('bookingDetail')->where('id', $request->booking_id)->where('passenger_id', Auth::user()->id)
@@ -37,6 +45,7 @@ class CancelService
 
             $calculateFine = $this->calculatePercentage($findBooking);
 
+
             $other_reason = null;
 
             if ($findReason->reason == "Other" || $findReason->id == 9) {
@@ -44,6 +53,9 @@ class CancelService
             }
 
             $findBooking->driver->driverCoordinate->update(['status' => 1]);
+
+            $stripeChargeId = $findBooking->stripe_charge_id;
+            $estimatedFare  = $findBooking->estimated_fare;
 
             $findBooking->update([
                 'ride_status' => 2,
@@ -65,23 +77,41 @@ class CancelService
                 $sendNotification = $this->cancelRide($driverFCM,$notificationType,$title,$message);
             }
 
+            if($calculateFine > 0)
+            {
+                $funds = $this->stripeService->captureFund($calculateFine,$stripeChargeId);
+            }
+            else{
+
+                $funds = $this->stripeService->releasingAmount($stripeChargeId);
+
+
+            }
+
+            if($funds->status != 'succeeded')
+            {
+                return makeResponse('error','Error in Releasing Fund',500);
+            }
+
+
+
 
             //add amount in passenger wallet and send back in response so that on driver app it is updated
 
-            if($calculateFine > 0) {
+//            if($calculateFine > 0) {
+//
+//                $this->passengerWalletUpdate($findBooking,$calculateFine,"debit","fine","Passenger ride cancel penalty amount.");
+////                $passengerWallet = $findBooking->passenger->wallet('Passenger-Wallet');
+////                $passengerWallet->decrementBalance($calculateFine);
+//            }
+//            $balance    =   CreateUserWalletTrait::passengerWalletBalance(Auth::user()->id);
+//            $data = [
+//                'fine' => $findBooking->fine_amount,
+//                'wallet_balance' => $balance
+//            ];
 
-                $this->passengerWalletUpdate($findBooking,$calculateFine,"debit","fine","Passenger ride cancel penalty amount.");
-//                $passengerWallet = $findBooking->passenger->wallet('Passenger-Wallet');
-//                $passengerWallet->decrementBalance($calculateFine);
-            }
-            $balance    =   CreateUserWalletTrait::passengerWalletBalance(Auth::user()->id);
-            $data = [
-                'fine' => $findBooking->fine_amount,
-                'wallet_balance' => $balance
-            ];
 
-
-            return makeResponse('success', 'Cancel Ride Successfully', 200,$data);
+            return makeResponse('success', 'Cancel Ride Successfully', 200);
 
         }
         catch (\Exception $e)

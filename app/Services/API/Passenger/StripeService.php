@@ -33,23 +33,23 @@ class StripeService
                 ],
             ]);
 
-            $response = ['type' => 'success','data'=>$token->id];
-            return  $response;
+            $response = ['type' => 'success', 'data' => $token->id];
+            return $response;
         } catch (\Stripe\Error\InvalidRequest $e) {
-            $response = ['type' => 'error','message'=>$e->getMessage()];
-            return  $response;
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
         } catch (\Stripe\Error\Authentication $e) {
-            $response = ['type' => 'error','message'=>$e->getMessage()];
-            return  $response;
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
         } catch (\Stripe\Error\ApiConnection $e) {
-            $response = ['type' => 'error','message'=>$e->getMessage()];
-            return  $response;
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
         } catch (\Stripe\Exception\CardException $e) {
-            $response = ['type' => 'error','message'=>$e->getError()->message];
-            return  $response;
+            $response = ['type' => 'error', 'message' => $e->getError()->message];
+            return $response;
         } catch (Exception $e) {
-            $response = ['type' => 'error','message'=>$e->getMessage()];
-            return  $response;
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
         }
 
     }
@@ -63,6 +63,83 @@ class StripeService
         ]);
 
         return $customerId;
+    }
+
+    public function holdAmount($bookingRecord)
+    {
+        try {
+            $amount = $bookingRecord['estimated_fare'];
+
+            $charge = \Stripe\Charge::create([
+                'amount' => $amount * 100,
+                'currency' => 'usd',
+                'description' => 'Towy Charge for Booking ID: ' . $bookingRecord['booking_unique_id'],
+                'customer' => Auth::user()->stripe_customer_id,
+                'capture' => false,
+            ]);
+
+            return $charge->id;
+
+        } catch (\Stripe\Error\InvalidRequest $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\Authentication $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\ApiConnection $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Exception\CardException $e) {
+            $response = ['type' => 'error', 'message' => $e->getError()->message];
+            return $response;
+        } catch (Exception $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        }
+
+    }
+
+    public function releasingAmount( $stripe_charge_id)
+    {
+
+        $release = $this->stripe->refunds->create([
+            'charge' => $stripe_charge_id,
+
+        ]);
+
+
+        return $release;
+    }
+
+    public function captureFund($amount, $stripe_charge_id)
+    {
+        try {
+            $charge = $this->stripe->charges->capture(
+                $stripe_charge_id,
+                ['amount' => $amount * 100]
+            );
+
+            return $charge;
+
+
+        } catch (\Stripe\Error\InvalidRequest $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\Authentication $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\ApiConnection $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Exception\CardException $e) {
+            $response = ['type' => 'error', 'message' => $e->getError()->message];
+            return $response;
+        } catch (Exception $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        }
+
+
     }
 
 

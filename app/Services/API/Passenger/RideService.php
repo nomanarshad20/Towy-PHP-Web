@@ -30,48 +30,20 @@ class RideService
     {
         DB::beginTransaction();
 
-
-        //finding distance
-//        try {
-//            $findingDistance = $this->getDistance($request->pick_up_latitude, $request->pick_up_longitude,
-//                $request->drop_off_latitude, $request->drop_off_longitude);
-//
-//
-//            $distanceInKm = str_replace(',', '', str_replace('km', '', $findingDistance['text']));
-//
-//        } catch (\Exception $e) {
-//            DB::rollBack();
-//            $response = ['result' => 'error', 'message' => 'Error in Finding Distance: ' . $e, 'code' => 500];
-//            return $response;
-//        }
-
-        //calculating estimated fare and getting vehicle type record
-//        try {
-//
-//            $gettingVehicleTypeRecords = $this->gettingVehicleTypeRecords(trim($distanceInKm));
-//
-//
-//
-//        } catch (\Exception $e) {
-//            DB::rollBack();
-//            $response = ['result' => 'error', 'message' => 'Error in Finding Distance: ' . $e, 'code' => 500];
-//            return $response;
-//        }
-
         //savingData in Booking Table
         try {
 
             $otpCode = mt_rand(1000, 9999);
 
             $pick_up_date = $pick_up_time = null;
-            if ($request->booking_type == 'book_later') {
-                $pick_up_date = Carbon::parse($request->pick_up_date)->format('Y-m-d');
-                $pick_up_time = Carbon::parse($request->pick_up_time)->format('H:i:s');
-            }
+//            if ($request->booking_type == 'book_later') {
+//                $pick_up_date = Carbon::parse($request->pick_up_date)->format('Y-m-d');
+//                $pick_up_time = Carbon::parse($request->pick_up_time)->format('H:i:s');
+//            }
 
 
             $bookingArray = [
-                'booking_unique_id' => uniqid('TOTO-'),
+                'booking_unique_id' => uniqid('TOWY-'),
                 'passenger_id' => Auth::user()->id,
                 'vehicle_type_id' => $request->vehicle_type_id,
                 'booking_type' => $request->booking_type,
@@ -83,10 +55,8 @@ class RideService
                 'drop_off_area' => $request->drop_off_area,
                 'drop_off_latitude' => $request->drop_off_latitude,
                 'drop_off_longitude' => $request->drop_off_longitude,
-//                'total_distance' => $distanceInKm,
                 'total_distance' => $request->total_distance,
-                'payment_type' => $request->payment_type,
-//                'estimated_fare' => $gettingVehicleTypeRecords['estimated_fare'],
+                'payment_type' => 'payment_gateway',
                 'estimated_fare' => $request->estimated_fare,
                 'actual_fare' => 0,
                 'ride_status' => 0,

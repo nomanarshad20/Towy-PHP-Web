@@ -35,7 +35,7 @@ class CreateBookingRequest extends FormRequest
             'payment_type' => 'required',
             'estimated_fare' => 'required',
             'total_distance' => 'required',
-            'booking_type' => 'required',
+//            'booking_type' => 'required',
             'pick_up_date' => 'required_if:booking_type,book_later',
             'pick_up_time' => 'required_if:booking_type,book_later',
 //                'driver_status' => 'required',
