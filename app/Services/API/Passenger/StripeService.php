@@ -142,5 +142,46 @@ class StripeService
 
     }
 
+    public function charge($bookingRecord,$customerID = null)
+    {
+        try {
+
+            if(!$customerID)
+            {
+                $customerID = Auth::user()->stripe_customer_id;
+            }
+
+
+            $amount = $bookingRecord->actual_fare;
+
+            $charge = \Stripe\Charge::create([
+                'amount' => $amount * 100,
+                'currency' => 'usd',
+                'description' => 'Towy Charge for Booking ID: ' . $bookingRecord->booking_unique_id,
+                'customer' => $customerID,
+            ]);
+
+            return $charge->id;
+
+        } catch (\Stripe\Error\InvalidRequest $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\Authentication $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\ApiConnection $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Exception\CardException $e) {
+            $response = ['type' => 'error', 'message' => $e->getError()->message];
+            return $response;
+        } catch (Exception $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        }
+
+    }
+
+
 
 }
