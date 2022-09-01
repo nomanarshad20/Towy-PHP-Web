@@ -80,20 +80,21 @@ class CancelService
             if($calculateFine > 0)
             {
                 $funds = $this->stripeService->captureFund($calculateFine,$stripeChargeId);
+
+                if($funds['type'] == 'error')
+                {
+                    return makeResponse('error',$funds['message'],500);
+                }
             }
             else{
 
                 $funds = $this->stripeService->releasingAmount($stripeChargeId);
 
-
+                if($funds->status != 'succeeded')
+                {
+                    return makeResponse('error','Error in Releasing Fund',500);
+                }
             }
-
-            if($funds->status != 'succeeded')
-            {
-                return makeResponse('error','Error in Releasing Fund',500);
-            }
-
-
 
 
             //add amount in passenger wallet and send back in response so that on driver app it is updated

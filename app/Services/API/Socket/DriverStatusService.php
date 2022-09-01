@@ -368,7 +368,7 @@ class DriverStatusService
 
         $bookingResponse = $this->driverBookingResponse($findBooking);
 
-        //ride start notification
+        //end ride notification
         $notification_type = 4;
         if ($passengerFCMToken) {
 //            $fcmToken = ['fcm_token' => $passengerFCMToken];
@@ -476,18 +476,17 @@ class DriverStatusService
         //deduct payment
         try{
 
-            if($findBooking->estimated_fare == $findBooking->actual_fare)
-            {
-                $funds = $this->stripeService->captureFund($findBooking->actual_fare,$findBooking->stripeChargeId);
+            $calculateDiff = $findBooking->actual_fare - $findBooking->estimated_fare;
 
-            }
-            else{
-                $funds = $this->stripeService->releasingAmount($findBooking->stripeChargeId);
-            }
+            $funds = $this->stripeService->captureFund($findBooking->estimated_fare,$findBooking->stripeChargeId);
 
-            if($funds->status != 'succeeded')
+            if($funds['type'] == 'error')
             {
-                return makeResponse('error','Error in Releasing Fund',500);
+                return $socket->emit($data['user_id'] . '-driverStatus', [
+                    'result' => 'error',
+                    'message' => $funds['message'],
+                    'data' => null
+                ]);
             }
 
 
@@ -508,7 +507,7 @@ class DriverStatusService
             try{
                 $passengerCustomerID = $findBooking->passenger->stripe_customer_id;
 
-                $charge = $this->stripeService->charge($findBooking,$passengerCustomerID);
+                $charge = $this->stripeService->charge($findBooking,$passengerCustomerID,$calculateDiff);
 
                 if(isset($charge) && $charge['type'] =='error')
                 {

@@ -142,7 +142,7 @@ class StripeService
 
     }
 
-    public function charge($bookingRecord,$customerID = null)
+    public function charge($bookingRecord,$customerID = null,$amount = null)
     {
         try {
 
@@ -151,8 +151,12 @@ class StripeService
                 $customerID = Auth::user()->stripe_customer_id;
             }
 
+            if(!$amount)
+            {
+                $amount = $bookingRecord->actual_fare;
+            }
 
-            $amount = $bookingRecord->actual_fare;
+
 
             $charge = \Stripe\Charge::create([
                 'amount' => $amount * 100,
@@ -181,7 +185,6 @@ class StripeService
         }
 
     }
-
 
 
 }
