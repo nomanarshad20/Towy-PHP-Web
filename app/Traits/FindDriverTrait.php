@@ -40,7 +40,7 @@ trait FindDriverTrait
 
 
         $available_drivers = DriversCoordinate::select('drivers_coordinates.driver_id',
-//            'users.first_name', 'users.last_name', 'users.fcm_token', 'users.is_verified',
+            'users.first_name', 'users.last_name', 'users.fcm_token', 'users.is_verified',
             'drivers_coordinates.latitude', 'drivers_coordinates.longitude')
             ->selectRaw("{$haveClause} AS distance")
             ->leftJoin('users', 'drivers_coordinates.driver_id', '=', 'users.id')
@@ -64,7 +64,7 @@ trait FindDriverTrait
             foreach ($available_drivers as $public_driver) {
 
                 $driversList[] = array(
-                    "id" => $public_driver->id,
+                    "id" => $public_driver->driver_id,
                     "first_name" => $public_driver->first_name,
                     "last_name" => $public_driver->last_name,
                     "distance" => $public_driver->distance,

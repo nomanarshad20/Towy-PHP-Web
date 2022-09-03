@@ -185,6 +185,7 @@ class RideService
             }
 
 
+
             return $response;
 
         } catch (\Exception $e) {
@@ -212,6 +213,7 @@ class RideService
                     'driver_id'=>$driver['id']
                 ]);
             }
+
 
             $response = ['result'=>'success','message'=>'Driver Save','code'=>200,'data'=>$firstDriver];
             return $response;
