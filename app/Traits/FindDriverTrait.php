@@ -36,6 +36,7 @@ trait FindDriverTrait
         }
 
 
+
         $haveClause = $this->distanceFormula($lat, $lng);
 
 

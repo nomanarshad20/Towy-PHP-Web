@@ -23,7 +23,7 @@ class FindDriversController extends Controller
             if (sizeof($gettingDrivers) > 0) {
                 $response = ['result' => 'success', 'data' => $gettingDrivers, 'message' => 'Nearest Drivers Find Successfully','code' => 200];
             } else {
-                $response = ['result' => 'error', 'data' => null, 'message' => null, 'code' => 404];
+                $response = ['result' => 'error', 'data' => null, 'message' => 'No Driver Found Near You.', 'code' => 404];
                 // hide message as per mobile developer request.
                 // $response = ['result' => 'error', 'data' => null, 'message' => 'Driver Not Found. Try Again Later', 'code' => 404];
             }

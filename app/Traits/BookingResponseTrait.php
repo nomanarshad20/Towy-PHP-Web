@@ -44,6 +44,7 @@ trait BookingResponseTrait
             'id' => $booking->id,
             'booking_unique_id' => $booking->booking_unique_id,
             'passenger_id' => $booking->passenger_id,
+            'franchise_id' => $booking->franchise_id,
             'vehicle_type_id' => $booking->vehicle_type_id,
             'booking_type' => $booking->booking_type,
             'pick_up_area' => $booking->pick_up_area,
@@ -67,8 +68,10 @@ trait BookingResponseTrait
             'vehicle_per_km_rate' => $booking->bookingDetail->vehicle_per_km_rate,
             'vehicle_per_min_rate' => $booking->bookingDetail->vehicle_per_min_rate,
             'min_vehicle_fare' => $booking->bookingDetail->min_vehicle_fare,
-            'passenger_name' => isset($booking->passenger) ? $booking->passenger->name : null,
-            'driver_name' => isset($booking->driver) ? $booking->driver->name : null,
+            'passenger_first_name' => isset($booking->passenger) ? $booking->passenger->first_name : null,
+            'passenger_last_name' => isset($booking->passenger) ? $booking->passenger->last_name : null,
+            'driver_first_name' => isset($booking->driver) ? $booking->driver->first_name : null,
+            'driver_last_name' => isset($booking->driver) ? $booking->driver->last_name : null,
             'driver_status' => (int)$booking->driver_status,
             'driver_id' => $booking->driver_id,
 
@@ -159,6 +162,7 @@ trait BookingResponseTrait
         $bookingArray = [
             'id' => $booking->id,
             'booking_unique_id' => $booking->booking_unique_id,
+            'franchise_id' => $booking->franchise_id,
 
             'vehicle_type_id' => $booking->vehicle_type_id,
             'booking_type' => $booking->booking_type,
@@ -182,7 +186,8 @@ trait BookingResponseTrait
 //            'created_ago' => Carbon::parse($booking->created_at)->diffForHumans(),
 
 
-            'passenger_name' => isset($booking->passenger) ? $booking->passenger->name : null,
+            'passenger_first_name' => isset($booking->passenger) ? $booking->passenger->first_name : null,
+            'passenger_last_name' => isset($booking->passenger) ? $booking->passenger->last_name : null,
             'passenger_id' => $booking->passenger_id,
 
 //            'driver_name' => isset($booking->driver) ? $booking->driver->name : null,
@@ -263,6 +268,7 @@ trait BookingResponseTrait
         $bookingArray = [
             'id' => $booking->id,
             'booking_unique_id' => $booking->booking_unique_id,
+            'franchise_id' => $booking->franchise_id,
 
             'vehicle_type_id' => $booking->vehicle_type_id,
             'booking_type' => $booking->booking_type,
@@ -289,7 +295,8 @@ trait BookingResponseTrait
 //            'passenger_name' => isset($booking->passenger) ? $booking->passenger->name : null,
 //            'passenger_id' => $booking->passenger_id,
 
-            'driver_name' => isset($booking->driver) ? $booking->driver->name : null,
+            'driver_first_name' => isset($booking->driver) ? $booking->driver->first_name : null,
+            'driver_last_name' => isset($booking->driver) ? $booking->driver->last_name : null,
 //            'driver_status' => (int)$booking->driver_status,
             'driver_id' => $booking->driver_id,
 
