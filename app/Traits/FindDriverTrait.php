@@ -36,17 +36,17 @@ trait FindDriverTrait
         }
 
 
-
         $haveClause = $this->distanceFormula($lat, $lng);
 
 
-        $available_drivers = DriversCoordinate::select('users.id', 'users.first_name', 'users.last_name', 'users.fcm_token',
-            'users.is_verified', 'drivers_coordinates.latitude', 'drivers_coordinates.longitude')
+        $available_drivers = DriversCoordinate::select('drivers_coordinates.driver_id',
+//            'users.first_name', 'users.last_name', 'users.fcm_token', 'users.is_verified',
+            'drivers_coordinates.latitude', 'drivers_coordinates.longitude')
             ->selectRaw("{$haveClause} AS distance")
             ->leftJoin('users', 'drivers_coordinates.driver_id', '=', 'users.id')
-            ->leftJoin('drivers', 'drivers_coordinates.driver_id', '=', 'drivers.user_id')
+//            ->leftJoin('drivers', 'drivers_coordinates.driver_id', '=', 'drivers.user_id')
 //            ->where('drivers.franchise_id', $franchise_id)
-            ->where('users.is_verified', 1)
+//            ->where('users.is_verified', 1)
             ->where('status', 1)
             ->whereRaw("{$haveClause} <= ?", $distanceRange)
             ->orderBY('distance', 'asc')
@@ -54,9 +54,11 @@ trait FindDriverTrait
             ->get();
 
 
+
         $booking_id = null;
-        if (isset($data->id) && $data->id != null)
+        if (isset($data->id) && $data->id != null) {
             $booking_id = $data->id;
+        }
 
         if (isset($available_drivers) && $available_drivers != null) {
             foreach ($available_drivers as $public_driver) {

@@ -12,13 +12,14 @@ use App\Services\API\Socket\RideAcceptRejectService;
 use App\Traits\BookingResponseTrait;
 use App\Traits\CreateUserWalletTrait;
 use App\Traits\FindDistanceTraits;
+use App\Traits\FindDriverTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class SocketController extends Controller
 {
 
-    use FindDistanceTraits, BookingResponseTrait, CreateUserWalletTrait;
+    use FindDistanceTraits, BookingResponseTrait, CreateUserWalletTrait, FindDriverTrait;
 
     public $acceptRejectService;
     public $driverService;
