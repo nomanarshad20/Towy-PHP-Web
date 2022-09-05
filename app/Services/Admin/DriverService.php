@@ -143,24 +143,53 @@ class DriverService
 
 
             try {
-                $data->driver->vehicle->update(['name' => $request->vehicle_name,
-                    'model' => $request->model,'vehicle_type_id'=>$request->vehicle_type_id,
-                    'model_year' => $request->model_year,
-                    'registration_number' => $request->registration_number]);
+                if(isset($data->driver->vehicle))
+                {
+                    $data->driver->vehicle->update(['name' => $request->vehicle_name,
+                        'model' => $request->model,'vehicle_type_id'=>$request->vehicle_type_id,
+                        'model_year' => $request->model_year,
+                        'registration_number' => $request->registration_number]);
+
+                    $saveVehicle = $data->driver->vehicle;
+                }
+                else{
+                    $saveVehicle =  Vehicle::create(['name' => $request->vehicle_name,
+                        'model' => $request->model,'vehicle_type_id'=>$request->vehicle_type_id,
+                        'model_year' => $request->model_year,
+                        'registration_number' => $request->registration_number]);
+                }
+
 
             } catch (\Exception $e) {
                 DB::rollBack();
                 return makeResponse('error', 'Error in Creating Vehicle: ' . $e, 200);
             }
 
+
             try {
 
-                $driver = $data->driver->update(['city' => $request->city,
-                    'franchise_id' => $request->franchise_id,
-                    'vehicle_type_id'=>$request->vehicle_type_id,
-                    'vehicle_id' => $data->driver->vehicle->id, 'user_id' => $request->id]);
+                if(isset($data->driver))
+                {
+                    $driver = Driver::where('user_id',$request->id)
+                        ->update(['city' => $request->city,
+                            'franchise_id' => $request->franchise_id,
+                            'vehicle_type_id'=>$request->vehicle_type_id,
+                            'vehicle_id' => isset($data->driver->vehicle)  ? $data->driver->vehicle->id: $saveVehicle->id,
+                            'user_id' => $request->id]);
 
-                $data->save();
+                }
+                else{
+                    $driver = Driver::create(['city' => $request->city,
+                        'franchise_id' => $request->franchise_id,
+                        'vehicle_type_id'=>$request->vehicle_type_id,
+                        'vehicle_id' => $saveVehicle->id,
+                        'user_id' => $request->id,
+
+                    ]);
+
+                }
+
+//                $data->save();
 
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -188,7 +217,8 @@ class DriverService
 
                 if ($request->has('registration_book')) {
                     $image = ImageUploadHelper::uploadImage($request->registration_book, 'upload/vehicle/' . $data->driver->vehicle->id . '/');
-                    $data->driver->vehicle->registration_book = $image;
+                    $saveVehicle->registration_book = $image;
+                    $saveVehicle->save();
                 }
 
                 if ($request->has('profile_image')) {
@@ -203,14 +233,30 @@ class DriverService
                 }
 
                 $data->driver->save();
-                $data->driver->vehicle->save();
+//                $data->driver->vehicle->save();
 
             } catch (\Exception $e) {
                 return makeResponse('error', 'Error in Saving Documents: ' . $e, 200);
             }
 
+
+
+
+            if ($data->driver->vehicle_inspection && $data->driver->vehicle_insurance
+            && $data->driver->drivers_license
+            && isset($saveVehicle) ? $saveVehicle->registration_book :false
+                && $data->image) {
+
+                $data->steps = 4;
+                $data->save();
+
+            }
+
+
+
             DB::commit();
-            return makeResponse('success', 'Driver Information Save Successfully', 200,);
+
+            return makeResponse('success', 'Driver Information Save Successfully', 200);
 
         } else {
             return makeResponse('error', 'Record Not Found', 200);
