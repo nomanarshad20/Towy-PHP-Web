@@ -97,7 +97,7 @@ trait BookingResponseTrait
 
             'driver_image' => isset($booking->driver) ? $booking->driver->image : null,
             'driver_mobile_no' => isset($booking->driver) ? $booking->driver->mobile_no : null,
-            'driver_rating' => isset($booking->driver) ? (float)$booking->driver->rating->avg('rating') : 0,
+            'driver_rating' => isset($booking->driver->rating) ? (float)$booking->driver->rating->avg('rating') : 0,
 
             'vehicle_name' => isset($booking->vehicle) ? $booking->vehicle->name : null,
             'vehicle_registration_number' => isset($booking->vehicle) ? $booking->vehicle->registration_number : null,
