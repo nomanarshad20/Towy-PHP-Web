@@ -320,7 +320,7 @@ class DriverStatusService
             $findBooking->driver_status = $data['driver_status'];
             $findBooking->total_calculated_distance = $totalDistance;
             $findBooking->actual_fare = $fare['total_fare'];
-            $findBooking->fine_amount = $fare['fine'];
+//            $findBooking->fine_amount = $fare['fine'];
             $findBooking->save();
 
             $findBooking->bookingDetail->update([
