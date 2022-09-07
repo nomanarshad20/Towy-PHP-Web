@@ -478,7 +478,7 @@ class DriverStatusService
 
             $calculateDiff = $findBooking->actual_fare - $findBooking->estimated_fare;
 
-            $funds = $this->stripeService->captureFund($findBooking->estimated_fare,$findBooking->stripeChargeId);
+            $funds = $this->stripeService->captureFund($findBooking->estimated_fare,$findBooking->stripe_charge_id);
 
             if($funds['type'] == 'error')
             {
