@@ -59,6 +59,20 @@ trait SendFirebaseNotificationTrait
         return true;
     }
 
+    public function driverRideAcceptRejectNotification($driverFCM,$booking,$notification_type,$title,$message)
+    {
+        $data = array();
+        $data['notification_type']  = $notification_type;
+        $data['title'] = $title;
+        $data['body'] = $message;
+        //$data['data'] = (object)$booking;
+        $data['data'] = $booking;
+
+        $this->sendPushNotification($driverFCM,$data);
+
+        return true;
+    }
+
     public function cancelRide($fcm,$notification_type,$title,$message)
     {
         $data = array();
@@ -68,6 +82,19 @@ trait SendFirebaseNotificationTrait
         $data['data'] = null;
 
         $this->sendPushNotification($fcm,$data);
+
+        return true;
+    }
+
+    public function bookingEndNotification($passengerFCM,$booking,$notification_type)
+    {
+        $data = array();
+        $data['notification_type']  = $notification_type;
+        $data['title'] = 'No Driver is Currently Free at the Moment';
+        $data['body'] = 'No Driver is Currently Free at the Moment. Request Again after sometime. If the issue persist contact with admin for that.';
+        $data['data'] = (object)$booking;
+
+        $this->sendPushNotification($passengerFCM['fcm_token'],$data);
 
         return true;
     }
