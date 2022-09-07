@@ -478,7 +478,14 @@ class DriverStatusService
 
             $calculateDiff = $findBooking->actual_fare - $findBooking->estimated_fare;
 
-            $funds = $this->stripeService->captureFund($findBooking->estimated_fare,$findBooking->stripe_charge_id);
+            $fareAmount = $findBooking->estimated_fare;
+            if($calculateDiff < 0)
+            {
+                $fareAmount = $findBooking->actual_fare;
+            }
+
+
+            $funds = $this->stripeService->captureFund($fareAmount,$findBooking->stripe_charge_id);
 
             if($funds['type'] == 'error')
             {
@@ -501,32 +508,37 @@ class DriverStatusService
         }
 
 
-        if($findBooking->actual_fare  != $findBooking->estimated_fare)
+        if($calculateDiff > 0)
         {
-            //if we have new fare then charge user directly
-            try{
-                $passengerCustomerID = $findBooking->passenger->stripe_customer_id;
-
-                $charge = $this->stripeService->charge($findBooking,$passengerCustomerID,$calculateDiff);
-
-                if(isset($charge) && $charge['type'] =='error')
-                {
-                    return makeResponse('error', $charge['message'], 500);
-                }
-
-                $findBooking->stripe_charge_id = $charge;
-                $findBooking->save();
-
-            }
-            catch (\Exception $e)
+            if($findBooking->actual_fare  != $findBooking->estimated_fare)
             {
-                return $socket->emit($data['user_id'] . '-driverStatus', [
-                    'result' => 'error',
-                    'message' => 'Error during Payment from Stripe direct Charge: '.$e,
-                    'data' => null
-                ]);
+                //if we have new fare then charge user directly
+                try{
+
+                    $passengerCustomerID = $findBooking->passenger->stripe_customer_id;
+
+                    $charge = $this->stripeService->charge($findBooking,$passengerCustomerID,$calculateDiff);
+
+                    if(isset($charge) && $charge['type'] =='error')
+                    {
+                        return makeResponse('error', $charge['message'], 500);
+                    }
+
+                    $findBooking->stripe_charge_id = $charge;
+                    $findBooking->save();
+
+                }
+                catch (\Exception $e)
+                {
+                    return $socket->emit($data['user_id'] . '-driverStatus', [
+                        'result' => 'error',
+                        'message' => 'Error during Payment from Stripe direct Charge: '.$e,
+                        'data' => null
+                    ]);
+                }
             }
         }
+
 
 
 
