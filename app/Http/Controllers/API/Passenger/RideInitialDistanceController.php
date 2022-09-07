@@ -33,7 +33,56 @@ class RideInitialDistanceController extends Controller
                 $request->drop_off_latitude, $request->drop_off_longitude);
 
 
-            $distanceInKm = str_replace(',', '', str_replace('km', '', $findingDistance['text']));
+
+            $time = explode(' ',$findingDistance['text_time']);
+
+
+
+            if(isset($time) && isset($time[1]))
+            {
+                if($time[1] == 'hours' || $time[1] == 'hour' )
+                {
+                    $simpleTime = $time[0] * 60;
+                }
+                elseif($time[1] == 'mins' || $time[1] == 'min')
+                {
+                    $simpleTime = $time[0];
+                }
+
+
+                if(isset($time[2]))
+                {
+                    $simpleTime = $simpleTime + $time[2];
+                }
+
+            }
+            else{
+                $simpleTime = 1;
+            }
+
+
+            $distance = explode(' ',$findingDistance['text']);
+
+
+            if(isset($distance) && isset($distance[1]))
+            {
+                if($distance[1] == 'm')
+                {
+                    $distanceInKm = (float)$distance[0]/1000;
+                }
+                elseif($distance[1] == 'km')
+                {
+                    $distanceInKm = (float)($findingDistance['value']/1000);
+                }
+                else{
+                    $distanceInKm = 1;
+                }
+            }
+            else{
+                $distanceInKm = 1;
+            }
+
+
 
         } catch (\Exception $e) {
             return makeResponse('error', 'Error in Finding Distance: ' . $e, 500);
@@ -64,7 +113,7 @@ class RideInitialDistanceController extends Controller
 
         try {
 
-            $gettingVehicleTypeRecords = $this->rideService->gettingVehicleTypeRecords(trim($distanceInKm),$peakRate);
+            $gettingVehicleTypeRecords = $this->rideService->gettingVehicleTypeRecords(trim($distanceInKm),$peakRate,trim($simpleTime));
 
         } catch (\Exception $e) {
             return makeResponse('error', 'Error in Calculating Estimated Fare & Getting Vehicle Type Record: ' . $e, 500);

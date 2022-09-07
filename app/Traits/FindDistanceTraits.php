@@ -12,7 +12,7 @@ trait FindDistanceTraits
     public function getDistance($pickUpLat, $pickupLng, $dropOffLat, $dropOffLng)
     {
 
-        $url = "http://maps.googleapis.com/maps/api/directions/json?origin=" . $pickUpLat . "," . $pickupLng . "&destination=" . $dropOffLat . "," . $dropOffLng . "&sensor=false&mode=driving&key=" . env('GOOGLE_MAP');
+        $url = "https://maps.googleapis.com/maps/api/directions/json?origin=" . $pickUpLat . "," . $pickupLng . "&destination=" . $dropOffLat . "," . $dropOffLng . "&sensor=false&mode=driving&key=" . env('GOOGLE_MAP');
 
         $client = new Client;
 
@@ -31,7 +31,7 @@ trait FindDistanceTraits
     }
 
 
-    public function gettingVehicleTypeRecords($distance = null, $peakRate = null)
+    public function gettingVehicleTypeRecords($distance = null, $peakRate = null,$simpleTime = null)
     {
 
         $findVehicleFares = VehicleType::get();
@@ -50,6 +50,17 @@ trait FindDistanceTraits
                     }
 
                 }
+
+                if ($simpleTime) {
+
+                    $timeFare = $findVehicleFare->per_min_rate * $simpleTime;
+                    $estimatedFare = $estimatedFare + $timeFare;
+
+                }
+
+                $estimatedFare = ceil ($estimatedFare + $findVehicleFare->min_fare);
+                $gst = 0;
+
 
 
                 $data[] = ['min_fare' => (float)$findVehicleFare->min_fare, 'per_km_rate' => (float)$findVehicleFare->per_km_rate,
