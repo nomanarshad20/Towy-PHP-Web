@@ -35,17 +35,10 @@ class DriverService
 
         if ($driverStatus->status == 2) {
             $findBooking = Booking::where('driver_id', Auth::user()->id)
-//                ->where('ride_status', 1)
-                ->where(function ($query){
-                    $query->where('ride_status',1)
-                        ->orwhere(function($query1){
-                            $query1->where('is_passenger_rating_given',0)
-                                ->where('is_driver_rating_given',0);
-                        });
-                })
-                ->whereNotNull('driver_status')
+                ->whereIn('ride_status', [1, 4])
+                ->where('is_driver_rating_given', 0)
+                ->orderBy('id', 'desc')
                 ->first();
-
 
             if (!$findBooking) {
                 $response = ['result' => 'error', 'message' => 'No Active Booking Found', 'code' => 404];
