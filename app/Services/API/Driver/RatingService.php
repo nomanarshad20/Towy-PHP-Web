@@ -21,6 +21,8 @@ class RatingService
                 ->where('passenger_id',$request->passenger_id)
                 ->where('driver_id',Auth::user()->id)->first();
 
+            dd($findBooking);
+
             if(!$findBooking)
             {
                 return makeResponse('error','Record Not Found',404);

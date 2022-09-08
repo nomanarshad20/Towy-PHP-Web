@@ -450,7 +450,7 @@ class DriverStatusService
 //        }
 
         try {
-            $findBooking->driver_status = $data['driver_status'];;
+            $findBooking->driver_status = $data['driver_status'];
             $findBooking->ride_status = 4;
 //            if ($findBooking->payment_type == 'cash_wallet' && $data['payment_type'] == 'cash_wallet') {
 //                $findBooking->payment_type = 'cash_wallet';
