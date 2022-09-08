@@ -21,7 +21,8 @@ class RatingService
                 ->where('passenger_id',$request->passenger_id)
                 ->where('driver_id',Auth::user()->id)->first();
 
-            dd($findBooking);
+            dd($request->passenger_id,Auth::user()->id,$request->booking_id);
+
 
             if(!$findBooking)
             {
