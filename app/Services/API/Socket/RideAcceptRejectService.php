@@ -201,7 +201,7 @@ class RideAcceptRejectService
                 $driverSocketId = $driverRecord->id;
 
                 if ($driverSocketId) {
-                    $socket->emit($driverSocketId.'-finalRideStatus',
+                    $socket->emit($driverSocketId.'-newRideRequest',
                         [
                             'result' => 'success',
                             'message' => "New Ride Request",
