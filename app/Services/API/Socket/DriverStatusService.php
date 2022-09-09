@@ -556,6 +556,10 @@ class DriverStatusService
         }
 
         $findBooking->push();
+
+        DB::commit();
+
+
         $passengerSocketId = $findBooking->passenger_id;
         $passengerFCMToken = $findBooking->passenger->fcm_token;
 
@@ -571,7 +575,6 @@ class DriverStatusService
             $sendFCMNotification = $this->duringRideNotifications($passengerFCMToken, $bookingResponse, $notification_type, $title, $message);
         }
 
-        DB::commit();
 //        if ($passengerSocketId) {
         $socket->emit($passengerSocketId . '-driverStatus', [
             'result' => 'success',
