@@ -32,7 +32,7 @@ class DriverStatusService
 
     public function reachToPickUp($data, $socket, $io, $user)
     {
-        DB::beginTransaction();
+//        DB::beginTransaction();
         $findBooking = Booking::where('id', $data['booking_id'])
             ->where('driver_id', $user->id)
             ->where('driver_status', 0)
@@ -65,8 +65,9 @@ class DriverStatusService
             $findBooking->push();
 
 
-        } catch (\Exception $e) {
-            DB::rollBack();
+        }
+        catch (\Exception $e) {
+//            DB::rollBack();
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
                 'message' => 'Error in Updating Driver Status: ' . $e,
@@ -77,7 +78,7 @@ class DriverStatusService
         $passengerFCMToken = $findBooking->passenger->fcm_token;
         $bookingResponse = $this->driverBookingResponse($findBooking);
 
-        DB::commit();
+//        DB::commit();
 
         //driver reach location notification
         $notification_type = 2;
@@ -119,7 +120,7 @@ class DriverStatusService
 //                'data' => null
 //            ]);
 //        }
-        DB::beginTransaction();
+//        DB::beginTransaction();
         $findBooking = Booking::where('id', $data['booking_id'])
             ->where('driver_id', $user->id)->where('driver_status', 1)
             ->where('ride_status', '=', 1)
@@ -138,7 +139,7 @@ class DriverStatusService
             $findBooking->save();
 
         } catch (\Exception $e) {
-            DB::rollBack();
+//            DB::rollBack();
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
                 'message' => 'Error in Updating Driver Status: ' . $e,
@@ -158,7 +159,7 @@ class DriverStatusService
 
             $findBooking->push();
         } catch (\Exception $e) {
-            DB::rollBack();
+//            DB::rollBack();
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
                 'message' => 'Error in Saving Driver Waiting Time: ' . $e,
@@ -181,7 +182,7 @@ class DriverStatusService
             $sendFCMNotification = $this->duringRideNotifications($passengerFCMToken, $bookingResponse, $notification_type, $title, $message);
         }
 
-        DB::commit();
+//        DB::commit();
 
 //        if ($passengerSocketId) {
         $socket->emit($passengerSocketId . '-driverStatus', [
@@ -202,7 +203,7 @@ class DriverStatusService
 
     public function completeRide($data, $socket, $io, $user)
     {
-        DB::beginTransaction();
+//        DB::beginTransaction();
 
         if (!isset($data['total_distance'])) {
             return $socket->emit($data['user_id'] . '-driverStatus', [
@@ -334,7 +335,7 @@ class DriverStatusService
 
 
         } catch (\Exception $e) {
-            DB::rollBack();
+//            DB::rollBack();
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
                 'message' => 'Error in Updating Driver Status: ' . $e,
@@ -354,7 +355,7 @@ class DriverStatusService
             }
 
         } catch (\Exception $e) {
-            DB::rollBack();
+//            DB::rollBack();
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
                 'message' => 'Error in Updating Voucher Status: ' . $e,
@@ -377,7 +378,7 @@ class DriverStatusService
             $sendFCMNotification = $this->duringRideNotifications($passengerFCMToken, $bookingResponse, $notification_type, $title, $message);
         }
 
-        DB::commit();
+//        DB::commit();
 
 //        if ($passengerSocketId) {
         $socket->emit($passengerSocketId . '-driverStatus', [
@@ -399,7 +400,7 @@ class DriverStatusService
 
     public function collectFare($data, $socket, $io, $user)
     {
-        DB::beginTransaction();
+//        DB::beginTransaction();
         $findBooking = Booking::where('id', $data['booking_id'])
             ->where('driver_id', $user->id)->where('driver_status', 3)
             ->where('ride_status', '=', 1)
@@ -465,7 +466,7 @@ class DriverStatusService
                 'route_json' => isset($data['route_json']) ? $data['route_json'] : null
             ]);
         } catch (\Exception $e) {
-            DB::rollBack();
+//            DB::rollBack();
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
                 'message' => 'Error in Updating Record: ' . $e,
@@ -547,7 +548,7 @@ class DriverStatusService
         $walletUpdate = $this->walletService->updateFareWallets($findBooking);
 
         if ($walletUpdate['result'] == 'error') {
-            DB::rollBack();
+//            DB::rollBack();
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => $walletUpdate['result'],
                 'message' => $walletUpdate['message'],
@@ -557,7 +558,7 @@ class DriverStatusService
 
         $findBooking->push();
 
-        DB::commit();
+//        DB::commit();
 
 
         $passengerSocketId = $findBooking->passenger_id;
