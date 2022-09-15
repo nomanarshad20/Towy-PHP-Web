@@ -9,39 +9,71 @@ trait SendFirebaseNotificationTrait
 
     public function rideRequestNotification($driver,$booking,$notification_type)
     {
-        $data = array();
-        $data['notification_type']  = $notification_type;
-        $data ['title'] = 'New Ride Request';
-        $data['body'] = 'New Ride Request Received';
-        $data['data'] = (object)$booking;
+        $title  = 'New Ride Request';
+        $message = 'New Ride Request Received';
 
-        $this->sendPushNotification($driver['fcm_token'],$data);
-
-        return true;
-    }
-
-    public function rideAcceptNotification($passengerFCM,$booking,$notification_type)
-    {
-        $data = array();
-        $data['notification_type']  = $notification_type;
-        $data ['title'] = 'Ride Accepted By Driver';
-        $data['body'] = 'Your Ride Has Been Accepted By Driver. Hang on Tight';
-        $data['data'] = (object)$booking;
-
-        $this->sendPushNotification($passengerFCM,$data);
-
-        return true;
-    }
-
-    public function duringRideNotifications($passengerFCM,$booking,$notification_type,$title,$message)
-    {
         $data = array();
         $data['notification_type']  = $notification_type;
         $data ['title'] = $title;
         $data['body'] = $message;
         $data['data'] = (object)$booking;
 
-        $this->sendPushNotification($passengerFCM,$data);
+        $notification = array();
+        $notification['notification_type']  = $notification_type;
+        $notification ['title'] = $title;
+        $notification['body'] = $message;
+        $notification['data'] = (object)$booking;
+
+        $this->sendPushNotification($driver['fcm_token'],$data,$notification);
+
+        return true;
+    }
+
+    public function rideAcceptNotification($passengerFCM,$booking,$notification_type)
+    {
+        $title  = 'Ride Accepted By Driver';
+        $message =  'Your Ride Has Been Accepted By Driver. Hang on Tight';
+
+
+
+        $data = array();
+        $data['notification_type']  = $notification_type;
+        $data ['title'] = $title;
+        $data['body'] = $message;
+        $data['data'] = (object)$booking;
+
+        $notification = array();
+        $notification['notification_type']  = $notification_type;
+        $notification ['title'] = $title;
+        $notification['body'] = $message;
+        $notification['data'] = (object)$booking;
+
+        $this->sendPushNotification($passengerFCM,$data,$notification);
+
+        return true;
+    }
+
+    public function duringRideNotifications($passengerFCM,$booking,$notification_type,$title,$message)
+    {
+        $title  = 'Ride Accepted By Driver';
+        $message =  'Your Ride Has Been Accepted By Driver. Hang on Tight';
+
+
+
+        $data = array();
+        $data['notification_type']  = $notification_type;
+        $data ['title'] = $title;
+        $data['body'] = $message;
+        $data['data'] = (object)$booking;
+
+
+        $notification = array();
+        $notification['notification_type']  = $notification_type;
+        $notification ['title'] = $title;
+        $notification['body'] = $message;
+        $notification['data'] = (object)$booking;
+
+        $this->sendPushNotification($passengerFCM,$data,$notification);
 
         return true;
     }
@@ -54,7 +86,13 @@ trait SendFirebaseNotificationTrait
         $data['body'] = $message;
         $data['data'] = (object)$voucher;
 
-        $this->sendPushNotification($fcm,$data);
+        $notification = array();
+        $notification['notification_type']  = $notification_type;
+        $notification ['title'] = $title;
+        $notification['body'] = $message;
+        $notification['data'] = (object)$voucher;
+
+        $this->sendPushNotification($fcm,$data,$notification);
 
         return true;
     }
@@ -68,7 +106,13 @@ trait SendFirebaseNotificationTrait
         //$data['data'] = (object)$booking;
         $data['data'] = $booking;
 
-        $this->sendPushNotification($driverFCM,$data);
+        $notification = array();
+        $notification['notification_type']  = $notification_type;
+        $notification ['title'] = $title;
+        $notification['body'] = $message;
+        $notification['data'] = $booking;
+
+        $this->sendPushNotification($driverFCM,$data,$notification);
 
         return true;
     }
@@ -81,25 +125,43 @@ trait SendFirebaseNotificationTrait
         $data['body'] = $message;
         $data['data'] = null;
 
-        $this->sendPushNotification($fcm,$data);
+
+        $notification = array();
+        $notification['notification_type']  = $notification_type;
+        $notification ['title'] = $title;
+        $notification['body'] = $message;
+        $notification['data'] = null;
+
+        $this->sendPushNotification($fcm,$data,$notification);
 
         return true;
     }
 
     public function bookingEndNotification($passengerFCM,$booking,$notification_type)
     {
+
+        $title  = 'No Driver is Currently Free at the Moment';
+        $message =  'No Driver is Currently Free at the Moment. Request Again after sometime. If the issue persist contact with admin for that.';
+
+
         $data = array();
         $data['notification_type']  = $notification_type;
-        $data['title'] = 'No Driver is Currently Free at the Moment';
-        $data['body'] = 'No Driver is Currently Free at the Moment. Request Again after sometime. If the issue persist contact with admin for that.';
+        $data['title'] = $title;
+        $data['body'] = $message;
         $data['data'] = (object)$booking;
 
-        $this->sendPushNotification($passengerFCM['fcm_token'],$data);
+        $notification = array();
+        $notification['notification_type']  = $notification_type;
+        $notification ['title'] = $title;
+        $notification['body'] = $message;
+        $notification['data'] =  (object)$booking;
+
+        $this->sendPushNotification($passengerFCM['fcm_token'],$data,$notification);
 
         return true;
     }
 
-    public function sendPushNotification($fcm, $dataBody)
+    public function sendPushNotification($fcm, $dataBody,$notificationBody)
     {
 
         $client = new \GuzzleHttp\Client(['verify' => false]);
@@ -119,9 +181,9 @@ trait SendFirebaseNotificationTrait
                     "priority" => "high",
                     "content_available" => true,
                     "mutable_content" => true,
-                    "time_to_live" => 35,
-//                    "notification" => $dataNoti,
-                    "data" => $dataBody
+                    "time_to_live" => 10,
+                    "notification" => $notificationBody,
+                    "data" => $dataBody,
                 ])
             ]
         );
