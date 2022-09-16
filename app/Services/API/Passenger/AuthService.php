@@ -360,7 +360,7 @@ class AuthService
 
         if (isset($user)) {
             // Get Passenger Wallet
-            $balance = CreateUserWalletTrait::passengerWalletBalance($user->id);
+            $balance = $this->passengerWalletBalance($user->id);
 
             $rating = 0;
             if (isset(Auth::user()->rating)) {
@@ -386,7 +386,8 @@ class AuthService
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
                 'wallet_balance' => $balance,
-                'rating' => $rating
+                'rating' => $rating,
+                'stripe_customer_id' => $user->stripe_customer_id
             ];
 
             if (isset($accessToken) && $accessToken != null) {

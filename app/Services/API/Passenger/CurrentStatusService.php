@@ -12,6 +12,13 @@ class CurrentStatusService
 {
     use BookingResponseTrait;
 
+    public $passengerAuth;
+
+    public function __construct(AuthService $authService)
+    {
+        $this->passengerAuth = $authService;
+    }
+
     public function index()
     {
 //        $booking =  Booking::where('ride_status',1)
@@ -39,9 +46,18 @@ class CurrentStatusService
         $bookingResponse = null;
         if ($booking) {
             $bookingResponse = $this->driverBookingResponse($booking);
-            return makeResponse('success', 'Booking Found', 200, $bookingResponse);
         }
-        return makeResponse('error', 'Booking Not Found', 404);
+        $passengerResponse = $this->passengerAuth->getUserData(Auth::user());
+
+
+        $data = [
+            'booking' => $bookingResponse,
+            'passenger' => $passengerResponse
+        ];
+
+
+        return makeResponse('success', 'Record Found', 200, $data);
+//        return makeResponse('error', 'Booking Not Found', 404);
 
 
     }
