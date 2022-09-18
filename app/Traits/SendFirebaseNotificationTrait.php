@@ -34,8 +34,6 @@ trait SendFirebaseNotificationTrait
         $title  = 'Ride Accepted By Driver';
         $message =  'Your Ride Has Been Accepted By Driver. Hang on Tight';
 
-
-
         $data = array();
         $data['notification_type']  = $notification_type;
         $data ['title'] = $title;
@@ -55,9 +53,6 @@ trait SendFirebaseNotificationTrait
 
     public function duringRideNotifications($passengerFCM,$booking,$notification_type,$title,$message)
     {
-        $title  = 'Ride Accepted By Driver';
-        $message =  'Your Ride Has Been Accepted By Driver. Hang on Tight';
-
 
 
         $data = array();
@@ -182,7 +177,7 @@ trait SendFirebaseNotificationTrait
                     "content_available" => true,
                     "mutable_content" => true,
                     "time_to_live" => 10,
-                    "notification" => $notificationBody,
+                    "notification" => $dataBody,
                     "data" => $dataBody,
                 ])
             ]
@@ -190,6 +185,7 @@ trait SendFirebaseNotificationTrait
 
         $response = $request->getBody();
         $response = json_decode($response);
+
 
 
         if ($response->success > 0) {

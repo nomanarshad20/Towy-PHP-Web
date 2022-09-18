@@ -4,8 +4,11 @@
 namespace App\Services\API\Socket;
 
 
+use App\Http\Controllers\API\Driver\DriverInformationController;
 use App\Models\AssignBookingDriver;
 use App\Models\Booking;
+use App\Models\BookingPoint;
+use App\Models\DriversCoordinate;
 use App\Models\User;
 use App\Models\VoucherCodePassenger;
 use App\Traits\BookingResponseTrait;
@@ -111,6 +114,31 @@ class RideAcceptRejectService
                 );
             }
 
+            try{
+                $getCoordinate =  DriversCoordinate::where('driver_id',$data['user_id'])->first();
+
+                if($getCoordinate)
+                {
+                    BookingPoint::create([
+                        'booking_id' => $findBooking->id,
+                        'lat' => $getCoordinate->latitude,
+                        'lng' => $getCoordinate->longitude,
+                        'type' => 0
+                    ]);
+                }
+
+            }
+            catch (\Exception $e)
+            {
+                return $socket->emit($data['user_id'].'-finalRideStatus',
+                    [
+                        'result' => 'error',
+                        'message' => "Error in saving Driver Starting Point: " . $e,
+                        'data' => null
+                    ]
+                );
+            }
+
 
 //            $passengerSocketID = $findBooking->passenger->socket_id;
 
@@ -167,6 +195,7 @@ class RideAcceptRejectService
                     ]
                 );
             }
+
 
         }
         else {

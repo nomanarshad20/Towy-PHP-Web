@@ -12,22 +12,28 @@ trait FindDistanceTraits
     public function getDistance($pickUpLat, $pickupLng, $dropOffLat, $dropOffLng)
     {
 
-        $url = "https://maps.googleapis.com/maps/api/directions/json?origin=" . $pickUpLat . "," . $pickupLng . "&destination=" . $dropOffLat . "," . $dropOffLng . "&sensor=false&mode=driving&key=" . env('GOOGLE_MAP');
+        $url = "http://maps.googleapis.com/maps/api/directions/json?origin=" . $pickUpLat . "," . $pickupLng . "&destination=" . $dropOffLat . "," . $dropOffLng . "&sensor=false&mode=driving&key=" . env('GOOGLE_MAP');
 
-        $client = new Client;
+        try {
+            $client = new Client;
 
-        $makeRequest = $client->request('GET', $url);
+            $makeRequest = $client->request('GET', $url);
 
-        $response = $makeRequest->getBody();
-        $responseCode = json_decode($response, true);
+            $response = $makeRequest->getBody();
 
+            $responseCode = json_decode($response, true);
 
-        return [
-            'value' => ($responseCode['routes'][0]['legs'][0]['distance']['value'] ?? false),
-            'text' => ($responseCode['routes'][0]['legs'][0]['distance']['text'] ?? false),
-            'text_time' => ($responseCode['routes'][0]['legs'][0]['duration']['text'] ?? false),
-            'value_time' => ($responseCode['routes'][0]['legs'][0]['duration']['value'] ?? false)
-        ];
+            return [
+                'value' => ($responseCode['routes'][0]['legs'][0]['distance']['value'] ?? false),
+                'text' => ($responseCode['routes'][0]['legs'][0]['distance']['text'] ?? false),
+                'text_time' => ($responseCode['routes'][0]['legs'][0]['duration']['text'] ?? false),
+                'value_time' => ($responseCode['routes'][0]['legs'][0]['duration']['value'] ?? false)
+            ];
+        }
+        catch (\Exception $e)
+        {
+            dd($e);
+        }
     }
 
 
@@ -82,6 +88,33 @@ trait FindDistanceTraits
         }
 
 
+    }
+
+    public function gettingDistanceInKm($calculatedistance)
+    {
+        $distance = explode(' ',$calculatedistance['text']);
+
+        $distanceInKm = 0;
+
+        if(isset($distance) && isset($distance[1]))
+        {
+            if($distance[1] == 'm')
+            {
+                $distanceInKm = (float)$distance[0]/1000;
+            }
+            elseif($distance[1] == 'km')
+            {
+                $distanceInKm = (float)($calculatedistance['value']/1000);
+            }
+            else{
+                $distanceInKm = 1;
+            }
+        }
+        else{
+            $distanceInKm = 1;
+        }
+
+        return $distanceInKm;
     }
 
 

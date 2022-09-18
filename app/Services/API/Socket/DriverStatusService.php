@@ -5,6 +5,7 @@ namespace App\Services\API\Socket;
 
 
 use App\Models\Booking;
+use App\Models\BookingPoint;
 use App\Models\P2PBookingTracking;
 use App\Models\User;
 use App\Models\VoucherCodePassenger;
@@ -12,6 +13,7 @@ use App\Services\API\Passenger\StripeService;
 use App\Services\API\UpdateWalletService;
 use App\Traits\BookingResponseTrait;
 use App\Traits\CreateUserWalletTrait;
+use App\Traits\FindDistanceTraits;
 use App\Traits\SendFirebaseNotificationTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -19,12 +21,12 @@ use Illuminate\Support\Facades\DB;
 
 class DriverStatusService
 {
-    use SendFirebaseNotificationTrait, BookingResponseTrait, CreateUserWalletTrait;
+    use SendFirebaseNotificationTrait, BookingResponseTrait, CreateUserWalletTrait, FindDistanceTraits;
 
     public $walletService;
     public $stripeService;
 
-    public function __construct(UpdateWalletService $walletService,StripeService $stripeService)
+    public function __construct(UpdateWalletService $walletService, StripeService $stripeService)
     {
         $this->walletService = $walletService;
         $this->stripeService = $stripeService;
@@ -65,8 +67,7 @@ class DriverStatusService
             $findBooking->push();
 
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
 //            DB::rollBack();
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
@@ -88,6 +89,7 @@ class DriverStatusService
             $message = 'Driver Reached to Your PickUp Location';
             $sendFCMNotification = $this->duringRideNotifications($passengerFCMToken, $bookingResponse, $notification_type, $title, $message);
         }
+
 
 
 //        dd('here');
@@ -112,6 +114,22 @@ class DriverStatusService
 
     public function startRide($data, $socket, $io, $user)
     {
+
+        if (!isset($data['lat'])) {
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Latitude Field is Required',
+                'data' => null
+            ]);
+        }
+
+        if (!isset($data['lng'])) {
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Longitude Field is Required',
+                'data' => null
+            ]);
+        }
 
 //        if (!isset($data['waiting_time'])) {
 //            $io->to($data['socket_id'])->emit('driverStatus', [
@@ -167,6 +185,17 @@ class DriverStatusService
             ]);
         }
 
+        try {
+            BookingPoint::create(['booking_id' => $findBooking->id,
+                'lat' => $data['lat'], 'lng' => $data['lng'], 'type' => 1]);
+        } catch (\Exception $e) {
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Error in Saving Driver Waiting Time: ' . $e,
+                'data' => null
+            ]);
+        }
+
 
         $passengerSocketId = $findBooking->passenger_id;
         $passengerFCMToken = $findBooking->passenger->fcm_token;
@@ -205,29 +234,45 @@ class DriverStatusService
     {
 //        DB::beginTransaction();
 
-        if (!isset($data['total_distance'])) {
+                if (!isset($data['lat'])) {
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
-                'message' => 'Total Distance is a required field',
+                'message' => 'Latitude is a required field',
                 'data' => null
             ]);
         }
 
-        if (!isset($data['mobile_final_distance'])) {
+        if (!isset($data['lng'])) {
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
-                'message' => 'Mobile Final Distance is a required field',
+                'message' => 'Longitude is a required field',
                 'data' => null
             ]);
         }
 
-        if (!isset($data['mobile_initial_distance'])) {
-            return $socket->emit($data['user_id'] . '-driverStatus', [
-                'result' => 'error',
-                'message' => 'Mobile Initial Distance is a required field',
-                'data' => null
-            ]);
-        }
+//        if (!isset($data['total_distance'])) {
+//            return $socket->emit($data['user_id'] . '-driverStatus', [
+//                'result' => 'error',
+//                'message' => 'Total Distance is a required field',
+//                'data' => null
+//            ]);
+//        }
+//
+//        if (!isset($data['mobile_final_distance'])) {
+//            return $socket->emit($data['user_id'] . '-driverStatus', [
+//                'result' => 'error',
+//                'message' => 'Mobile Final Distance is a required field',
+//                'data' => null
+//            ]);
+//        }
+//
+//        if (!isset($data['mobile_initial_distance'])) {
+//            return $socket->emit($data['user_id'] . '-driverStatus', [
+//                'result' => 'error',
+//                'message' => 'Mobile Initial Distance is a required field',
+//                'data' => null
+//            ]);
+//        }
 
         $findBooking = Booking::where('id', $data['booking_id'])
             ->where('driver_id', $user->id)->where('driver_status', 2)
@@ -243,10 +288,21 @@ class DriverStatusService
             ]);
         }
 
+        try {
+            BookingPoint::create(['booking_id' => $findBooking->id,
+                'lat' => $data['lat'], 'lng' => $data['lng'], 'type' => 2]);
+        } catch (\Exception $e) {
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Error in Saving Driver Waiting Time: ' . $e,
+                'data' => null
+            ]);
+        }
+
 
         $totalDistance = $initialDistance = $finalDistance = 0;
         $fareType = 'mobile';
-        $mobileDistance = $data['total_distance'];
+        $mobileDistance = 0;
 
 
         $p2pDistance = P2PBookingTracking::where('booking_id', $findBooking->id)->sum('distance');
@@ -257,9 +313,45 @@ class DriverStatusService
         $p2pRideDistance = round($p2pRideDistance, 2);
         $p2pInitialDistance = round($p2pInitialDistance, 2);
 
-        $totalDistance = $mobileDistance;
-        $initialDistance = $data['mobile_initial_distance'];
-        $finalDistance = $data['mobile_final_distance'];
+        //calculating Distance From Google Location API
+        $initialPoints = $endPoints = $startPoints = array();
+        $pickUpDistance = $rideDistance = 0;
+        $bookingPoints = BookingPoint::where('booking_id', $findBooking->id)->get();
+        if (sizeof($bookingPoints) > 0) {
+            foreach ($bookingPoints as $bookingPoint) {
+                if ($bookingPoint->type == 0) {
+                    $initialPoints = ['lat' => $bookingPoint->lat, 'lng' => $bookingPoint->lng];
+                } elseif ($bookingPoint->type == 1) {
+                    $startPoints = ['lat' => $bookingPoint->lat, 'lng' => $bookingPoint->lng];
+                } elseif ($bookingPoint->type == 2) {
+                    $endPoints = ['lat' => $bookingPoint->lat, 'lng' => $bookingPoint->lng];
+                }
+
+            }
+
+
+            $pickUpDistanceCalculate = $this->getDistance($initialPoints['lat'], $initialPoints['lng'],
+                $startPoints['lat'], $startPoints['lng']);
+
+
+            $pickUpDistance = $this->gettingDistanceInKm($pickUpDistanceCalculate);
+
+
+            $rideDistanceCalculate = $this->getDistance($startPoints['lat'], $startPoints['lng'],
+                $endPoints['lat'], $endPoints['lng']);
+
+            $rideDistance = $this->gettingDistanceInKm($rideDistanceCalculate);
+
+        }
+
+
+
+//        $totalDistance = $mobileDistance;
+//        $initialDistance = $data['mobile_initial_distance'];
+//        $finalDistance = $data['mobile_final_distance'];
+        $totalDistance = $rideDistance + $pickUpDistance;
+        $initialDistance = $pickUpDistance;
+        $finalDistance = $rideDistance;
         $fareType = 'mobile';
 
 //        if ($mobileDistance > $p2pDistance) {
@@ -329,12 +421,13 @@ class DriverStatusService
                 'total_ride_minutes' => $fare['totalRideTime'],
                 'p2p_before_pick_up_distance' => $p2pInitialDistance,
                 'p2p_after_pick_up_distance' => $p2pRideDistance,
-                'mobile_final_distance' => $data['mobile_final_distance'],
-                'mobile_initial_distance' => $data['mobile_initial_distance']
+                'mobile_final_distance' => $rideDistance,
+                'mobile_initial_distance' => $pickUpDistance
             ]);
 
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
 //            DB::rollBack();
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
@@ -354,7 +447,8 @@ class DriverStatusService
                     ->where('voucher_code_id', $voucherId)->update(['is_used' => 1]);
             }
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
 //            DB::rollBack();
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
@@ -475,21 +569,19 @@ class DriverStatusService
         }
 
         //deduct payment
-        try{
+        try {
 
             $calculateDiff = $findBooking->actual_fare - $findBooking->estimated_fare;
 
             $fareAmount = $findBooking->estimated_fare;
-            if($calculateDiff < 0)
-            {
+            if ($calculateDiff < 0) {
                 $fareAmount = $findBooking->actual_fare;
             }
 
 
-            $funds = $this->stripeService->captureFund($fareAmount,$findBooking->stripe_charge_id);
+            $funds = $this->stripeService->captureFund($fareAmount, $findBooking->stripe_charge_id);
 
-            if($funds['type'] == 'error')
-            {
+            if ($funds['type'] == 'error') {
                 return $socket->emit($data['user_id'] . '-driverStatus', [
                     'result' => 'error',
                     'message' => $funds['message'],
@@ -498,50 +590,40 @@ class DriverStatusService
             }
 
 
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
-                'message' => 'Error during Payment from Stripe: '.$e,
+                'message' => 'Error during Payment from Stripe: ' . $e,
                 'data' => null
             ]);
         }
 
 
-        if($calculateDiff > 0)
-        {
-            if($findBooking->actual_fare  != $findBooking->estimated_fare)
-            {
+        if ($calculateDiff > 0) {
+            if ($findBooking->actual_fare != $findBooking->estimated_fare) {
                 //if we have new fare then charge user directly
-                try{
+                try {
 
                     $passengerCustomerID = $findBooking->passenger->stripe_customer_id;
 
-                    $charge = $this->stripeService->charge($findBooking,$passengerCustomerID,$calculateDiff);
+                    $charge = $this->stripeService->charge($findBooking, $passengerCustomerID, $calculateDiff);
 
-                    if(isset($charge) && $charge['type'] =='error')
-                    {
+                    if (isset($charge) && $charge['type'] == 'error') {
                         return makeResponse('error', $charge['message'], 500);
                     }
 
                     $findBooking->stripe_charge_id = $charge;
                     $findBooking->save();
 
-                }
-                catch (\Exception $e)
-                {
+                } catch (\Exception $e) {
                     return $socket->emit($data['user_id'] . '-driverStatus', [
                         'result' => 'error',
-                        'message' => 'Error during Payment from Stripe direct Charge: '.$e,
+                        'message' => 'Error during Payment from Stripe direct Charge: ' . $e,
                         'data' => null
                     ]);
                 }
             }
         }
-
-
-
 
 
         //updateWallet
@@ -728,7 +810,7 @@ class DriverStatusService
 //            }
 //
 //        } else {
-            $totalCollectFare = $totalFare;
+        $totalCollectFare = $totalFare;
 //        }
 
         $fare = [
