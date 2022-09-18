@@ -98,7 +98,7 @@ class AuthService
         Auth::loginUsingId($id, true);
         Auth::user()->tokens()->delete();
 
-        $token = Auth::user()->createToken('TOTOBookingApp')->plainTextToken;
+        $token = Auth::user()->createToken('TowyBookingApp')->plainTextToken;
 
 
         $data = $this->loginUserResponse($token);
@@ -129,7 +129,7 @@ class AuthService
             if (Auth::attempt($credentials)) {
                 if (Auth::user()->user_type == $userType) {
                     Auth::user()->tokens()->delete();
-                    $token = Auth::user()->createToken('TOTOBookingApp')->plainTextToken;
+                    $token = Auth::user()->createToken('TowyBookingApp')->plainTextToken;
                     $response = ['result' => 'success', 'message' => 'Login Successful', 'data' => $token];
                     return $response;
                 } else {
@@ -268,6 +268,8 @@ class AuthService
             'email' => Auth::user()->email,
             'first_name' => Auth::user()->first_name,
             'last_name' => Auth::user()->last_name,
+            'vehicle_model_year' => isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->model_year : null,
+            'ssn' => isset(Auth::user()->driver)  ? Auth::user()->driver->ssn:null
 
         ];
 

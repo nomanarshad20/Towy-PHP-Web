@@ -56,7 +56,7 @@ class AuthService
             Auth::loginUsingId($userFind->id);
             if (Auth::user()->user_type == $userType) {
                 Auth::user()->tokens()->delete();
-                $token = Auth::user()->createToken('TOTOBookingApp')->plainTextToken;
+                $token = Auth::user()->createToken('TowyBookingApp')->plainTextToken;
                 $data = $this->getUserData(Auth::user(), $token);
                 $response = ['result' => 'success', 'message' => 'Login Successful', 'data' => $data];
                 return $response;
@@ -103,7 +103,7 @@ class AuthService
 
             Auth::loginUsingId($user->id, true);
 
-            $token = Auth::user()->createToken('TOTOBookingApp')->plainTextToken;
+            $token = Auth::user()->createToken('TowyBookingApp')->plainTextToken;
 
             $data = $this->getUserData($user, $token);
 
@@ -173,7 +173,7 @@ class AuthService
 
             DB::commit();
             Auth::loginUsingId($user->id, true);
-            $token = Auth::user()->createToken('TOTOBookingApp')->plainTextToken;
+            $token = Auth::user()->createToken('TowyBookingApp')->plainTextToken;
             $data = $this->getUserData($user, $token);
             $response = ['result' => 'success', 'message' => $message, 'code' => 200, 'data' => $data];
 
