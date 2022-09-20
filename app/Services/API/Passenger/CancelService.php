@@ -6,6 +6,7 @@ namespace App\Services\API\Passenger;
 
 use App\Models\Booking;
 use App\Models\BookingCancelReason;
+use App\Models\DriversCoordinate;
 use App\Traits\CalculateCancelPercentageAmountTrait;
 use App\Traits\CreateUserWalletTrait;
 use App\Traits\SendFirebaseNotificationTrait;
@@ -51,7 +52,7 @@ class CancelService
                 $other_reason = $request->other_reason;
             }
 
-            $findBooking->driver->driverCoordinate->update(['status' => 1]);
+//            $findBooking->driver->driverCoordinate->update(['status' => 1]);
 
             $stripeChargeId = $findBooking->stripe_charge_id;
             $estimatedFare = $findBooking->estimated_fare;
