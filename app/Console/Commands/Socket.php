@@ -77,6 +77,12 @@ class Socket extends Command
                 return $this->socketService->walletPayment($data, $io, $socket);
             });
 
+            //get driver last location for ride
+            $socket->on('driver-last-location',function($data) use($io,$socket){
+                return $this->socketService->getDriverLastLocation($data,$io,$socket);
+            });
+
+
 //            $socket->on('disconnect', function ($data) use ($io, $socket) {
 //
 //                if (!isset($data['socket_id'])) {

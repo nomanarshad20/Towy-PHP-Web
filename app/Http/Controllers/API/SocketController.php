@@ -496,4 +496,75 @@ class SocketController extends Controller
 
 
     }
+
+
+    public function getDriverLastLocation($data, $io, $socket)
+    {
+
+        if (!isset($data['user_id'])) {
+            return $socket->emit('driverLastLocation', [
+                    'result' => 'error',
+                    'message' => 'User ID is a Required Field',
+                    'data' => null
+                ]
+            );
+
+
+        }
+
+        $currentUser = User::where('id', $data['user_id'])->first();
+
+        if (!$currentUser) {
+            return $socket->emit($data['user_id'] . '-driverLastLocation',
+                [
+                    'result' => 'error',
+                    'message' => 'User Not Found',
+                    'data' => null
+                ]
+            );
+        }
+
+        $findBooking = Booking::where('id', $data['booking_id'])
+            ->where('passenger_id', $currentUser->id)
+            ->whereNotNull('driver_id')->first();
+
+        if (!$findBooking) {
+            return $socket->emit($data['user_id'] . '-driverLastLocation',
+                [
+                    'result' => 'error',
+                    'message' => 'Booking Not Found',
+                    'data' => null
+                ]
+            );
+        }
+
+        $getCoordinate = DriversCoordinate::where('driver_id', $findBooking->driver_id)
+            ->first();
+
+        if (!$getCoordinate) {
+            return $socket->emit($data['user_id'] . '-driverLastLocation',
+                [
+                    'result' => 'error',
+                    'message' => 'Driver Location Not Found',
+                    'data' => null
+                ]
+            );
+        }
+
+        return $socket->emit($data['user_id'] . '-driverLastLocation',
+            [
+                'result' => 'success',
+                'message' => 'Driver Last Coordinate',
+                'data' => [
+                    "latitude" => $getCoordinate->latitude,
+                    "longitude" => $getCoordinate->longitude,
+                    "city" => $getCoordinate->city,
+                    "area_name" => $getCoordinate->area_name,
+                    "bearing" => $getCoordinate->bearing
+                ],
+
+            ]);
+
+    }
+
 }
