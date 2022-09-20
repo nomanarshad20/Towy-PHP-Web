@@ -14,14 +14,13 @@ use Illuminate\Support\Facades\Auth;
 
 class CancelService
 {
-    use CalculateCancelPercentageAmountTrait;
-    use SendFirebaseNotificationTrait;
+    use CalculateCancelPercentageAmountTrait, SendFirebaseNotificationTrait;
 
     public $stripeService;
 
     public function __construct(StripeService $stripeService)
     {
-        $this->stripeService =  $stripeService;
+        $this->stripeService = $stripeService;
     }
 
 
@@ -41,7 +40,7 @@ class CancelService
             return makeResponse('error', 'Cancel Reason Not Found', 404);
         }
 
-        try{
+        try {
 
             $calculateFine = $this->calculatePercentage($findBooking);
 
@@ -55,7 +54,7 @@ class CancelService
             $findBooking->driver->driverCoordinate->update(['status' => 1]);
 
             $stripeChargeId = $findBooking->stripe_charge_id;
-            $estimatedFare  = $findBooking->estimated_fare;
+            $estimatedFare = $findBooking->estimated_fare;
 
             $findBooking->update([
                 'ride_status' => 2,
@@ -65,34 +64,32 @@ class CancelService
                 'chat' => json_encode($request->chat_messages)
             ]);
 
-            //send Notification to Driver
-            $driverFCM = $findBooking->driver->fcm_token;
+            if (isset($findBooking->driver) && $findBooking->driver != null) {
+                $findBooking->driver->driverCoordinate->update(['status' => 1]);
+                //send Notification to Driver
+                $driverFCM = $findBooking->driver->fcm_token;
 
 
-            if($driverFCM)
-            {
-                $notificationType = 14;
-                $title =  'Passenger Cancel The Ride';
-                $message = 'Passenger han Cancelled his ride';
-                $sendNotification = $this->cancelRide($driverFCM,$notificationType,$title,$message);
-            }
-
-            if($calculateFine > 0)
-            {
-                $funds = $this->stripeService->captureFund($calculateFine,$stripeChargeId);
-
-                if($funds['type'] == 'error')
-                {
-                    return makeResponse('error',$funds['message'],500);
+                if ($driverFCM) {
+                    $notificationType = 14;
+                    $title = 'Passenger Cancel The Ride';
+                    $message = 'Passenger han Cancelled his ride';
+                    $sendNotification = $this->cancelRide($driverFCM, $notificationType, $title, $message);
                 }
             }
-            else{
+
+            if ($calculateFine > 0) {
+                $funds = $this->stripeService->captureFund($calculateFine, $stripeChargeId);
+
+                if ($funds['type'] == 'error') {
+                    return makeResponse('error', $funds['message'], 500);
+                }
+            } else {
 
                 $funds = $this->stripeService->releasingAmount($stripeChargeId);
 
-                if($funds->status != 'succeeded')
-                {
-                    return makeResponse('error','Error in Releasing Fund',500);
+                if ($funds->status != 'succeeded') {
+                    return makeResponse('error', 'Error in Releasing Fund', 500);
                 }
             }
 
@@ -114,12 +111,9 @@ class CancelService
 
             return makeResponse('success', 'Cancel Ride Successfully', 200);
 
+        } catch (\Exception $e) {
+            return makeResponse('error', 'Error in Updating Records: ' . $e, 500);
         }
-        catch (\Exception $e)
-        {
-            return makeResponse('error','Error in Updating Records: '.$e,500);
-        }
-
 
 
     }

@@ -48,6 +48,44 @@ class RideAcceptRejectService
             );
         }
 
+        if ($findBooking->ride_status == 2) {
+
+//            $findBooking->driver->driverCoordinate->update(['status' => 1]);
+            //send Notification to Driver
+            $driverFCM = $gettingCurrentUser->fcm_token;
+
+            $driver = DriversCoordinate::where('driver_id', $gettingCurrentUser->id)
+                ->update(['status' => 1]);
+
+            $booking = $this->driverBookingResponse($findBooking);
+
+            if ($driverFCM) {
+
+
+                $notificationType = 15;
+                $title = 'Passenger Cancel The Ride';
+                $message = 'Passenger han Cancelled his ride';
+
+                $notificationsData = [
+                    'result' => 'error',
+                    'message' => "Passenger han Cancelled his ride",
+                    'data' => null
+                ];
+
+                $sendNotification = $this->cancelRide($driverFCM, $notificationType, $title, $message, $notificationsData);
+            }
+
+
+            return $socket->emit($data['user_id'] . '-finalRideStatus',
+                [
+                    'result' => 'error',
+                    'message' => "Ride is Cancel By Passenger",
+                    'data' => null
+                ]
+            );
+        }
+
+
         try {
             $findDriverRecord = AssignBookingDriver::where('booking_id', $findBooking->id)
                 ->where('driver_id', $gettingCurrentUser->id)
