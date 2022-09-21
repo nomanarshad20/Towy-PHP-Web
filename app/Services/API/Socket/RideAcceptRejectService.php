@@ -27,7 +27,7 @@ class RideAcceptRejectService
         $gettingCurrentUser = User::find($data['user_id']);
 
         if (!$gettingCurrentUser) {
-            return $socket->emit($data['user_id'].'-finalRideStatus',
+            return $socket->emit($data['user_id'] . '-finalRideStatus',
                 [
                     'result' => 'error',
                     'message' => 'User Not Found',
@@ -39,7 +39,7 @@ class RideAcceptRejectService
         $findBooking = Booking::find($data['booking_id']);
 
         if (!$findBooking) {
-            return $socket->emit($data['user_id'].'-finalRideStatus',
+            return $socket->emit($data['user_id'] . '-finalRideStatus',
                 [
                     'result' => 'error',
                     'message' => 'Booking Not Found',
@@ -102,7 +102,7 @@ class RideAcceptRejectService
 
             }
         } catch (\Exception $e) {
-            return $socket->emit($data['user_id'].'-finalRideStatus',
+            return $socket->emit($data['user_id'] . '-finalRideStatus',
                 [
                     'result' => 'error',
                     'message' => "Unable to Save Driver Status" . $e,
@@ -115,7 +115,7 @@ class RideAcceptRejectService
             try {
                 $findBooking->vehicle_id = $gettingCurrentUser->driver->vehicle_id;
                 $findBooking->driver_id = $gettingCurrentUser->id;
-                if(isset($gettingCurrentUser->franchise_id))
+                if (isset($gettingCurrentUser->franchise_id))
                     $findBooking->franchise_id = $gettingCurrentUser->franchise_id;
                 $findBooking->ride_status = 1;
 //                $findBooking->driver_status = 0;
@@ -129,21 +129,19 @@ class RideAcceptRejectService
 //                }
 
                 // update voucher
-                if($findBooking->bookingDetail->is_voucher == 1)
-                {
+                if ($findBooking->bookingDetail->is_voucher == 1) {
                     $voucher_detail = json_decode($findBooking->bookingDetail->voucher_detail);
 
                     $voucherId = $voucher_detail->voucher_id;
 
-                    $find =  VoucherCodePassenger::where('passenger_id',$findBooking->passenger_id)
-                        ->where('voucher_code_id',$voucherId)->update(['is_used'=>1]);
+                    $find = VoucherCodePassenger::where('passenger_id', $findBooking->passenger_id)
+                        ->where('voucher_code_id', $voucherId)->update(['is_used' => 1]);
 
                 }
 
                 $findBooking->save();
-            }
-            catch (\Exception $e) {
-                return $socket->emit($data['user_id'].'-finalRideStatus',
+            } catch (\Exception $e) {
+                return $socket->emit($data['user_id'] . '-finalRideStatus',
                     [
                         'result' => 'error',
                         'message' => "Error in Update Booking Record and Driver Status: " . $e,
@@ -152,11 +150,10 @@ class RideAcceptRejectService
                 );
             }
 
-            try{
-                $getCoordinate =  DriversCoordinate::where('driver_id',$data['user_id'])->first();
+            try {
+                $getCoordinate = DriversCoordinate::where('driver_id', $data['user_id'])->first();
 
-                if($getCoordinate)
-                {
+                if ($getCoordinate) {
                     BookingPoint::create([
                         'booking_id' => $findBooking->id,
                         'lat' => $getCoordinate->latitude,
@@ -165,10 +162,8 @@ class RideAcceptRejectService
                     ]);
                 }
 
-            }
-            catch (\Exception $e)
-            {
-                return $socket->emit($data['user_id'].'-finalRideStatus',
+            } catch (\Exception $e) {
+                return $socket->emit($data['user_id'] . '-finalRideStatus',
                     [
                         'result' => 'error',
                         'message' => "Error in saving Driver Starting Point: " . $e,
@@ -176,31 +171,6 @@ class RideAcceptRejectService
                     ]
                 );
             }
-
-
-//            $passengerSocketID = $findBooking->passenger->socket_id;
-
-
-//            if ($passengerSocketID) {
-            $socket->emit($findBooking->passenger_id.'-finalRideStatus',
-                [
-                    'result' => 'success',
-                    'message' => "Driver has Accepted Your Ride Request",
-                    'data' => $this->driverBookingResponse($findBooking)
-                ]
-            );
-//            }
-
-
-
-
-            $socket->emit($data['user_id'].'-finalRideStatus',
-                [
-                    'result' => 'success',
-                    'message' => "You have Accepted Passenger's Ride Request",
-                    'data' => $this->driverBookingResponse($findBooking)
-                ]
-            );
 
             $passengerFCMToken = $findBooking->passenger->fcm_token;
 
@@ -217,15 +187,14 @@ class RideAcceptRejectService
                 $title = 'Accept Ride';
                 $message = 'You have accept the ride request by passenger';
 
-                $sendNotificationToDriver = $this->driverRideAcceptRejectNotification($driverFCMToken, $this->driverBookingResponse($findBooking), $notification_type,$title,$message);
+                $sendNotificationToDriver = $this->driverRideAcceptRejectNotification($driverFCMToken, $this->driverBookingResponse($findBooking), $notification_type, $title, $message);
             }
 
             try {
                 $deleteUnResponsiveDriver = AssignBookingDriver::where('booking_id', $findBooking->id)
                     ->whereNull('status')->delete();
-            }
-            catch (\Exception $e) {
-                return $socket->emit($data['user_id'].'-finalRideStatus',
+            } catch (\Exception $e) {
+                return $socket->emit($data['user_id'] . '-finalRideStatus',
                     [
                         'result' => 'error',
                         'message' => "Unable to delete other Driver Records: " . $e,
@@ -235,8 +204,25 @@ class RideAcceptRejectService
             }
 
 
-        }
-        else {
+            $socket->emit($findBooking->passenger_id . '-finalRideStatus',
+                [
+                    'result' => 'success',
+                    'message' => "Driver has Accepted Your Ride Request",
+                    'data' => $this->driverBookingResponse($findBooking)
+                ]
+            );
+
+
+            return $socket->emit($data['user_id'] . '-finalRideStatus',
+                [
+                    'result' => 'success',
+                    'message' => "You have Accepted Passenger's Ride Request",
+                    'data' => $this->driverBookingResponse($findBooking)
+                ]
+            );
+
+
+        } else {
 
 
             $gettingCurrentUser->driverCoordinate->update(['status' => 1]);
@@ -247,7 +233,7 @@ class RideAcceptRejectService
 //                ->orderBy('id', 'asc')
 //                ->first();
 
-            $findNextDriver = $this->findNextDriver($findBooking,$gettingCurrentUser);
+            $findNextDriver = $this->findNextDriver($findBooking, $gettingCurrentUser);
 
 
             if ($findNextDriver) {
@@ -255,7 +241,7 @@ class RideAcceptRejectService
 
                 $driverRecord->driverCoordinate->update(['status' => 3]);
 
-                $findNextDriver->update(['ride_send_time',Carbon::now()->format('Y-m-d H:i:s')]);
+                $findNextDriver->update(['ride_send_time', Carbon::now()->format('Y-m-d H:i:s')]);
 
                 $booking = $this->driverBookingResponse($findBooking);
 
@@ -268,7 +254,7 @@ class RideAcceptRejectService
                 $driverSocketId = $driverRecord->id;
 
                 if ($driverSocketId) {
-                    $socket->emit($driverSocketId.'-newRideRequest',
+                    $socket->emit($driverSocketId . '-newRideRequest',
                         [
                             'result' => 'success',
                             'message' => "New Ride Request",
@@ -277,15 +263,14 @@ class RideAcceptRejectService
                     );
                 }
 
-                $socket->emit($data['user_id'].'-finalRideStatus',
+                $socket->emit($data['user_id'] . '-finalRideStatus',
                     [
                         'result' => 'error',
                         'message' => "You have Rejected/Ignored the Ride Request",
                         'data' => null
                     ]
                 );
-            }
-            else {
+            } else {
                 $passengerID = $findBooking->passenger_id;
 
                 $findBooking->ride_status = 6;
@@ -306,7 +291,7 @@ class RideAcceptRejectService
                         $sendNotificationToDriver = $this->driverRideAcceptRejectNotification($driverFCMToken, $booking, $notification_type, $title, $message);
                     }
 
-                    $socket->emit($passengerID.'-finalRideStatus',
+                    $socket->emit($passengerID . '-finalRideStatus',
                         [
                             'result' => 'error',
                             'message' => "No one has accepted your ride request",
@@ -314,15 +299,14 @@ class RideAcceptRejectService
                         ]
                     );
 
-                    return  $socket->emit($data['user_id'].'-finalRideStatus',
+                    return $socket->emit($data['user_id'] . '-finalRideStatus',
                         [
                             'result' => 'error',
                             'message' => "You have ignored ride request",
                             'data' => null
                         ]
                     );
-                }
-                elseif ($data['driver_action'] == 0) {
+                } elseif ($data['driver_action'] == 0) {
 
                     $driverFCMToken = $gettingCurrentUser->fcm_token;
 
@@ -335,8 +319,7 @@ class RideAcceptRejectService
                     }
 
 
-
-                    $socket->emit($passengerID.'-finalRideStatus',
+                    $socket->emit($passengerID . '-finalRideStatus',
                         [
                             'result' => 'error',
                             'message' => "No one has accepted your ride request",
@@ -345,7 +328,7 @@ class RideAcceptRejectService
                     );
 
 
-                    return  $socket->emit($data['user_id'].'-finalRideStatus',
+                    return $socket->emit($data['user_id'] . '-finalRideStatus',
                         [
                             'result' => 'error',
                             'message' => "You have rejected ride request",
@@ -359,7 +342,7 @@ class RideAcceptRejectService
 
     }
 
-    public function findNextDriver($findBooking,$gettingCurrentUser)
+    public function findNextDriver($findBooking, $gettingCurrentUser)
     {
         $findNextDriver = AssignBookingDriver::where('booking_id', $findBooking->id)
             ->whereNull('status')
@@ -367,21 +350,17 @@ class RideAcceptRejectService
             ->orderBy('id', 'asc')
             ->first();
 
-        if($findNextDriver)
-        {
+        if ($findNextDriver) {
             $driverRecord = User::find($findNextDriver->driver_id);
 
-            if($driverRecord->driverCoordinate->status == 1)
-            {
+            if ($driverRecord->driverCoordinate->status == 1) {
                 return $findNextDriver;
-            }
-            else{
+            } else {
                 $findNextDriver->delete();
 
-                return $this->findNextDriver($findBooking,$driverRecord->driver_id);
+                return $this->findNextDriver($findBooking, $driverRecord->driver_id);
             }
-        }
-        else{
+        } else {
             return $findNextDriver;
         }
 
