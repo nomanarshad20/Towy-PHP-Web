@@ -205,6 +205,38 @@ class SocketController extends Controller
 
                             ]);
                     }
+                    else {
+                        $socket->emit($checkForBooking->passenger_id . '-driverCoordinate', [
+                            'result' => 'success',
+                            'message' => 'Driver Coordinate is less than 20m',
+                            'data' => [
+                                "latitude" => $driver->latitude,
+                                "longitude" => $driver->longitude,
+                                "city" => $driver->city,
+                                "area_name" => $driver->area_name,
+                                "bearing" => $driver->bearing,
+                                'distance' => $distance
+
+                            ],
+                        ]);
+
+
+                        return $socket->emit($data['user_id'] . '-driverCoordinate',
+                            [
+                                'result' => 'success',
+                                'message' => 'Driver Coordinate is less than 20m',
+                                'data' => [
+                                    "latitude" => $driver->latitude,
+                                    "longitude" => $driver->longitude,
+                                    "city" => $driver->city,
+                                    "area_name" => $driver->area_name,
+                                    "bearing" => $driver->bearing,
+                                    'distance' => $distance
+
+                                ],
+
+                            ]);
+                    }
 
                 }
 
