@@ -38,7 +38,7 @@ class AuthService
             if ($checkType == 'mobile_no') {
                 $mobile = $request->login;
                 $email = null;
-                $otp = null;
+//                $otp = null;
                 $checkUser = User::where('mobile_no', $mobile)->first();
                 if ($checkUser) {
                     $response = ['result' => 'error', 'message' => 'This mobile number is already is in use', 'code' => 422];
@@ -48,7 +48,7 @@ class AuthService
             elseif ($checkType == 'email') {
                 $mobile = null;
                 $email = $request->login;
-                $otpCode = mt_rand(1000, 9999);
+//                $otpCode = mt_rand(1000, 9999);
 
                 $checkUser = User::where('email', $email)->first();
                 if ($checkUser) {
@@ -63,7 +63,7 @@ class AuthService
 
 
             $user = User::create([
-                'otp' => $otpCode,
+//                'otp' => $otpCode,
                 'mobile_no' => $mobile,
                 'fcm_token' => $request->fcm_token,
                 'user_type' => $request->user_type,
