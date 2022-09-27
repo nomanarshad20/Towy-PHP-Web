@@ -5,6 +5,7 @@
 @endsection
 
 @section('style')
+    <link rel="stylesheet" href="{{asset('admin/css/jquery-ui.css')}}">
 @endsection
 
 
@@ -41,7 +42,7 @@
                                         <img src="{{asset($userInfo->image)}}" height="180" width="200"
                                              style="margin: 0 auto;  display: block; border: 1px solid; border-radius: 80px;" />
                                     @else
-                                        <img src="{{asset('admin/img/raido-default-driver.png')}}" height="180" width="200"
+                                        <img src="{{asset('admin/img/admin.png')}}" height="180" width="200"
                                              style="margin: 0 auto;display: block;border: 0px solid;border-radius: 100px;" />
                                     @endif
                                     <br/>
@@ -58,7 +59,7 @@
                                             style="position: relative;font-weight:bold;display: block;margin:0px 20px 0px;left:25%;top:0%;">
                                         <tr>
                                             <td style="padding:5px 25px;">Name</td>
-                                            <td>{{$userInfo->name ?? ''}}</td>
+                                            <td>{{$userInfo->first_name.' '.$userInfo->last_name ?? ''}}</td>
                                         </tr>
                                         <tr>
                                             <td style="padding:5px 25px;">Contact#</td>
@@ -66,12 +67,12 @@
                                         </tr>
                                         <tr>
                                             <td style="padding:5px 25px;">User ID</td>
-                                            <td>{{$userInfo->referral_id ?? ''}}</td>
+                                            <td>{{$userInfo->referral_code ?? ''}}</td>
                                         </tr>
-                                        <tr>
-                                            <td style="padding:5px 25px;">Franchise</td>
-                                            <td>{{$userInfo->driver->franchise->name ?? ''}}</td>
-                                        </tr>
+{{--                                        <tr>--}}
+{{--                                            <td style="padding:5px 25px;">Franchise</td>--}}
+{{--                                            <td>{{$userInfo->driver->franchise->name ?? ''}}</td>--}}
+{{--                                        </tr>--}}
                                         {{--<tr>
                                             <td style="padding:5px 25px;">Vehicle </td>
                                             <td>{{$userInfo->driver->vehicle->name ?? ''}}
@@ -117,7 +118,7 @@
                                 </div>
                             </div>--}}
                             <div class="row" style="">
-                                <form action="{{route('payReceiveFromDriver')}}" method="post"
+                                <form action="{{route('payReceiveFromDriver')}}" method="post" class="rechargeWalletForm"
                                       style="margin-bottom: 30px;width: 100%;">
 
                                     <input name="_token" type="hidden" value="{{ csrf_token() }}" />
@@ -127,19 +128,22 @@
                                         <select name="payReceiveFlag"
                                                 style="width:100%;font-size:13px;height: 35px;border-radius: 4px;border:1px solid #f5b900 !important;">
                                             <option value="paid">Pay to Driver</option>
-                                            <option value="received">Received from Driver</option>
-                                            <option value="bonus">Give Bonus to Driver</option>
+{{--                                            <option value="received">Received from Driver</option>--}}
+{{--                                            <option value="bonus">Give Bonus to Driver</option>--}}
                                         </select>
                                     </div>
                                     <br>
                                     <div class="col-xl-12 col-md-12 mb-12">
                                         <input type="text" id="amount" name="amount" required
+                                               onkeypress="return isNumberKey(event)"
+                                               class="form-control"
                                                style="width:100%;font-size:13px;height: 35px;border-radius: 4px;border:1px solid #f5b900 !important;">
                                     </div>
                                     <br>
                                     <div class="col-xl-12 col-md-12 mb-12" style="float: right;">
                                         <div class="col-xl-6 col-md-6 mb-12" style="float: right;">
-                                            <input type="submit" class="btn btn-primary btn-user " value="SUBMIT"
+                                            <input type="button" class="btn btn-primary btn-user " value="SUBMIT"
+                                                   id="recharge_button"
                                                    style="background:#f5b900 !important;float: right;border:1px solid #f5b900 !important;">
                                         </div>
                                     </div>
@@ -157,16 +161,20 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="card-body" style="padding-top:0px; !important;">
-                                    <form id="form1" method="post" style="margin-bottom: 30px;">
-                                        @csrf
-                                    <input type="date" id="dateFrom" name="fromDate"
+                                    <form id="form1" method="get" style="margin-bottom: 30px;">
+{{--                                        @csrf--}}
+                                    <input type="text" id="dateFrom" name="fromDate" class="datepicker"
                                            style="width: 200px;height: 35px;border-radius: 4px;border:1px solid #f5b900 !important;"
-                                           value="{{$_POST['fromDate']??date('Y-m-d')}}">
+                                           value="{{$_GET['fromDate']??date('Y-m-d')}}"
+{{--                                           value="{{$_POST['fromDate']??date('Y-m-d')}}"--}}
+                                    >
                                     <input type="hidden" class="form-control" name="driverID" value="{{$userInfo->id}}">
-                                    <input type="date" id="dateTill" name="tillDate"
+                                    <input type="text" id="dateTill" name="tillDate" class="datepicker"
                                            max="{{date("Y-m-d", strtotime('today'))}}"
                                            style="width: 200px;height: 35px;border-radius: 4px;border:1px solid #f5b900 !important;"
-                                           value="{{$_POST['tillDate']??date('Y-m-d')}}">
+{{--                                           value="{{$_POST['tillDate']??date('Y-m-d')}}"--}}
+                                           value="{{$_GET['tillDate']??date('Y-m-d')}}"
+                                    >
                                         <input type="submit" class="btn btn-primary btn-user" value="SEARCH" id="searchReportFrm" style="background:#f5b900 !important;border:1px solid #f5b900 !important;">
 {{--                                    <button class="btn btn-primary btn-user" onclick="getPartnerRidesCalculationsHistory()"--}}
 {{--                                            style="background:#f5b900 !important;border:1px solid #f5b900 !important;">SEARCH</button>--}}
@@ -278,7 +286,7 @@
                                                 {{number_format($ridesSummary['amountPaidToDriver'],2) ?? 0}}</td>
                                         </tr>
                                         <tr style="padding-bottom: 7px;position: relative;display: block;">
-                                            <td style="width: 165px;font-size:13px;">Cash Paid To Raido</td>
+                                            <td style="width: 165px;font-size:13px;">Cash Paid To Towy</td>
                                             <td style="color:red;font-size:13px;font-size:13px;">Rs.
                                                 {{number_format($ridesSummary['amountReceivedFromDriver'],2) ?? 0}}</td>
                                         </tr>
@@ -428,49 +436,49 @@
     </div>
     <!-- /.container-fluid -->
 
-    <script>
-        $.ajaxSetup({
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-        });
+{{--    <script>--}}
+{{--        $.ajaxSetup({--}}
+{{--            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }--}}
+{{--        });--}}
 
-        function getPartnerRidesCalculationsHistory()
-        {
-            //preventDefault();
-            var rprtFrom    = $('input[name=reportFrom]').val();
-            var rprtTill    = $('input[name=reportTill]').val();
-            var rprtId      = $('input[name=driverID]').val();
-            //alert(rprtFrom);
-            if (rprtFrom == '' || rprtTill == '') {
-                alert('Please select both dates before searching');
-                return false;
-            }
-            if (new Date(rprtFrom) > new Date(rprtTill)) {
-                alert('Please select an appropriate date range');
-                return false;
-            }
-            jQuery.ajax({
-                type: "post",
-                url: '{{{URL::to("")}}}/ridesCalculationsHistoryAjax',
-                data: {id: rprtId,
-                    fromDate: rprtFrom,
-                    tillDate: rprtTill,
-                    "_token": "{{ csrf_token() }}"
-                },
-                //	cache: false,
-                success: function (response) {
-                    console.log(response);
-                    $("#pcontent").html("");
-                    $("#pcontent").html(response);
-                    //	$( "#ajaxval p" ).append(response);
-                }, error: function (response) {
-                    console.log(response);
-                    alert("error!!!! " + response);
-                }
-            });
-        }
+{{--        function getPartnerRidesCalculationsHistory()--}}
+{{--        {--}}
+{{--            //preventDefault();--}}
+{{--            var rprtFrom    = $('input[name=reportFrom]').val();--}}
+{{--            var rprtTill    = $('input[name=reportTill]').val();--}}
+{{--            var rprtId      = $('input[name=driverID]').val();--}}
+{{--            //alert(rprtFrom);--}}
+{{--            if (rprtFrom == '' || rprtTill == '') {--}}
+{{--                alert('Please select both dates before searching');--}}
+{{--                return false;--}}
+{{--            }--}}
+{{--            if (new Date(rprtFrom) > new Date(rprtTill)) {--}}
+{{--                alert('Please select an appropriate date range');--}}
+{{--                return false;--}}
+{{--            }--}}
+{{--            jQuery.ajax({--}}
+{{--                type: "post",--}}
+{{--                url: '{{{URL::to("")}}}/ridesCalculationsHistoryAjax',--}}
+{{--                data: {id: rprtId,--}}
+{{--                    fromDate: rprtFrom,--}}
+{{--                    tillDate: rprtTill,--}}
+{{--                    "_token": "{{ csrf_token() }}"--}}
+{{--                },--}}
+{{--                //	cache: false,--}}
+{{--                success: function (response) {--}}
+{{--                    console.log(response);--}}
+{{--                    $("#pcontent").html("");--}}
+{{--                    $("#pcontent").html(response);--}}
+{{--                    //	$( "#ajaxval p" ).append(response);--}}
+{{--                }, error: function (response) {--}}
+{{--                    console.log(response);--}}
+{{--                    alert("error!!!! " + response);--}}
+{{--                }--}}
+{{--            });--}}
+{{--        }--}}
 
 
-    </script>
+{{--    </script>--}}
 
 
 
@@ -615,5 +623,64 @@
         </div>
     </div>--}}
 
+    @include('admin.driver.modal.recharge_modal')
+
 @endsection
+
+
+
+@section('script')
+    <script src="{{asset('admin/js/jquery-ui.js')}}"></script>
+
+    <script>
+
+        $(".datepicker").datepicker({
+            dateFormat: 'yy-mm-dd'
+        });
+
+        $("#recharge_button").click(function () {
+
+            var selectedamount = $('#amount').val();
+            var negative_amount = 0;
+            var balance = {{$driverWalletBalance}};
+            if (balance < 0) {
+                negative_amount = abs(balance);
+            }
+
+            if (selectedamount < negative_amount || selectedamount == "" || selectedamount == null) {
+                errorMsg("Please Add Amount grater than 0 or greater than negative wallet amount.");
+                return false;
+            } else {
+                $('#recharge_modal').modal('show');
+            }
+            // else {
+            //     return false;
+            // }
+
+        });
+
+        $('#rechargeRecordBtn').click(function(){
+            $('.rechargeWalletForm').submit();
+        });
+
+        $('#amount').keypress(function (eve) {
+            if ((eve.which != 46 || $(this).val().indexOf('.') != -1) && (eve.which < 48 || eve.which > 57)) {
+                eve.preventDefault();
+            }
+            // this part is when left part of number is deleted and leaves a . in the leftmost position. For example, 33.25, then 33 is deleted
+            $('#amount').keyup(function (eve) {
+                // console.log($(this).val().indexOf('.'))
+                // if ($(this).val().indexOf('.') == 0) {
+                //     $(this).val($(this).val().substring(1));
+                // }
+                if ($(this).val().indexOf('0') == 0) {
+                    $(this).val($(this).val().substring(1));
+                } else if ($(this).val().indexOf('.') == 0) {
+                    $(this).val($(this).val().substring(1));
+                }
+            });
+        });
+    </script>
+@endsection
+
 
