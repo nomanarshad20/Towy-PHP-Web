@@ -113,6 +113,7 @@ Route::namespace('Admin')->group(function () {
         Route::get('booking-edit/{id}',[BookingController::class,'edit'])->name('bookingEdit');
         Route::post('booking-update',[BookingController::class,'update'])->name('bookingUpdate');
         Route::post('booking-delete',[BookingController::class,'delete'])->name('bookingDelete');
+        Route::get('booking-detail/{id}',[BookingController::class,'detail'])->name('bookingDetail');
 
         Route::get('vehicle-fare-setting',[VehicleFareController::class,'create'])->name('vehicleFareSetting');
         Route::post('save-vehicle-fare',[VehicleFareController::class,'save'])->name('saveVehicleFare');
