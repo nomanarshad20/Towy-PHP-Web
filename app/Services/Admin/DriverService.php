@@ -405,7 +405,7 @@ class DriverService
                         $payment_method     = "bonus";
                         $description        = "Received  Bonus Rs. " . $amount . " From Toto Admin.";
                         // Update Partner Wallet
-                        $driverCalculations = CreateUserWalletTrait::driverWalletUpdate($data, 0, 0, 0, $amount, "credit", $payment_method, $description);
+                        $driverCalculations = $this->driverWalletUpdate($data, 0, 0, 0, $amount, "credit", $payment_method, $description);
 
                     }else{
                         if ($payReceiveFlag == "received") {
@@ -414,7 +414,7 @@ class DriverService
                             $description    = "Rs. " . $amount . " " . $payReceiveFlag . " from Partner";
                         }
 
-                        $franchiseCalculations = CreateUserWalletTrait::franchiseWalletUpdate($data, 0, 0, 0, $amount, $type, $payment_method, $description);
+                        $franchiseCalculations = $this->franchiseWalletUpdate($data, 0, 0, 0, $amount, $type, $payment_method, $description);
                     }
 
                     return Redirect()->back()->with('success', 'Amount successfully Paid');
