@@ -340,7 +340,7 @@
                                                                 <div
                                                                     class="text-center text-xs font-weight-bold text-info text-uppercase mb-1">
                                                                     Acceptance Rate :
-                                                                    {{$ridesSummary['acceptRidesPercent'] ?? 0}}%
+                                                                    {{number_format($ridesSummary['acceptRidesPercent'],2) ?? 0}}%
                                                                 </div>
                                                             </div>
 
@@ -359,7 +359,7 @@
                                                                 <div
                                                                     class="text-center text-xs font-weight-bold text-warning text-uppercase mb-1">
                                                                     Ride Completion :
-                                                                    {{$ridesSummary['completeRidesPercent'] ?? 0}}%</div>
+                                                                    {{number_format($ridesSummary['completeRidesPercent'],2) ?? 0}}%</div>
 
                                                             </div>
                                                         </div>
