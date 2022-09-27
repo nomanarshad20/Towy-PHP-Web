@@ -443,7 +443,7 @@ class AuthService
     public function sendOTP($request)
     {
         DB::beginTransaction();
-//        $user = User::where('id', $request->user_id)->first();
+        $user = User::where('email', $request->login)->first();
 
 //        if (!$user) {
 //            DB::rollBack();
@@ -453,8 +453,8 @@ class AuthService
 
         $otpCode = mt_rand(100000, 999999);
 
-//        $user->otp = $otpCode;
-//        $user->save();
+        $user->otp = $otpCode;
+        $user->save();
         $data = [
 
             'otp' => $otpCode,
@@ -464,7 +464,7 @@ class AuthService
         Notification::route('mail', $request->login)->notify(new EmailVerificationNotification($data));
 
 
-//        DB::commit();
+        DB::commit();
         return makeResponse('success', 'OTP Code is Send on your email address', '200', $data);
 
     }
