@@ -380,9 +380,8 @@ class AuthService
         $user->otp = $otpCode;
         $user->save();
         $data = [
-
             'otp' => $otpCode,
-            'email' => $user->email,
+            'email' =>  $request->login
         ];
 
         Notification::send($user, new ResetPasswordNotification($data));
@@ -443,18 +442,18 @@ class AuthService
     public function sendOTP($request)
     {
         DB::beginTransaction();
-        $user = User::where('email', $request->login)->first();
-
+//        $user = User::where('email', $request->login)->first();
+//
 //        if (!$user) {
 //            DB::rollBack();
-//            return makeResponse('error', 'User ID does not Exist', 401);
+//            return makeResponse('error', 'User Email does not Exist In Our System', 401);
 //        }
 
 
         $otpCode = mt_rand(100000, 999999);
 
-        $user->otp = $otpCode;
-        $user->save();
+//        $user->otp = $otpCode;
+//        $user->save();
         $data = [
 
             'otp' => $otpCode,
