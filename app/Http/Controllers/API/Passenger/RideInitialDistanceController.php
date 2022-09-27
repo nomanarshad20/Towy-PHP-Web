@@ -120,7 +120,7 @@ class RideInitialDistanceController extends Controller
         }
 
         if (sizeof($gettingVehicleTypeRecords) > 0) {
-            return makeResponse('success', 'Distance and Fare Caluclate Successfully', 200, $gettingVehicleTypeRecords);
+            return makeResponse('success', 'Distance and Fare Calculate Successfully', 200, $gettingVehicleTypeRecords);
         } else {
             return makeResponse('error', 'Record Not Found', 500);
 

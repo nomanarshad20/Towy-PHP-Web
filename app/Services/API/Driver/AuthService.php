@@ -38,7 +38,7 @@ class AuthService
             if ($checkType == 'mobile_no') {
                 $mobile = $request->login;
                 $email = null;
-
+                $otp = null;
                 $checkUser = User::where('mobile_no', $mobile)->first();
                 if ($checkUser) {
                     $response = ['result' => 'error', 'message' => 'This mobile number is already is in use', 'code' => 422];
@@ -48,20 +48,22 @@ class AuthService
             elseif ($checkType == 'email') {
                 $mobile = null;
                 $email = $request->login;
+                $otpCode = mt_rand(1000, 9999);
 
                 $checkUser = User::where('email', $email)->first();
                 if ($checkUser) {
                     $response = ['result' => 'error', 'message' => 'The email is already is in use', 'code' => 422];
                     return $response;
                 }
-            } else {
+            }
+            else {
                 $response = ['result' => 'error', 'message' => 'Please Enter Valid Mobile No or Email', 'code' => 422];
                 return $response;
             }
 
 
             $user = User::create([
-//                'otp' => $otpCode,
+                'otp' => $otpCode,
                 'mobile_no' => $mobile,
                 'fcm_token' => $request->fcm_token,
                 'user_type' => $request->user_type,
@@ -137,21 +139,17 @@ class AuthService
                     $response = ['result' => 'error', 'message' => 'Your Phone Number is already registered as a Passenger'];
                     return $response;
                 }
-            }
-            else {
+            } else {
                 $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
                 return $response;
             }
-        }
-        else {
-            if($checkLoginType == 'mobile_no')
-            {
-                $checkUserState = User::where('mobile_no',$login)
+        } else {
+            if ($checkLoginType == 'mobile_no') {
+                $checkUserState = User::where('mobile_no', $login)
                     ->whereNUll('password')
                     ->where('user_type', $userType)
                     ->first();
-            }
-            elseif($checkLoginType == 'email'){
+            } elseif ($checkLoginType == 'email') {
                 $checkUserState = User::where('email', $login)
                     ->whereNUll('password')
                     ->where('user_type', $userType)
@@ -159,21 +157,17 @@ class AuthService
             }
 
 
-
             if ($checkUserState) {
                 $response = $this->checkUserState($checkUserState);
                 return $response;
-            }
-            else {
+            } else {
 
-                if($checkLoginType == 'mobile_no')
-                {
+                if ($checkLoginType == 'mobile_no') {
                     $checkUserState = User::where('mobile_no', $login)
                         ->where('user_type', $userType)
                         ->first();
 
-                }
-                elseif($checkLoginType == 'email'){
+                } elseif ($checkLoginType == 'email') {
 
                     $checkUserState = User::where('email', $login)
                         ->where('user_type', $userType)
@@ -296,7 +290,7 @@ class AuthService
             'first_name' => Auth::user()->first_name,
             'last_name' => Auth::user()->last_name,
             'vehicle_model_year' => isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->model_year : null,
-            'ssn' => isset(Auth::user()->driver)  ? Auth::user()->driver->ssn:null
+            'ssn' => isset(Auth::user()->driver) ? Auth::user()->driver->ssn : null
 
         ];
 
