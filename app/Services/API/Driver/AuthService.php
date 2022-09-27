@@ -44,7 +44,8 @@ class AuthService
                     $response = ['result' => 'error', 'message' => 'This mobile number is already is in use', 'code' => 422];
                     return $response;
                 }
-            } elseif ($checkType == 'email') {
+            }
+            elseif ($checkType == 'email') {
                 $mobile = null;
                 $email = $request->login;
 
@@ -136,24 +137,50 @@ class AuthService
                     $response = ['result' => 'error', 'message' => 'Your Phone Number is already registered as a Passenger'];
                     return $response;
                 }
-            } else {
+            }
+            else {
                 $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
                 return $response;
             }
-        } else {
-            $checkUserState = User::where('mobile_no', $mobileNo)->whereNUll('password')
-                ->where('user_type', $userType)
-                ->first();
+        }
+        else {
+            if($checkLoginType == 'mobile_no')
+            {
+                $checkUserState = User::where('mobile_no',$login)
+                    ->whereNUll('password')
+                    ->where('user_type', $userType)
+                    ->first();
+            }
+            elseif($checkLoginType == 'email'){
+                $checkUserState = User::where('email', $login)
+                    ->whereNUll('password')
+                    ->where('user_type', $userType)
+                    ->first();
+            }
+
 
 
             if ($checkUserState) {
                 $response = $this->checkUserState($checkUserState);
                 return $response;
-            } else {
+            }
+            else {
 
-                $checkUserState = User::where('mobile_no', $mobileNo)
-                    ->where('user_type', $userType)
-                    ->first();
+                if($checkLoginType == 'mobile_no')
+                {
+                    $checkUserState = User::where('mobile_no', $login)
+                        ->where('user_type', $userType)
+                        ->first();
+
+                }
+                elseif($checkLoginType == 'email'){
+
+                    $checkUserState = User::where('email', $login)
+                        ->where('user_type', $userType)
+                        ->first();
+
+                }
+
 
                 if ($checkUserState) {
                     if ($checkUserState->password) {
