@@ -281,7 +281,7 @@
                                         </tr>
                                         <tr
                                             style="padding-bottom:7px;position: relative;display:block;border-top: 1px solid;padding-top: 0px;margin-top: 10px;">
-                                            <td style="width: 165px;font-size:13px;">Cash Received From Raido</td>
+                                            <td style="width: 165px;font-size:13px;">Cash Received From Towy</td>
                                             <td style="color:green;font-size:13px;">Rs.
                                                 {{number_format($ridesSummary['amountPaidToDriver'],2) ?? 0}}</td>
                                         </tr>
