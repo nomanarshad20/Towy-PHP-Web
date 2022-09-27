@@ -693,7 +693,8 @@ class DriverStatusService
             $calculateWaitingTime = (float)($waitingTimePrice * $totalTime);
 
 
-        } else {
+        }
+        else {
 
             $waitingTimePrice = $findBooking->bookingDetail->waiting_price_per_min;
             $calculateWaitingTime = (float)($waitingTimePrice * $driverWaitingTime);

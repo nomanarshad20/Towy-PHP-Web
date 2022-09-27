@@ -359,7 +359,7 @@ class DriverService
                 $preFromDate            = $secondDate;
                 $preTillDate            = $firstDate;
 
-                $preDriverCalculations  = DriverPortalTrait::driverPortalPreviousDetails($id, $preFromDate, $preTillDate);
+                $preDriverCalculations  = $this->driverPortalPreviousDetails($id, $preFromDate, $preTillDate);
 
                 if(isset($preDriverCalculations) && $preDriverCalculations['previous_final_total_amount'] != 0)
                     $previousAmount     = $preDriverCalculations['previous_final_total_amount'];
@@ -369,12 +369,12 @@ class DriverService
             if ($firstDate->lessThanOrEqualTo($secondDate))
                 $fromDate       = $secondDate;
 
-            $ridesSummary       = DriverPortalTrait::driverPortalDetails($id, $fromDate, $tillDate,$previousAmount);
+            $ridesSummary       = $this->driverPortalDetails($id, $fromDate, $tillDate,$previousAmount);
 
             return view('admin.driver.portal', compact('ridesSummary','userInfo'));
 
         }else {
-            return Redirect()->back()->withErrors(['error', 'Invalid Request, Driver not found!']);
+            return redirect()->back()->with('error', 'Invalid Request, Driver not found!');
         }
     }
 

@@ -67,6 +67,8 @@ Route::namespace('Admin')->group(function () {
         Route::post('driver-delete',[DriverController::class,'delete'])->name('driverDelete');
         Route::get('driver-change-status',[DriverController::class,'changeStatus'])->name('driverChangeStatus');
         Route::get('driver-delete-image',[DriverController::class,'deleteImage'])->name('driverDeleteImage');
+        Route::any('driver-portal/{id?}',[DriverController::class,'portal'])->name('driverPortal');
+        Route::post('payReceiveFromDriver',[DriverController::class,'payReceiveFromDriver'])->name('payReceiveFromDriver');
 
         Route::get('passenger-listing',[PassengerController::class,'index'])->name('passengerListing');
         Route::get('passenger-create',[PassengerController::class,'create'])->name('passengerCreate');
