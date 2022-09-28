@@ -113,7 +113,7 @@ class RideInitialDistanceController extends Controller
 
         try {
 
-            $gettingVehicleTypeRecords = $this->rideService->gettingVehicleTypeRecords(trim($distanceInKm),$peakRate,trim($simpleTime));
+            $gettingVehicleTypeRecords = $this->rideService->gettingVehicleTypeRecords(trim($distanceInKm),$peakRate,trim($simpleTime),$request->pick_up_latitude, $request->pick_up_longitude);
 
         } catch (\Exception $e) {
             return makeResponse('error', 'Error in Calculating Estimated Fare & Getting Vehicle Type Record: ' . $e, 500);
