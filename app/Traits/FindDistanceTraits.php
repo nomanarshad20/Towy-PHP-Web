@@ -83,7 +83,6 @@ trait FindDistanceTraits
 
                     $calculateDriverTimeToReach = $this->getDistance($available_driver->latitude,$available_driver->longitude,$pickupLat, $pickupLng);
 
-                    dd($calculateDriverTimeToReach);
 
                     $time = explode(' ',$calculateDriverTimeToReach['text_time']);
 
