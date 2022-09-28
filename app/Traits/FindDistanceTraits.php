@@ -142,7 +142,7 @@ trait FindDistanceTraits
         if (sizeof($data) > 0) {
             return $data;
         } else {
-            return false;
+            return $data;
         }
 
 
