@@ -8,6 +8,7 @@ use App\Models\DriversCoordinate;
 use App\Models\Setting;
 use App\Models\VehicleType;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Http;
 
 trait FindDistanceTraits
 {
@@ -21,10 +22,15 @@ trait FindDistanceTraits
 
             $makeRequest = $client->request('GET', $url);
 
+//            $makeRequest =  Http::get($url);
+
             $response = $makeRequest->getBody();
+
+//            dd($makeRequest->body());
 
             $responseCode = json_decode($response, true);
 
+            dd($responseCode,$response);
 
             return [
                 'value' => ($responseCode['routes'][0]['legs'][0]['distance']['value'] ?? false),
