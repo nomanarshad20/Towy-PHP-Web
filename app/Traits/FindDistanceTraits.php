@@ -14,7 +14,7 @@ trait FindDistanceTraits
     public function getDistance($pickUpLat, $pickupLng, $dropOffLat, $dropOffLng)
     {
 
-        $url = "https://maps.googleapis.com/maps/api/directions/json?origin=" . $pickUpLat . "," . $pickupLng . "&destination=" . $dropOffLat . "," . $dropOffLng . "&sensor=false&mode=driving&key=" . env('GOOGLE_MAP');
+        $url = "http://maps.googleapis.com/maps/api/directions/json?origin=" . $pickUpLat . "," . $pickupLng . "&destination=" . $dropOffLat . "," . $dropOffLng . "&sensor=false&mode=driving&key=" . env('GOOGLE_MAP');
 
         try {
             $client = new Client;
@@ -78,6 +78,7 @@ trait FindDistanceTraits
 
                     $calculateDriverTimeToReach = $this->getDistance($available_driver->latitude,$available_driver->longitude,$pickupLat, $pickupLng);
 
+                    dd($calculateDriverTimeToReach);
 
                     $time = explode(' ',$calculateDriverTimeToReach['text_time']);
 
