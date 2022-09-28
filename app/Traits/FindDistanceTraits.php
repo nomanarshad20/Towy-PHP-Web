@@ -138,7 +138,7 @@ trait FindDistanceTraits
                         'total_distance' => (float)$distance,
                         'peak_factor_applied' => $peak_factor_applied,
                         'peak_factor_rate' => $peakRate,
-                        'driver_reach_time' => $driverTime,
+                        'driver_reach_time_in_minutes' => $driverTime,
                         'driver_id' => $available_driver->driver_id,
                         'estimated_fare' => (float)$estimatedFare, 'name' => $findVehicleFare->name];
                 }
