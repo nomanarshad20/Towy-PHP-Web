@@ -191,7 +191,7 @@
                                     <table>
                                         <tr style="padding-bottom:7px;position: relative;display: block;">
                                             <td style="width: 165px;font-size:13px;">
-                                                {{$ridesSummary['totalCompletedRides'] ?? 0}} X Cash Trips</td>
+                                                {{$ridesSummary['totalCompletedRides'] ?? 0}} X  Trips</td>
                                             <td style="font-size:13px;">Rs.
                                                 {{number_format($ridesSummary['totalDriverCashEarnings'],2) ?? 0}}</td>
 {{--                                            totalDriverCreditAmount--}}
