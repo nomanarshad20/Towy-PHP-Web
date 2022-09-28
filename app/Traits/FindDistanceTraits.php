@@ -30,7 +30,6 @@ trait FindDistanceTraits
 
             $responseCode = json_decode($response, true);
 
-            dd($responseCode,$response);
 
             return [
                 'value' => ($responseCode['routes'][0]['legs'][0]['distance']['value'] ?? false),
