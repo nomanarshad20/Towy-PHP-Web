@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\DriversCoordinate;
 use App\Models\P2PBookingTracking;
 use App\Models\User;
+use App\Services\API\Socket\DriverCancelService;
 use App\Services\API\Socket\DriverStatusService;
 use App\Services\API\Socket\RideAcceptRejectService;
 use App\Traits\BookingResponseTrait;
@@ -23,11 +24,13 @@ class SocketController extends Controller
 
     public $acceptRejectService;
     public $driverService;
+    public $driverCancelService;
 
-    public function __construct(RideAcceptRejectService $acceptRejectService, DriverStatusService $driverStatusService)
+    public function __construct(RideAcceptRejectService $acceptRejectService, DriverStatusService $driverStatusService,DriverCancelService $cancelService)
     {
         $this->acceptRejectService = $acceptRejectService;
         $this->driverService = $driverStatusService;
+        $this->driverCancelService =  $cancelService;
     }
 
     public function updateUser($data, $socket, $io)
@@ -204,8 +207,7 @@ class SocketController extends Controller
                                 ],
 
                             ]);
-                    }
-                    else {
+                    } else {
                         $socket->emit($checkForBooking->passenger_id . '-driverCoordinate', [
                             'result' => 'success',
                             'message' => 'Driver Coordinate is less than 20m',
@@ -241,15 +243,13 @@ class SocketController extends Controller
                 }
 
 
-            }
-            else {
+            } else {
                 $distance = 21;
                 if (!isset($driver)) {
                     $driver = new DriversCoordinate;
                     $driver->driver_id = $data['user_id'];
 
-                }
-                else {
+                } else {
                     $distance = 0;
                     if ($data['latitude'] == $driver->latitude && $data['longitude'] == $driver->longitude) {
                         return $socket->emit($data['user_id'] . '-driverCoordinate',
@@ -282,8 +282,7 @@ class SocketController extends Controller
                     $driver->city = $data['city'];
                     $driver->bearing = $data['bearing'];
                     $driver->save();
-                }
-                else {
+                } else {
                     return $socket->emit($data['user_id'] . '-driverCoordinate',
                         [
                             'result' => 'success',
@@ -318,8 +317,7 @@ class SocketController extends Controller
 
                 ]);
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
 
             return $socket->emit($data['user_id'] . '-driverCoordinate',
                 [
@@ -596,6 +594,34 @@ class SocketController extends Controller
                 ],
 
             ]);
+
+    }
+
+    public function driverCancelBooking($data, $io, $socket)
+    {
+        if (!isset($data['user_id'])) {
+            return $socket->emit('driverLastLocation', [
+                    'result' => 'error',
+                    'message' => 'User ID is a Required Field',
+                    'data' => null
+                ]
+            );
+        }
+
+        $currentUser = User::where('id', $data['user_id'])->first();
+
+        if (!$currentUser) {
+            return $socket->emit($data['user_id'] . '-driverLastLocation',
+                [
+                    'result' => 'error',
+                    'message' => 'User Not Found',
+                    'data' => null
+                ]
+            );
+        }
+
+        return $this->driverCancelService->cancelService($data, $socket, $io, $currentUser);
+
 
     }
 

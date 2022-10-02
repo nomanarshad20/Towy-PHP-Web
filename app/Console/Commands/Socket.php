@@ -83,6 +83,11 @@ class Socket extends Command
             });
 
 
+            //driver cancel service
+            $socket->on('driver-cancel-booking',function($data) use($io,$socket){
+                return $this->socketService->driverCancelBooking($data,$io,$socket);
+            });
+
 //            $socket->on('disconnect', function ($data) use ($io, $socket) {
 //
 //                if (!isset($data['socket_id'])) {

@@ -14,9 +14,8 @@ use Illuminate\Support\Facades\Auth;
 
 class CancelService
 {
-    use CalculateCancelPercentageAmountTrait;
-    use CreateUserWalletTrait;
-    use SendFirebaseNotificationTrait;
+    use CalculateCancelPercentageAmountTrait,CreateUserWalletTrait,SendFirebaseNotificationTrait;
+
 
     public function cancelService($request)
     {
@@ -80,7 +79,7 @@ class CancelService
                 $sendNotification = $this->cancelRide($passengerFCM,$notificationType,$title,$message);
             }
 
-            $balance    =   CreateUserWalletTrait::driverWalletBalance(Auth::user()->id);
+            $balance    =   $this->driverWalletBalance(Auth::user()->id);
 
             $data = [
                 'fine' => $findBooking->fine_amount,
