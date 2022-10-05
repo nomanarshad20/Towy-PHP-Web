@@ -24,7 +24,8 @@ class DashboardService
             ->toArray();
         $totalBooking = array_sum(array_column($bookings, 'total'));
 
-        $bookingData =  Booking::all()->
+        $bookingsData = Booking::with('bookingDetail')->get();
+        $bookingData =  $bookingsData->
         whereBetween('created_at',[Carbon::now()->subMonth(6),Carbon::now()])
             ->groupBy(function ($user) {
                 return Carbon::parse($user->created_at)->format('M/Y');
