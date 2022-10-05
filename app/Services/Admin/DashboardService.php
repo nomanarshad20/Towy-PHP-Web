@@ -20,6 +20,7 @@ class DashboardService
 
         $bookings = Booking::select('ride_status','booking_type', DB::raw('count(*) as total'))
             ->groupBy('ride_status','booking_type')
+            ->whereNotNull('booking_type')
             ->get()
             ->toArray();
         $totalBooking = array_sum(array_column($bookings, 'total'));

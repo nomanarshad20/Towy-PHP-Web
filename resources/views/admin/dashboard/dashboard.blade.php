@@ -155,7 +155,7 @@
 
                 @foreach($bookings as $booking)
                     @if($booking['ride_status'] == 2 || $booking['ride_status'] == 5
-                        || $booking['ride_status'] == 4)
+                        || $booking['ride_status'] == 4 || $booking['ride_status'] == 6)
                         <div class="col-md-4 grid-margin stretch-card">
                             <div class="card">
                                 <div class="card-body">
@@ -167,6 +167,8 @@
                                                 Driver Cancel
                                             @elseif($booking['ride_status'] == 4 && $booking['booking_type'] == 'book_now')
                                                 Complete
+                                            @elseif($booking['ride_status'] == 6 && $booking['booking_type'] == 'book_now')
+                                                All Driver Rejected/Ignored
                                             @endif
 
 
