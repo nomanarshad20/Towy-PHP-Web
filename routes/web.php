@@ -161,6 +161,7 @@ Route::namespace('Admin')->group(function () {
 
     });
 
+    Route::get('test',[\App\Http\Controllers\Admin\TestController::class,'test']);
 
 });
 

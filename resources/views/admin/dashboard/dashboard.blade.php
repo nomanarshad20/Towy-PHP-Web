@@ -161,15 +161,14 @@
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-baseline">
                                         <h6 class="card-title mb-0">
-                                            @if($booking['ride_status'] == 2 || $booking['ride_status'] == 'book_now')
+                                            @if($booking['ride_status'] == 2 && $booking['booking_type'] == 'book_now')
                                                 Passenger Cancel
-                                            @elseif($booking['ride_status'] == 2 || $booking['ride_status'] == 'book_later')
-                                                Schedule
-                                            @elseif($booking['ride_status'] == 4)
-                                                Complete
-                                            @elseif($booking['ride_status'] == 5)
+                                            @elseif($booking['ride_status'] == 5 && $booking['booking_type'] == 'book_now')
                                                 Driver Cancel
+                                            @elseif($booking['ride_status'] == 4 && $booking['booking_type'] == 'book_now')
+                                                Complete
                                             @endif
+
 
                                         </h6>
                                         <div class="dropdown mb-2">
