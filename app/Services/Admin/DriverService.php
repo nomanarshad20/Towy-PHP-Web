@@ -374,7 +374,7 @@ class DriverService
             $driverWalletBalance        = $this->driverWalletBalance($id);
 
 
-            return view('admin.driver.portal', compact('ridesSummary','userInfo','driverWalletBalance'));
+            return view('admin.driver.driver_portal', compact('ridesSummary','userInfo','driverWalletBalance'));
 
         }else {
             return redirect()->back()->with('error', 'Invalid Request, Driver not found!');
