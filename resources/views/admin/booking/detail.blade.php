@@ -65,10 +65,10 @@
                             <p><strong>To:</strong> {{$data->drop_off_area}}</p>
 
                             <h5 class="mt-5 mb-2 text-muted">Passenger :</h5>
-                            <p>{{$data->passenger->name}}</p>
+                            <p>{{$data->passenger->first_name.' '.$data->passenger->last_name}}</p>
 
                             <h5 class="mt-5 mb-2 text-muted">Driver :</h5>
-                            <p>{{$data->driver->name}}</p>
+                            <p>{{$data->driver->first_name.' '.$data->driver->last_name}}</p>
 
                         </div>
                         <div class="col-lg-3 pe-0">
@@ -96,7 +96,7 @@
                             @endif
 
                             <h6 class="mb-0 mt-3 text-end fw-normal mb-2"><span
-                                    class="text-muted">Total Distance :</span>
+                                    class="text-muted">Total Distance In Km:</span>
                                 {{$data->total_calculated_distance ? $data->total_calculated_distance:0}}
                             </h6>
 
@@ -119,8 +119,8 @@
                                     <td class="text-start">1</td>
                                     <td class="text-start">Per Km Rate</td>
                                     <td class="text-start">{{$data->bookingDetail->vehicle_per_km_rate}}</td>
-                                    <td class="text-start">{{$data->total_calculated_distance ? $data->total_calculated_distance :0}}</td>
-                                    <td>{{ $data->bookingDetail->vehicle_per_km_rate * $data->total_calculated_distance}}</td>
+                                    <td class="text-start">{{$data->total_calculated_distance ? $data->bookingDetail->mobile_final_distance :0}}</td>
+                                    <td>{{ $data->bookingDetail->vehicle_per_km_rate * $data->bookingDetail->mobile_final_distance}}</td>
                                 </tr>
 
                                 <tr class="text-end">
@@ -136,8 +136,8 @@
                                     <td class="text-start">3</td>
                                     <td class="text-start">Pick Up KM Rate</td>
                                     <td class="text-start">{{$data->bookingDetail->initial_distance_rate ? $data->bookingDetail->initial_distance_rate:0}}</td>
-                                    <td class="text-start">{{$data->bookingDetail->p2p_before_pick_up_distance ? $data->bookingDetail->p2p_before_pick_up_distance:0}}</td>
-                                    <td>{{$data->bookingDetail->initial_distance_rate * $data->bookingDetail->p2p_before_pick_up_distance}}</td>
+                                    <td class="text-start">{{$data->bookingDetail->mobile_initial_distance ? $data->bookingDetail->mobile_initial_distance:0}}</td>
+                                    <td>{{$data->bookingDetail->initial_distance_rate * $data->bookingDetail->mobile_initial_distance}}</td>
                                 </tr>
 
                                 <tr class="text-end">
@@ -165,15 +165,16 @@
                     @php
                         if($data->ride_status !=2 && $data->ride_status !=3)
                         {
-                            $sum =  ($data->bookingDetail->vehicle_per_km_rate * $data->total_calculated_distance) +
+                            $sum =  ($data->bookingDetail->vehicle_per_km_rate * $data->bookingDetail->mobile_final_distance) +
                                     ($data->bookingDetail->vehicle_per_min_rate * $data->bookingDetail->total_ride_minutes) +
-                                    ($data->bookingDetail->initial_distance_rate * $data->bookingDetail->p2p_before_pick_up_distance) +
+                                    ($data->bookingDetail->initial_distance_rate * $data->bookingDetail->mobile_initial_distance) +
                                     ($data->bookingDetail->initial_time_rate * $data->bookingDetail->total_minutes_to_reach_pick_up_point) +
                                     ($data->bookingDetail->waiting_price_per_min * $data->bookingDetail->driver_waiting_time);
                         }
                         else{
                             $sum = $data->fine_amount;
                         }
+                    $sum =  $sum + $data->bookingDetail->min_vehicle_fare;
 
                     $totalTaxAmount = ($data->bookingDetail->vehicle_tax * $sum )/100;
 
