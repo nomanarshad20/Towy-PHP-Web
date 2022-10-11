@@ -608,7 +608,7 @@ class DriverStatusService
 
                     $charge = $this->stripeService->charge($findBooking, $passengerCustomerID, $calculateDiff);
 
-                    if (isset($charge) && $charge['type'] == 'error') {
+                    if (isset($charge['type']) && $charge['type'] == 'error') {
                         return makeResponse('error', $charge['message'], 500);
                     }
 
