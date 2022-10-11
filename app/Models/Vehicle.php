@@ -15,4 +15,9 @@ class Vehicle extends Model
     {
         return $this->hasOne(Driver::class,'vehicle_id');
     }
+
+    public function vehicleType()
+    {
+        return $this->belongsTo(VehicleType::class,'vehicle_type_id');
+    }
 }

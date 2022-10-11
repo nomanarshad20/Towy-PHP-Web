@@ -29,10 +29,10 @@ class BookingService
     {
         $passengers = User::where('user_type', 1)->where('is_verified', 1)->get();
         $franchises = User::where('user_type', 3)->where('is_verified', 1)->get();
-        $drivers = User::where('user_type',2)->where('is_verified',1)->get();
+        $drivers = User::where('user_type', 2)->where('is_verified', 1)->get();
 //        $vehicleTypes = VehicleType::where('status', 1)->get();
 
-        return view('admin.booking.create', compact('passengers', 'franchises','drivers'));
+        return view('admin.booking.create', compact('passengers', 'franchises', 'drivers'));
     }
 
     public function save($request)
@@ -45,8 +45,41 @@ class BookingService
                 $request->drop_off_lat, $request->drop_off_lng);
 
 
-            $distanceInKm = str_replace(',', '', str_replace('km', '', $findingDistance['text']));
-            $distanceInKm = str_replace(',', '', str_replace('m', '', $findingDistance['text']));
+            $time = explode(' ', $findingDistance['text_time']);
+
+
+            if (isset($time) && isset($time[1])) {
+                if ($time[1] == 'hours' || $time[1] == 'hour') {
+                    $simpleTime = $time[0] * 60;
+                } elseif ($time[1] == 'mins' || $time[1] == 'min') {
+                    $simpleTime = $time[0];
+                }
+
+
+                if (isset($time[2])) {
+                    $simpleTime = $simpleTime + $time[2];
+                }
+
+            } else {
+                $simpleTime = 1;
+            }
+
+
+            $distance = explode(' ', $findingDistance['text']);
+
+
+            if (isset($distance) && isset($distance[1])) {
+                if ($distance[1] == 'm') {
+                    $distanceInKm = (float)$distance[0] / 1000;
+                } elseif ($distance[1] == 'km') {
+                    $distanceInKm = (float)($findingDistance['value'] / 1000);
+                } else {
+                    $distanceInKm = 1;
+                }
+            } else {
+                $distanceInKm = 1;
+            }
+
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -55,7 +88,8 @@ class BookingService
 
         //calculating estimated fare and getting vehicle type record
         try {
-            $gettingVehicleTypeRecords = $this->gettingVehicleTypeRecords(trim($distanceInKm));
+//                $gettingVehicleTypeRecords = $this->gettingVehicleTypeRecords(trim($distanceInKm));
+            $gettingVehicleTypeRecords = $this->gettingVehicleTypeRecords(trim($distanceInKm), null, trim($simpleTime), $request->pick_up_lat, $request->pick_up_lng);
         } catch (\Exception $e) {
             DB::rollBack();
             return makeResponse('error', 'Error in Calculating Estimated Fare & Getting Vehicle Type Record: ' . $e, 200);
@@ -74,12 +108,11 @@ class BookingService
 
             $otpCode = mt_rand(1000, 9999);
 
-            $driverId =  null;
+            $driverId = null;
             $vehicleId = null;
             $rideStatus = 0;
 
-            if($request->driver_id)
-            {
+            if ($request->driver_id) {
                 $driverId = $request->driver_id;
                 $findVehicle = User::find($driverId);
                 $vehicleId = $findVehicle->driver->vehicle_id;
@@ -95,7 +128,7 @@ class BookingService
                 'pick_up_latitude' => $request->pick_up_lat,
                 'pick_up_longitude' => $request->pick_up_lng,
                 'pick_up_date' => $pick_up_date,
-                'pick_up_time' =>$pick_up_time,
+                'pick_up_time' => $pick_up_time,
                 'drop_off_area' => $request->drop_off_area,
                 'drop_off_latitude' => $request->drop_off_lat,
                 'drop_off_longitude' => $request->drop_off_lng,
@@ -125,7 +158,7 @@ class BookingService
 
             DB::commit();
 
-            return makeResponse('success', 'Booking Created Successfully' , 200);
+            return makeResponse('success', 'Booking Created Successfully', 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -139,15 +172,13 @@ class BookingService
     {
         $data = Booking::find($id);
 
-        if($data)
-        {
+        if ($data) {
             $passengers = User::where('user_type', 1)->where('is_verified', 1)->get();
             $franchises = User::where('user_type', 3)->where('is_verified', 1)->get();
-            $drivers = User::where('user_type',2)->where('is_verified', 1)->get();
-            return view('admin.booking.edit',compact('passengers','drivers','franchises','data'));
-        }
-        else{
-            return redirect()->route('bookingListing')->with('error','Record Not Found');
+            $drivers = User::where('user_type', 2)->where('is_verified', 1)->get();
+            return view('admin.booking.edit', compact('passengers', 'drivers', 'franchises', 'data'));
+        } else {
+            return redirect()->route('bookingListing')->with('error', 'Record Not Found');
         }
     }
 
@@ -155,68 +186,52 @@ class BookingService
     {
         DB::beginTransaction();
 
-        $data  = Booking::find($request->id);
+        $data = Booking::find($request->id);
 
-        if($data)
-        {
+        if ($data) {
             //finding distance
             try {
                 $findingDistance = $this->getDistance($request->pick_up_lat, $request->pick_up_lng,
                     $request->drop_off_lat, $request->drop_off_lng);
 
 
-                $time = explode(' ',$findingDistance['text_time']);
+                $time = explode(' ', $findingDistance['text_time']);
 
 
-
-                if(isset($time) && isset($time[1]))
-                {
-                    if($time[1] == 'hours' || $time[1] == 'hour' )
-                    {
+                if (isset($time) && isset($time[1])) {
+                    if ($time[1] == 'hours' || $time[1] == 'hour') {
                         $simpleTime = $time[0] * 60;
-                    }
-                    elseif($time[1] == 'mins' || $time[1] == 'min')
-                    {
+                    } elseif ($time[1] == 'mins' || $time[1] == 'min') {
                         $simpleTime = $time[0];
                     }
 
 
-                    if(isset($time[2]))
-                    {
+                    if (isset($time[2])) {
                         $simpleTime = $simpleTime + $time[2];
                     }
 
-                }
-                else{
+                } else {
                     $simpleTime = 1;
                 }
 
 
-                $distance = explode(' ',$findingDistance['text']);
+                $distance = explode(' ', $findingDistance['text']);
 
 
-                if(isset($distance) && isset($distance[1]))
-                {
-                    if($distance[1] == 'm')
-                    {
-                        $distanceInKm = (float)$distance[0]/1000;
-                    }
-                    elseif($distance[1] == 'km')
-                    {
-                        $distanceInKm = (float)($findingDistance['value']/1000);
-                    }
-                    else{
+                if (isset($distance) && isset($distance[1])) {
+                    if ($distance[1] == 'm') {
+                        $distanceInKm = (float)$distance[0] / 1000;
+                    } elseif ($distance[1] == 'km') {
+                        $distanceInKm = (float)($findingDistance['value'] / 1000);
+                    } else {
                         $distanceInKm = 1;
                     }
-                }
-                else{
+                } else {
                     $distanceInKm = 1;
                 }
 
 
-
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
                 DB::rollBack();
                 return makeResponse('error', 'Error in Finding Distance: ' . $e, 200);
             }
@@ -224,13 +239,11 @@ class BookingService
             //calculating estimated fare and getting vehicle type record
             try {
 //                $gettingVehicleTypeRecords = $this->gettingVehicleTypeRecords(trim($distanceInKm));
-                $gettingVehicleTypeRecords = $this->gettingVehicleTypeRecords(trim($distanceInKm),null,trim($simpleTime),$request->pick_up_latitude, $request->pick_up_longitude);
-
+                $gettingVehicleTypeRecords = $this->gettingVehicleTypeRecords(trim($distanceInKm), null, trim($simpleTime), $request->pick_up_lat, $request->pick_up_lng);
             } catch (\Exception $e) {
                 DB::rollBack();
                 return makeResponse('error', 'Error in Calculating Estimated Fare & Getting Vehicle Type Record: ' . $e, 200);
             }
-
 
 
             //savingData in Booking Table
@@ -242,21 +255,18 @@ class BookingService
                     $pick_up_time = Carbon::parse($request->pick_up_time)->format('H:i:s');
                 }
 
-                if($request->ride_status == 4)
-                {
+                if ($request->ride_status == 4) {
                     $is_passenger_rating_given = 1;
                     $is_driver_rating_given = 1;
-                }
-                else{
+                } else {
                     $is_passenger_rating_given = 1;
                     $is_driver_rating_given = 1;
                 }
 
-                $driverId =  null;
+                $driverId = null;
                 $vehicleId = null;
 
-                if($request->driver_id)
-                {
+                if ($request->driver_id) {
                     $driverId = $request->driver_id;
                     $findVehicle = User::find($driverId);
                     $vehicleId = $findVehicle->driver->vehicle_id;
@@ -271,19 +281,19 @@ class BookingService
                     'pick_up_latitude' => $request->pick_up_lat,
                     'pick_up_longitude' => $request->pick_up_lng,
                     'pick_up_date' => $pick_up_date,
-                    'pick_up_time' =>$pick_up_time,
+                    'pick_up_time' => $pick_up_time,
                     'drop_off_area' => $request->drop_off_area,
                     'drop_off_latitude' => $request->drop_off_lat,
                     'drop_off_longitude' => $request->drop_off_lng,
                     'total_distance' => $distanceInKm,
                     'payment_type' => 'cash',
-                    'estimated_fare' => $gettingVehicleTypeRecords[0]['estimated_fare'],
+                    'estimated_fare' => $request->estimated_fare,
                     'actual_fare' => 0,
                     'ride_status' => $request->ride_status,
                     'is_passenger_rating_given' => $is_passenger_rating_given,
                     'is_driver_rating_given' => $is_driver_rating_given,
                     'driver_id' => $driverId,
-                    'vehicle_id' => $vehicleId
+                    'vehicle_id' => $vehicleId,
 
                 ]);
             } catch (\Exception $e) {
@@ -292,24 +302,49 @@ class BookingService
             }
 
             try {
-                $data->bookingDetail->update ([
-                    'waiting_price_per_min' => $gettingVehicleTypeRecords[0]['waiting_price_per_min'],
-                    'vehicle_tax' => $gettingVehicleTypeRecords[0]['tax_rate'],
-                    'vehicle_per_km_rate' => $gettingVehicleTypeRecords[0]['per_km_rate'],
-                    'vehicle_per_min_rate' => $gettingVehicleTypeRecords[0]['per_min_rate'],
-                    'min_vehicle_fare' => $gettingVehicleTypeRecords[0]['min_fare']
-                ]);
+//                if(sizeof($gettingVehicleTypeRecords) >0  && $request->driver) {
+                if($vehicleId && $driverId)
+                {
+                    $data->bookingDetail->update([
+                        'waiting_price_per_min' => $findVehicle->driver->vehicle->vehicleType->waiting_price_per_min,
+                        'vehicle_tax' => $findVehicle->driver->vehicle->vehicleType->tax_rate,
+                        'vehicle_per_km_rate' => $findVehicle->driver->vehicle->vehicleType->per_km_rate,
+                        'vehicle_per_min_rate' => $findVehicle->driver->vehicle->vehicleType->per_min_rate,
+                        'min_vehicle_fare' => $findVehicle->driver->vehicle->vehicleType->min_fare
+                    ]);
+                }
+                else{
+                    $data->bookingDetail->update([
+                        'waiting_price_per_min' => $gettingVehicleTypeRecords[0]['waiting_price_per_min'],
+                        'vehicle_tax' => $gettingVehicleTypeRecords[0]['tax_rate'],
+                        'vehicle_per_km_rate' => $gettingVehicleTypeRecords[0]['per_km_rate'],
+                        'vehicle_per_min_rate' => $gettingVehicleTypeRecords[0]['per_min_rate'],
+                        'min_vehicle_fare' => $gettingVehicleTypeRecords[0]['min_fare']
+                    ]);
+                }
+
+
+
+//                else{
+//                    $data->bookingDetail->update([
+//                        'waiting_price_per_min' => 0,
+//                        'vehicle_tax' => 0,
+//                        'vehicle_per_km_rate' => 0,
+//                        'vehicle_per_min_rate' => 0,
+//                        'min_vehicle_fare' => 0
+//                    ]);
+//                }
+
 
                 DB::commit();
 
-                return makeResponse('success', 'Booking Updated Successfully' , 200);
+                return makeResponse('success', 'Booking Updated Successfully', 200);
 
             } catch (\Exception $e) {
                 DB::rollBack();
                 return makeResponse('error', 'Error in Updating Booking Detail Request: ' . $e, 200);
             }
-        }
-        else{
+        } else {
             return makeResponse('error', 'Record Not Found', 200);
         }
     }
@@ -318,42 +353,30 @@ class BookingService
     {
         $data = Booking::find($request->id);
 
-        if($data)
-        {
-            try{
+        if ($data) {
+            try {
                 $data->delete();
                 return makeResponse('success', 'Record Deleted', 200);
 
-            }
-            catch (\Exception $e)
-            {
-                return makeResponse('error', 'Error in Delete Booking Record: '.$e, 200);
+            } catch (\Exception $e) {
+                return makeResponse('error', 'Error in Delete Booking Record: ' . $e, 200);
 
             }
-        }
-        else{
+        } else {
             return makeResponse('error', 'Record Not Found', 200);
         }
     }
 
     public function detail($id)
     {
-        $data =  Booking::find($id);
+        $data = Booking::find($id);
 
-        if($data)
-        {
-            return view('admin.booking.detail',compact('data'));
-        }
-        else{
-            return redirect()->route('bookingListing')->with('error','Record Not Found');
+        if ($data) {
+            return view('admin.booking.detail', compact('data'));
+        } else {
+            return redirect()->route('bookingListing')->with('error', 'Record Not Found');
         }
     }
-
-
-
-
-
-
 
 
 }

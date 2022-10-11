@@ -107,7 +107,7 @@
                             <div class="col-sm-6">
                                 <div class="mb-3">
                                     <label class="form-label">Estimated Fare</label>
-                                    <input type="text" readonly value="{{$data->estimated_fare}}" class="form-control">
+                                    <input type="text" name="estimated_fare" readonly value="{{$data->estimated_fare}}" class="form-control">
                                 </div>
                             </div><!-- Col -->
 

@@ -40,6 +40,9 @@ class BookingController extends Controller
 
     public function update(CreateBookingRequest $request)
     {
+        $this->validate($request,[
+            'driver_id' => 'required'
+        ]);
         return $this->bookingService->update($request);
     }
 
