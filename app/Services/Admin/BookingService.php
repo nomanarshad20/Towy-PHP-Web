@@ -165,18 +165,67 @@ class BookingService
                     $request->drop_off_lat, $request->drop_off_lng);
 
 
-                $distanceInKm = str_replace(',', '', str_replace('km', '', $findingDistance['text']));
-                $distanceInKm = str_replace(',', '', str_replace('m', '', $findingDistance['text']));
+                $time = explode(' ',$findingDistance['text_time']);
 
 
-            } catch (\Exception $e) {
+
+                if(isset($time) && isset($time[1]))
+                {
+                    if($time[1] == 'hours' || $time[1] == 'hour' )
+                    {
+                        $simpleTime = $time[0] * 60;
+                    }
+                    elseif($time[1] == 'mins' || $time[1] == 'min')
+                    {
+                        $simpleTime = $time[0];
+                    }
+
+
+                    if(isset($time[2]))
+                    {
+                        $simpleTime = $simpleTime + $time[2];
+                    }
+
+                }
+                else{
+                    $simpleTime = 1;
+                }
+
+
+                $distance = explode(' ',$findingDistance['text']);
+
+
+                if(isset($distance) && isset($distance[1]))
+                {
+                    if($distance[1] == 'm')
+                    {
+                        $distanceInKm = (float)$distance[0]/1000;
+                    }
+                    elseif($distance[1] == 'km')
+                    {
+                        $distanceInKm = (float)($findingDistance['value']/1000);
+                    }
+                    else{
+                        $distanceInKm = 1;
+                    }
+                }
+                else{
+                    $distanceInKm = 1;
+                }
+
+
+
+            }
+            catch (\Exception $e) {
                 DB::rollBack();
                 return makeResponse('error', 'Error in Finding Distance: ' . $e, 200);
             }
 
             //calculating estimated fare and getting vehicle type record
             try {
-                $gettingVehicleTypeRecords = $this->gettingVehicleTypeRecords(trim($distanceInKm));
+//                $gettingVehicleTypeRecords = $this->gettingVehicleTypeRecords(trim($distanceInKm));
+                $gettingVehicleTypeRecords = $this->gettingVehicleTypeRecords(trim($distanceInKm),null,trim($simpleTime),$request->pick_up_latitude, $request->pick_up_longitude);
+
             } catch (\Exception $e) {
                 DB::rollBack();
                 return makeResponse('error', 'Error in Calculating Estimated Fare & Getting Vehicle Type Record: ' . $e, 200);
