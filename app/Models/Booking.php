@@ -42,4 +42,20 @@ class Booking extends Model
     {
         return $this->belongsTo(Vehicle::class,'passenger_id');
     }
+
+
+    public function cancel()
+    {
+        return $this->belongsTo(BookingCancelReason::class,'cancel_id');
+    }
+
+    public function driverRating()
+    {
+        return $this->belongsTo(BookingRating::class,'giver_id');
+    }
+
+    public function passengerRating()
+    {
+        return $this->belongsTo(BookingRating::class,'giver_id');
+    }
 }
