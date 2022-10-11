@@ -63,10 +63,10 @@
                                         @endif
 
                                     </td>
-                                    <td>{{isset($booking->passenger) ? $booking->passenger->name:'N/A'}}</td>
-                                    <td>{{isset($booking->driver) ? $booking->driver->name:'N/A'}}</td>
+                                    <td>{{isset($booking->passenger) ? $booking->passenger->first_name .' '.$booking->passenger->last_name:'N/A'}}</td>
+                                    <td>{{isset($booking->driver) ? $booking->driver->first_name.' '.$booking->driver->last_name:'N/A'}}</td>
                                     {{--                                    <td>{{$booking->vehicleType->name}}</td>--}}
-                                    <td>{{isset($booking->franchise) ? $booking->franchise->name:'N/A'}}</td>
+                                    <td>{{isset($booking->franchise) ? $booking->franchise->first_name.' '.$booking->franchise->last_name:'N/A'}}</td>
                                     <td>{{$booking->booking_type}}</td>
                                     <td>{{$booking->pick_up_area}}</td>
                                     <td>{{$booking->drop_off_area}}</td>
