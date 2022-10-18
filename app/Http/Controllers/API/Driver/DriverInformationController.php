@@ -145,4 +145,11 @@ class DriverInformationController extends Controller
 
         return makeResponse($saveVehicleType['result'],$saveVehicleType['message'],$saveVehicleType['code'],$data);
     }
+
+    public function recommendedVehicle()
+    {
+        $getVehicleTypes =  $this->driverService->getRecommendedVehicleType();
+
+        return makeResponse($getVehicleTypes['result'],$getVehicleTypes['message'],$getVehicleTypes['code'], $getVehicleTypes['data']);
+    }
 }

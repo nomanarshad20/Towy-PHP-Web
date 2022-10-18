@@ -311,5 +311,27 @@ class DriverInformationService
 
     }
 
+    public function getRecommendedVehicleType()
+    {
+        $recommendedVehicleType =  Driver::select('vehicle_type_id',DB::raw('count("vehicle_type_id") as total'))
+            ->whereNotNull('vehicle_type_id')->groupBy('vehicle_type_id')
+            ->take(2)
+            ->pluck('vehicle_type_id')->toArray();
+        $data = VehicleType::select('id', 'name', 'image','description')->where('status', 1)->whereIn('id',$recommendedVehicleType)->get();
+
+//        $vehicleTypeArray =  array();
+//        foreach($data as $vehicleType)
+//        {
+//            $vehicleTypeArray[] = ['id'=>$vehicleType->id,'name'=>$vehicleType->name];
+//        }
+
+        if (sizeof($data) > 0) {
+            $response = ['result' => 'success', 'message' => 'Recommended Vehicle Type Found Successfully', 'code' => 200, 'data' => $data];
+        } else {
+            $response = ['result' => 'error', 'message' => 'Recommended Vehicle Type Not Found', 'code' => 404, 'data' => null];
+        }
+        return $response;
+    }
+
 
 }

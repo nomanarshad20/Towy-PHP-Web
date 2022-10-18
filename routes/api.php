@@ -112,6 +112,8 @@ Route::group(['middleware' => ['json.response']], function () {
                 Route::get('driver-save-vehicle-type',[DriverInformationController::class,'saveVehicleType']);
                 Route::get('driver-save-social-security-number',[DriverInformationController::class,'saveSocialSecurityNumber']);
 
+                Route::get('recommended-vehicle-types',[DriverInformationController::class,'recommendedVehicle']);
+
                 Route::post('driver-save-location',[DriverLocationController::class,'save']);
 
                 Route::get('driver-trip-history',[TripsController::class,'index']);
