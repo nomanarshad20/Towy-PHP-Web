@@ -140,4 +140,11 @@ Route::group(['middleware' => ['json.response']], function () {
     });
 
 
+    Route::get('passenger-help',function(){
+       return view('passenger_help');
+    });
+
+    Route::get('driver-help',function(){
+        return view('driver_help');
+    });
 });
