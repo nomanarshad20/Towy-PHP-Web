@@ -98,4 +98,9 @@ class DriverController extends Controller
     {
         return $this->driverService->payOrReceivePartnerAmount($request);
     }
+
+    public function approvalRequest(Request $request)
+    {
+        return $this->driverService->approvalRequest($request);
+    }
 }

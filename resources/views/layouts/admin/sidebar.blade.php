@@ -52,6 +52,10 @@
                         <li class="nav-item">
                             <a href="{{route('driverCreate')}}" class="nav-link">Create</a>
                         </li>
+
+                        <li class="nav-item">
+                            <a href="{{route('driverApprovalRequest')}}" class="nav-link">Approval Request</a>
+                        </li>
                     </ul>
                 </div>
             </li>

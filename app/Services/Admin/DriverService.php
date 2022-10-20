@@ -7,6 +7,7 @@ namespace App\Services\Admin;
 use App\Helper\ImageUploadHelper;
 use App\Models\Driver;
 use App\Models\Franchise;
+use App\Models\ResendRequest;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleType;
@@ -427,5 +428,12 @@ class DriverService
         } catch (\Exception $e) {
             return Redirect()->back()->withErrors(['error', $e->getMessage()]);
         }
+    }
+
+    public function approvalRequest($request)
+    {
+        $data = ResendRequest::all();
+
+        return view('admin.driver.approval_request_list',compact('data'));
     }
 }
