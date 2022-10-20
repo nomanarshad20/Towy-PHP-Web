@@ -7,11 +7,13 @@ namespace App\Services\API\Driver;
 use App\Helper\ImageUploadHelper;
 use App\Models\Driver;
 use App\Models\DriversCoordinate;
+use App\Models\ResendRequest;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Mockery\Exception;
 use const http\Client\Curl\AUTH_ANY;
 
 class DriverInformationService
@@ -331,6 +333,22 @@ class DriverInformationService
             $response = ['result' => 'error', 'message' => 'Recommended Vehicle Type Not Found', 'code' => 404, 'data' => null];
         }
         return $response;
+    }
+
+    public function resendRequest($request)
+    {
+        try{
+            $data =  ResendRequest::create([
+               'user_id' => Auth::user()->id,
+               'message' => $request->message
+            ]);
+
+            return makeResponse('success','Your request send to successfully.Admin will get back to you shortly');
+
+        }
+        catch (\Exception $e){
+            return makeResponse('error','Error in Saving Request: '.$e);
+        }
     }
 
 

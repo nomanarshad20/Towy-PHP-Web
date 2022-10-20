@@ -111,6 +111,7 @@ Route::group(['middleware' => ['json.response']], function () {
                 Route::get('driver-get-vehicle-types',[DriverInformationController::class,'getVehicleType']);
                 Route::get('driver-save-vehicle-type',[DriverInformationController::class,'saveVehicleType']);
                 Route::get('driver-save-social-security-number',[DriverInformationController::class,'saveSocialSecurityNumber']);
+                Route::post('resend-approval-request',[DriverInformationController::class,'resendRequest']);
 
                 Route::get('recommended-vehicle-types',[DriverInformationController::class,'recommendedVehicle']);
 
@@ -127,6 +128,7 @@ Route::group(['middleware' => ['json.response']], function () {
 
                 Route::post('driver-save-rating',[BookingRatingController::class,'giveRating']);
                 Route::post('driver-portal',[FareDistributionsController::class,'driverWalletPortal']);
+
 
 
             });

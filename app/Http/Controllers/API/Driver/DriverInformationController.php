@@ -152,4 +152,9 @@ class DriverInformationController extends Controller
 
         return makeResponse($getVehicleTypes['result'],$getVehicleTypes['message'],$getVehicleTypes['code'], $getVehicleTypes['data']);
     }
+
+    public function resendRequest(Request $request)
+    {
+        return $this->driverService->resendRequest($request);
+    }
 }
