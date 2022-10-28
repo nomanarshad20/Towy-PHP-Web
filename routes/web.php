@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\CancelReasonController;
 use App\Http\Controllers\Admin\VoucherCodeController;
 use App\Http\Controllers\Admin\BannerImageController;
 use App\Http\Controllers\Admin\PassengerController;
+use App\Http\Controllers\Admin\ServiceController;
 //use App\Http\Controllers\Admin\HtmlPagesContentController;
 /*
 |--------------------------------------------------------------------------
@@ -97,6 +98,16 @@ Route::namespace('Admin')->group(function () {
         Route::post('vehicle-delete',[VehicleController::class,'delete'])->name('vehicleDelete');
 //        Route::get('vehicle-change-status',[VehicleController::class,'changeStatus'])->name('vehicleChangeStatus');
         Route::get('vehicle-delete-image',[VehicleController::class,'deleteImage'])->name('vehicleDeleteImage');
+
+
+        Route::get('service-listing',[ServiceController::class,'index'])->name('serviceListing');
+        Route::get('service-create',[ServiceController::class,'create'])->name('serviceCreate');
+        Route::post('service-save',[ServiceController::class,'save'])->name('serviceSave');
+        Route::get('service-edit/{id}',[ServiceController::class,'edit'])->name('serviceEdit');
+        Route::post('service-update',[ServiceController::class,'update'])->name('serviceUpdate');
+        Route::post('service-delete',[ServiceController::class,'delete'])->name('serviceDelete');
+//        Route::get('vehicle-change-status',[VehicleController::class,'changeStatus'])->name('vehicleChangeStatus');
+        Route::get('service-delete-image',[ServiceController::class,'deleteImage'])->name('serviceDeleteImage');
 
 
         Route::get('vehicle-type-listing',[VehicleTypeController::class,'index'])->name('vehicleTypeListing');
