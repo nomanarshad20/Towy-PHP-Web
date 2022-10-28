@@ -6,7 +6,7 @@
 
 @section('style')
     <link rel="stylesheet" href="{{asset('admin/css/dataTables.bootstrap4.css')}}">
-
+    <link rel="stylesheet" href="{{asset('admin/css/select2(4.0.3).min.css')}}">
 
 @endsection
 
@@ -87,12 +87,25 @@
                                 </div>
                             </div><!-- Col -->
 
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">User Type</label>
+                                    <select class="form-control userType" name="user_type">
+                                        <option value="4" {{$data->user_type == 4 ? 'selected':''}}>Service Provider</option>
+
+                                        <option value="2" {{$data->user_type == 2 ? 'selected':''}}>Towy (Driver)</option>
+                                    </select>
+
+                                </div>
+                            </div><!-- Col -->
+
+
 
                         </div><!-- Row -->
 
-                        <h6 class="card-title">Vehicle Information</h6>
+                        <h6 class="card-title vehicleSection" style="display: none">Vehicle Information</h6>
 
-                        <div class="row">
+                        <div class="row vehicleSection" style="display: none">
 {{--                            <div class="col-sm-6">--}}
 {{--                                <div class="mb-3">--}}
 {{--                                    <label class="form-label">Vehicle Type</label>--}}
@@ -143,11 +156,11 @@
                             </div>
                         </div>
 
-                        <h6 class="card-title">
+                        <h6 class="card-title vehicleSection" style="display: none">
                             Driver Documentation
                         </h6>
 
-                        <div class="row">
+                        <div class="row vehicleSection" style="display: none">
                             <div class="col-md-6 stretch-card grid-margin grid-margin-md-0">
                                 <div class="card">
                                     <div class="card-body">
@@ -193,7 +206,6 @@
                                 </div>
                             </div>
 
-
                             <div class="col-md-6 stretch-card grid-margin grid-margin-md-0">
                                 <div class="card">
                                     <div class="card-body">
@@ -224,6 +236,30 @@
                                     </div>
                                 </div>
                             </div>
+
+
+                        </div>
+
+                        <h6 class="card-title serviceSection" style="display: none" >Service</h6>
+
+                        <div class="row serviceSection" style="display: none">
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Service</label>
+
+                                    <select name="services[]" multiple="multiple" class="form-control js-example-basic-multiple">
+
+                                        @foreach($services as $service)
+                                            @if(in_array($service->id,$userServices))
+                                                <option value="{{$service->id}}" selected>{{$service->name}}</option>
+                                            @else
+                                                <option value="{{$service->id}}">{{$service->name}}</option>
+                                            @endif
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div><!-- Col -->
+
 
 
                         </div>
@@ -262,9 +298,22 @@
     <script src="{{asset('admin/js/dropify.min.js')}}"></script>
 
     <script src="{{asset('admin/js/dropify.js')}}"></script>
+    <script src="{{asset('admin/js/select2(4.0.3).full.js')}}"></script>
 
     <script>
         $(document).ready(function () {
+
+            $('.js-example-basic-multiple').select2();
+
+
+            @if($data->user_type == 2)
+                $('.vehicleSection').show();
+                $('.serviceSection').hide();
+            @elseif($data->user_type == 4)
+                $('.serviceSection').show();
+                $('.vehicleSection').hide();
+            @endif
+
 
             $('.updateDriverBtn').click(function () {
 
@@ -362,6 +411,24 @@
                 });
 
             });
+
+            $('.userType').click(function(){
+                var data =  $(this).val();
+                if(data == 2)
+                {
+                    $('.vehicleSection').show();
+                    $('.serviceSection').hide();
+                }
+                else if(data == 4)
+                {
+
+                    $('.vehicleSection').hide();
+                    $('.serviceSection').show();
+                    $('.js-example-basic-multiple').select2();
+
+                }
+            });
+
 
 
         });

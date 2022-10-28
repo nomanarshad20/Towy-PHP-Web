@@ -6,6 +6,8 @@
 
 @section('style')
     <link rel="stylesheet" href="{{asset('admin/css/dataTables.bootstrap4.css')}}">
+    <link rel="stylesheet" href="{{asset('admin/css/select2(4.0.3).min.css')}}">
+
 @endsection
 
 
@@ -83,11 +85,24 @@
                             </div><!-- Col -->
 
 
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">User Type</label>
+                                    <select class="form-control userType" name="user_type">
+                                        <option value="4">Service Provider</option>
+
+                                        <option value="2">Towy (Driver)</option>
+                                    </select>
+
+                                </div>
+                            </div><!-- Col -->
+
+
                         </div><!-- Row -->
 
-                        <h6 class="card-title">Vehicle Information</h6>
+                        <h6 class="card-title vehicleSection">Vehicle Information</h6>
 
-                        <div class="row">
+                        <div class="row vehicleSection">
                             <div class="col-sm-6">
                                 <div class="mb-3">
                                     <label class="form-label">Vehicle Type</label>
@@ -134,6 +149,26 @@
                             </div>
                         </div>
 
+                        <h6 class="card-title serviceSection" >Service</h6>
+
+                        <div class="row serviceSection" >
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Service</label>
+
+                                        <select name="services[]" multiple="multiple" class="form-control js-example-basic-multiple">
+
+                                        @foreach($services as $service)
+                                            <option value="{{$service->id}}">{{$service->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div><!-- Col -->
+
+
+
+                        </div>
+
                         <button type="button" class="btn btn-primary createDriverBtn">
                             Create
                         </button>
@@ -147,8 +182,16 @@
 @endsection
 
 @section('script')
+
+    <script src="{{asset('admin/js/select2(4.0.3).full.js')}}"></script>
+
+
     <script>
         $(document).ready(function () {
+
+            $('.vehicleSection').hide();
+            $('.js-example-basic-multiple').select2();
+
 
             $('.createDriverBtn').click(function () {
 
@@ -195,6 +238,20 @@
 
 
                 });
+            });
+
+            $('.userType').click(function(){
+                var data =  $(this).val();
+                if(data == 2)
+                {
+                    $('.vehicleSection').show();
+                    $('.serviceSection').hide();
+                }
+                else if(data == 4)
+                {
+                    $('.vehicleSection').hide();
+                    $('.serviceSection').show();
+                }
             });
 
 

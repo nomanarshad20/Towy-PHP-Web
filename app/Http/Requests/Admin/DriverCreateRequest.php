@@ -30,10 +30,10 @@ class DriverCreateRequest extends FormRequest
 //            'franchise_id' => 'required',
             'city' => 'required',
 
-            'vehicle_name' => 'required',
-            'model' => 'required',
-            'model_year' => 'required',
-            'registration_number' => 'required',
+            'vehicle_name' => 'required_if:user_type,2',
+            'model' => 'required_if:user_type,2',
+            'model_year' => 'required_if:user_type,2',
+            'registration_number' => 'required_if:user_type,2',
 
         ];
     }

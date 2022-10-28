@@ -8,6 +8,7 @@ use App\Helper\ImageUploadHelper;
 use App\Models\Driver;
 use App\Models\Franchise;
 use App\Models\ResendRequest;
+use App\Models\Service;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleType;
@@ -19,20 +20,21 @@ use Illuminate\Support\Facades\DB;
 class DriverService
 {
 
-    use CreateUserWalletTrait,DriverPortalTrait;
+    use CreateUserWalletTrait, DriverPortalTrait;
 
     public function index()
     {
-        $data = User::where('user_type', 2)->get();
+        $data = User::whereIn('user_type', [2,4])->get();
         return view('admin.driver.listing', compact('data'));
     }
 
     public function create()
     {
 //        $franchises = User::where('user_type', 3)->where('is_verified', 1)->get();
-        $vehicleTypes =  VehicleType::where('status',1)->get();
+        $vehicleTypes = VehicleType::where('status', 1)->get();
+        $services = Service::all();
 
-        return view('admin.driver.create', compact('vehicleTypes'));
+        return view('admin.driver.create', compact('vehicleTypes', 'services'));
     }
 
     public function save($request)
@@ -44,9 +46,7 @@ class DriverService
                 'last_name' => $request->last_name,
                 'email' => $request->email,
                 'password' => bcrypt($request->password),
-                'mobile_no' => $request->mobile_no, 'user_type' => 2,
-
-
+                'mobile_no' => $request->mobile_no, 'user_type' => $request->user_type,
             ]);
 
         } catch (\Exception $e) {
@@ -54,24 +54,45 @@ class DriverService
             return makeResponse('error', 'Error in Creating User: ' . $e, 200);
         }
 
+        if ($request->user_type == 2) {
 
-        try {
-            $vehicle = Vehicle::create(['name' => $request->vehicle_name,
-                'model' => $request->model,'vehicle_type_id'=>$request->vehicle_type_id,
-                'model_year' => $request->model_year,
-                'registration_number' => $request->registration_number]);
+            try {
+                $vehicle = Vehicle::create(['name' => $request->vehicle_name,
+                    'model' => $request->model, 'vehicle_type_id' => $request->vehicle_type_id,
+                    'model_year' => $request->model_year,
+                    'registration_number' => $request->registration_number]);
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return makeResponse('error', 'Error in Creating Vehicle: ' . $e, 200);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return makeResponse('error', 'Error in Creating Vehicle: ' . $e, 200);
+            }
+        } elseif ($request->user_type == 4) {
+            try {
+                foreach ($request->services as $service) {
+                    $driverService = \App\Models\DriverService::create([
+                        'user_id' => $user->id,
+                        'service_id' => $service
+                    ]);
+                }
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return makeResponse('error', 'Error in Saving Driver Service: ' . $e, 200);
+            }
         }
 
         try {
 
+            $vehicle = null;
+            if(isset($vehicle->id))
+            {
+                $vehicle =  $vehicle->id;
+            }
+
+
             $driver = Driver::create(['city' => $request->city,
                 'franchise_id' => $request->franchise_id,
-                'vehicle_type_id'=>$request->vehicle_type_id,
-                'vehicle_id' => $vehicle->id, 'user_id' => $user->id]);
+                'vehicle_type_id' => $request->vehicle_type_id,
+                'vehicle_id' => $vehicle, 'user_id' => $user->id]);
 
 
             $user->referral_code = "partner-00" . $user->id;
@@ -95,11 +116,14 @@ class DriverService
         $data = User::find($id);
 
         if ($data) {
+
+            $services = Service::all();
             $franchises = User::where('user_type', 3)->where('is_verified', 1)->get();
+            $userServices = \App\Models\DriverService::where('user_id',$id)->pluck('service_id')->toArray();
 //            $vehicleTypes =  VehicleType::where('status',1)->get();
 
 
-            return view('admin.driver.edit', compact('data', 'franchises'));
+            return view('admin.driver.edit', compact('data', 'franchises','services','userServices'));
         } else {
             return redirect()->route('driverListing')->with('error', 'Record Not Found');
         }
@@ -126,12 +150,12 @@ class DriverService
 
         $data = User::find($request->id);
 
-        if ($data && $data->user_type == 2) {
+        if ($data) {
             try {
                 $data->update(['first_name' => $request->first_name,
                     'last_name' => $request->last_name,
                     'email' => $request->email,
-                    'mobile_no' => $request->mobile_no, 'user_type' => 2,
+                    'mobile_no' => $request->mobile_no, 'user_type' => $request->user_type,
                 ]);
 
                 if ($request->password) {
@@ -143,47 +167,72 @@ class DriverService
             }
 
 
-            try {
-                if(isset($data->driver->vehicle))
-                {
-                    $data->driver->vehicle->update(['name' => $request->vehicle_name,
-                        'model' => $request->model,'vehicle_type_id'=>$request->vehicle_type_id,
-                        'model_year' => $request->model_year,
-                        'registration_number' => $request->registration_number]);
+            if($request->user_type == 2) {
+                try {
+                    if (isset($data->driver->vehicle)) {
+                        $data->driver->vehicle->update(['name' => $request->vehicle_name,
+                            'model' => $request->model, 'vehicle_type_id' => $request->vehicle_type_id,
+                            'model_year' => $request->model_year,
+                            'registration_number' => $request->registration_number]);
 
-                    $saveVehicle = $data->driver->vehicle;
+                        $saveVehicle = $data->driver->vehicle;
+                    } else {
+                        $saveVehicle = Vehicle::create(['name' => $request->vehicle_name,
+                            'model' => $request->model, 'vehicle_type_id' => $request->vehicle_type_id,
+                            'model_year' => $request->model_year,
+                            'registration_number' => $request->registration_number]);
+                    }
+
+
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    return makeResponse('error', 'Error in Creating Vehicle: ' . $e, 200);
                 }
-                else{
-                    $saveVehicle =  Vehicle::create(['name' => $request->vehicle_name,
-                        'model' => $request->model,'vehicle_type_id'=>$request->vehicle_type_id,
-                        'model_year' => $request->model_year,
-                        'registration_number' => $request->registration_number]);
+            }
+            elseif($request->user_type == 4){
+                try {
+                    \App\Models\DriverService::where('user_id',$request->id)->delete();
+
+                    foreach ($request->services as $service) {
+                        $driverService = \App\Models\DriverService::create([
+                            'user_id' => $request->id,
+                            'service_id' => $service
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    return makeResponse('error', 'Error in Saving Driver Service: ' . $e, 200);
                 }
-
-
-            } catch (\Exception $e) {
-                DB::rollBack();
-                return makeResponse('error', 'Error in Creating Vehicle: ' . $e, 200);
             }
 
-
             try {
 
-                if(isset($data->driver))
+                $vehicle = null;
+                if(isset($saveVehicle->id))
                 {
-                    $driver = Driver::where('user_id',$request->id)
+                    $vehicle = $saveVehicle->id;
+                }
+
+                if(isset($data->driver->vehicle) )
+                {
+                    $vehicle = $data->driver->vehicle->id;
+                }
+
+                if (isset($data->driver)) {
+                    $driver = Driver::where('user_id', $request->id)
                         ->update(['city' => $request->city,
                             'franchise_id' => $request->franchise_id,
-                            'vehicle_type_id'=>$request->vehicle_type_id,
-                            'vehicle_id' => isset($data->driver->vehicle)  ? $data->driver->vehicle->id: $saveVehicle->id,
+                            'vehicle_type_id' => $request->vehicle_type_id,
+//                            'vehicle_id' => isset($data->driver->vehicle) ? $data->driver->vehicle->id : $saveVehicle->id,
+                            'vehicle_id' =>$vehicle,
                             'user_id' => $request->id]);
 
-                }
-                else{
+                } else {
                     $driver = Driver::create(['city' => $request->city,
                         'franchise_id' => $request->franchise_id,
-                        'vehicle_type_id'=>$request->vehicle_type_id,
-                        'vehicle_id' => $saveVehicle->id,
+                        'vehicle_type_id' => $request->vehicle_type_id,
+//                        'vehicle_id' => $saveVehicle->id,
+                        'vehicle_id' =>$vehicle,
                         'user_id' => $request->id,
 
                     ]);
@@ -215,7 +264,6 @@ class DriverService
                 }
 
 
-
                 if ($request->has('registration_book')) {
                     $image = ImageUploadHelper::uploadImage($request->registration_book, 'upload/vehicle/' . $data->driver->vehicle->id . '/');
                     $saveVehicle->registration_book = $image;
@@ -225,7 +273,7 @@ class DriverService
                 if ($request->has('profile_image')) {
                     $profile_image = ImageUploadHelper::uploadImage($request->profile_image, 'upload/driver/' . $request->id . '/');
                     $data->image = $profile_image;
-                    $vehicleTypes =  VehicleType::where('status',1)->get();
+                    $vehicleTypes = VehicleType::where('status', 1)->get();
 
                     $data->save();
 
@@ -241,18 +289,15 @@ class DriverService
             }
 
 
-
-
             if ($data->driver->vehicle_inspection && $data->driver->vehicle_insurance
             && $data->driver->drivers_license
-            && isset($saveVehicle) ? $saveVehicle->registration_book :false
+            && isset($saveVehicle) ? $saveVehicle->registration_book : false
                 && $data->image) {
 
                 $data->steps = 4;
                 $data->save();
 
             }
-
 
 
             DB::commit();
@@ -325,7 +370,7 @@ class DriverService
 
                 $data->driver->vehilce->save();
             } else {
-                $data->driver->update(['' .$request->image => null]);
+                $data->driver->update(['' . $request->image => null]);
             }
 
             return makeResponse('success', 'Image Removed Successfully', 200);
@@ -338,81 +383,81 @@ class DriverService
     }
 
 
-    public function portal($id,$fromDate=null,$tillDate=null)
+    public function portal($id, $fromDate = null, $tillDate = null)
     {
-        $ridesSummary       = [];
-        $previousAmount     = 0;
+        $ridesSummary = [];
+        $previousAmount = 0;
 
-        if(!isset($fromDate) && $fromDate == null){
-            $fromDate           = Carbon::today();
+        if (!isset($fromDate) && $fromDate == null) {
+            $fromDate = Carbon::today();
         }
-        if(!isset($tillDate) && $tillDate == null){
-            $tillDate           = Carbon::now();
+        if (!isset($tillDate) && $tillDate == null) {
+            $tillDate = Carbon::now();
         }
 
-        $userInfo               = User::where('id', $id)->first();
+        $userInfo = User::where('id', $id)->first();
 
-        if(isset($userInfo) && $userInfo != null){
-            $firstDate          = Carbon::parse($fromDate);
-            $secondDate         = Carbon::parse($userInfo->created_at);
+        if (isset($userInfo) && $userInfo != null) {
+            $firstDate = Carbon::parse($fromDate);
+            $secondDate = Carbon::parse($userInfo->created_at);
 
             if ($firstDate->greaterThan($secondDate)) {
-                $preFromDate            = $secondDate;
-                $preTillDate            = $firstDate;
+                $preFromDate = $secondDate;
+                $preTillDate = $firstDate;
 
-                $preDriverCalculations  = $this->driverPortalPreviousDetails($id, $preFromDate, $preTillDate);
+                $preDriverCalculations = $this->driverPortalPreviousDetails($id, $preFromDate, $preTillDate);
 
-                if(isset($preDriverCalculations) && $preDriverCalculations['previous_final_total_amount'] != 0)
-                    $previousAmount     = $preDriverCalculations['previous_final_total_amount'];
+                if (isset($preDriverCalculations) && $preDriverCalculations['previous_final_total_amount'] != 0)
+                    $previousAmount = $preDriverCalculations['previous_final_total_amount'];
 
             }
 
             if ($firstDate->lessThanOrEqualTo($secondDate))
-                $fromDate       = $secondDate;
+                $fromDate = $secondDate;
 
-            $ridesSummary       = $this->driverPortalDetails($id, $fromDate, $tillDate,$previousAmount);
+            $ridesSummary = $this->driverPortalDetails($id, $fromDate, $tillDate, $previousAmount);
 
-            $driverWalletBalance        = $this->driverWalletBalance($id);
+            $driverWalletBalance = $this->driverWalletBalance($id);
 
 
-            return view('admin.driver.driver_portal', compact('ridesSummary','userInfo','driverWalletBalance'));
+            return view('admin.driver.driver_portal', compact('ridesSummary', 'userInfo', 'driverWalletBalance'));
 
-        }else {
+        } else {
             return redirect()->back()->with('error', 'Invalid Request, Driver not found!');
         }
     }
 
     public function payOrReceivePartnerAmount($request)
     {
-        try{
-            $amount         = $request->amount;
-            $partnerId      = $request->id;
+        try {
+            $amount = $request->amount;
+            $partnerId = $request->id;
             $payReceiveFlag = $request->payReceiveFlag;
             $payment_method = "cash_paid";
-            $driver_type    = "Public Partner";
-            $type           = "debit";
-            $description    = "Rs. " . $amount . " " . $payReceiveFlag . " to Partner";
+            $driver_type = "Public Partner";
+            $type = "debit";
+            $description = "Rs. " . $amount . " " . $payReceiveFlag . " to Partner";
 
-            $user           = User::with('driver')->where('id',$partnerId)->first();
-            if(isset($user) && $amount > 0) {
+            $user = User::with('driver')->where('id', $partnerId)->first();
+            if (isset($user) && $amount > 0) {
                 if ($amount > 0) {
                     $data[] = [
-                        "driver_id"     => $user->id,
-                        "franchise_id"  => $user->driver->franchise_id
+                        "driver_id" => $user->id,
+                        "franchise_id" => $user->driver->franchise_id
                     ];
-                    if($payReceiveFlag == 'bonus'){
+                    if ($payReceiveFlag == 'bonus') {
 
-                        $type               = "credit";
-                        $payment_method     = "bonus";
-                        $description        = "Received  Bonus Rs. " . $amount . " From Toto Admin.";
+                        $type = "credit";
+                        $payment_method = "bonus";
+                        $description = "Received  Bonus Rs. " . $amount . " From Toto Admin.";
                         // Update Partner Wallet
                         $driverCalculations = $this->driverWalletUpdate($data, 0, 0, 0, $amount, "credit", $payment_method, $description);
 
-                    }else{
+                    } else {
                         if ($payReceiveFlag == "received") {
-                            $type           = "credit";
+                            $type = "credit";
                             $payment_method = "cash_received";
-                            $description    = "Rs. " . $amount . " " . $payReceiveFlag . " from Partner";
+                            $description = "Rs. " . $amount . " " . $payReceiveFlag . " from Partner";
                         }
 
                         $franchiseCalculations = $this->franchiseWalletUpdate($data, 0, 0, 0, $amount, $type, $payment_method, $description);
@@ -422,7 +467,7 @@ class DriverService
                 } else {
                     return Redirect()->back()->withErrors(['error', 'Invalid Request, Driver not found!']);
                 }
-            }else{
+            } else {
                 return Redirect()->back()->withErrors(['error', 'Invalid Request, Driver not found! or Invalid Amount']);
             }
         } catch (\Exception $e) {
@@ -434,6 +479,6 @@ class DriverService
     {
         $data = ResendRequest::all();
 
-        return view('admin.driver.approval_request_list',compact('data'));
+        return view('admin.driver.approval_request_list', compact('data'));
     }
 }
