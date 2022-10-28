@@ -72,4 +72,26 @@ class ServicesService
             return response()->json(['result'=>'error','message'=>'Record Not Found']);
         }
     }
+
+    public function delete($request)
+    {
+        try{
+            $data =  Service::find($request->id);
+
+            if($data)
+            {
+                $data->delete();
+
+                return response()->json(['result'=>'success','message'=>'Record Deleted Successfully']);
+            }
+            else{
+                return response()->json(['result'=>'error','message'=>'Record Not Found']);
+            }
+
+        }
+        catch (\Exception $e)
+        {
+            return response()->json(['result'=>'error','message'=>'Error in Delete Record: '.$e]);
+        }
+    }
 }

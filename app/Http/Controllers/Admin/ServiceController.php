@@ -44,9 +44,9 @@ class ServiceController extends Controller
         return $this->service->save($request,$service);
     }
 
-    public function delete()
+    public function delete(Request $request)
     {
-
+        return $this->service->delete($request);
     }
 
     public function deleteImage(Request $request)
