@@ -69,6 +69,11 @@ class User extends Authenticatable
         return $this->hasMany(UserWallet::class);
     }
 
+    public function service()
+    {
+        return $this->hasMany(DriverService::class,'user_id');
+    }
+
     /*
     public function validTransactions()
     {

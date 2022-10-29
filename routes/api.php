@@ -28,6 +28,7 @@ use App\Http\Controllers\API\Passenger\CurrentStatusController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\Driver\Auth\ForgotPasswordController;
 use App\Http\Controllers\API\Passenger\StripeController;
+use App\Http\Controllers\API\Driver\ServicesController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -128,6 +129,10 @@ Route::group(['middleware' => ['json.response']], function () {
 
                 Route::post('driver-save-rating',[BookingRatingController::class,'giveRating']);
                 Route::post('driver-portal',[FareDistributionsController::class,'driverWalletPortal']);
+
+
+                Route::get('services-list',[ServicesController::class,'index']);
+                Route::post('save-driver-service',[ServicesController::class,'save']);
 
 
 

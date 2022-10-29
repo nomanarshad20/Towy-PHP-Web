@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 use App\Traits\CreateUserWalletTrait;
 use Illuminate\Support\Facades\Notification;
 use Symfony\Component\Mime\Email;
-
+use App\Models\DriverService;
 class AuthService
 {
     use CreateUserWalletTrait;
@@ -222,6 +222,15 @@ class AuthService
             }
         }
 
+        $services = array();
+        if(Auth::user()->user_type == 4)
+        {
+            foreach (Auth::user()->service as $service)
+            {
+                $services[] = ['service_id'=>$service->service_id,'service_name'=>$service->service->name];
+            }
+        }
+
         // Get Driver Wallet
 //        $passengerWallet = Auth::user()->wallet('Driver-Wallet');
 //
@@ -290,8 +299,8 @@ class AuthService
             'first_name' => Auth::user()->first_name,
             'last_name' => Auth::user()->last_name,
             'vehicle_model_year' => isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->model_year : null,
-            'ssn' => isset(Auth::user()->driver) ? Auth::user()->driver->ssn : null
-
+            'ssn' => isset(Auth::user()->driver) ? Auth::user()->driver->ssn : null,
+            'services' => $services
         ];
 
         if ($token) {

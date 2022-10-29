@@ -11,4 +11,12 @@ class DriverService extends Model
 
     protected $table = 'driver_services';
     protected $guarded = [];
+
+    public function service(){
+        return $this->belongsTo(Service::class,'service_id');
+    }
+
+    public function user(){
+        return $this->belongsTo(User::class,'user_id');
+    }
 }
