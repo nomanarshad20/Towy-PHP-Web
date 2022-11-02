@@ -100,6 +100,8 @@ Route::group(['middleware' => ['json.response']], function () {
 
                 Route::post('passenger-create-stripe-customer',[StripeController::class,'createCustomer']);
 
+//                Route::get('passenger-service-list',[ServiceController::class,'index']);
+
 
             });
 
