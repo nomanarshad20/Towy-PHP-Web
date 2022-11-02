@@ -29,6 +29,7 @@ use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\Driver\Auth\ForgotPasswordController;
 use App\Http\Controllers\API\Passenger\StripeController;
 use App\Http\Controllers\API\Driver\ServicesController;
+use App\Http\Controllers\API\Passenger\ServiceController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -100,7 +101,7 @@ Route::group(['middleware' => ['json.response']], function () {
 
                 Route::post('passenger-create-stripe-customer',[StripeController::class,'createCustomer']);
 
-//                Route::get('passenger-service-list',[ServiceController::class,'index']);
+                Route::get('passenger-service-list',[ServiceController::class,'index']);
 
 
             });
