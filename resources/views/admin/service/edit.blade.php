@@ -40,29 +40,29 @@
                                 </div>
                             </div><!-- Col -->
 
-                            <div class="col-sm-4">
-                                <div class="mb-3">
-                                    <label class="form-label">Initial Distance Rate</label>
-                                    <input type="text" name="initial_distance_rate" class="form-control" value="{{$data->initial_distance_rate}}"
-                                           onkeypress="return isNumberKey(event)" placeholder="Enter Initial Distance Rate">
-                                </div>
-                            </div><!-- Col -->
+{{--                            <div class="col-sm-4">--}}
+{{--                                <div class="mb-3">--}}
+{{--                                    <label class="form-label">Initial Distance Rate</label>--}}
+{{--                                    <input type="text" name="initial_distance_rate" class="form-control" value="{{$data->initial_distance_rate}}"--}}
+{{--                                           onkeypress="return isNumberKey(event)" placeholder="Enter Initial Distance Rate">--}}
+{{--                                </div>--}}
+{{--                            </div><!-- Col -->--}}
 
-                            <div class="col-sm-4">
-                                <div class="mb-3">
-                                    <label class="form-label">Initial Time Rate</label>
-                                    <input type="text" name="initial_time_rate" class="form-control" onkeypress="return isNumberKey(event)"
-                                           placeholder="Enter Initial Time Rate" value="{{$data->initial_time_rate}}">
-                                </div>
-                            </div><!-- Col -->
+{{--                            <div class="col-sm-4">--}}
+{{--                                <div class="mb-3">--}}
+{{--                                    <label class="form-label">Initial Time Rate</label>--}}
+{{--                                    <input type="text" name="initial_time_rate" class="form-control" onkeypress="return isNumberKey(event)"--}}
+{{--                                           placeholder="Enter Initial Time Rate" value="{{$data->initial_time_rate}}">--}}
+{{--                                </div>--}}
+{{--                            </div><!-- Col -->--}}
 
-                            <div class="col-sm-4">
-                                <div class="mb-3">
-                                    <label class="form-label">Service Time Rate</label>
-                                    <input type="text" name="service_time_rate" class="form-control" value="{{$data->service_time_rate}}"
-                                           onkeypress="return isNumberKey(event)" placeholder="Enter Service Time Rate">
-                                </div>
-                            </div><!-- Col -->
+{{--                            <div class="col-sm-4">--}}
+{{--                                <div class="mb-3">--}}
+{{--                                    <label class="form-label">Service Time Rate</label>--}}
+{{--                                    <input type="text" name="service_time_rate" class="form-control" value="{{$data->service_time_rate}}"--}}
+{{--                                           onkeypress="return isNumberKey(event)" placeholder="Enter Service Time Rate">--}}
+{{--                                </div>--}}
+{{--                            </div><!-- Col -->--}}
 
 
                             <div class="col-sm-12">

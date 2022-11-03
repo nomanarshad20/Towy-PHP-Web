@@ -17,10 +17,10 @@ class CreateServicesTable extends Migration
             $table->id();
 
             $table->string('name');
-            $table->string('initial_distance_rate')->default(0)->nullable();
-            $table->string('initial_time_rate')->default(0)->nullable();
+//            $table->string('initial_distance_rate')->default(0)->nullable();
+//            $table->string('initial_time_rate')->default(0)->nullable();
             $table->string('base_rate')->default(0)->nullable();
-            $table->string('service_time_rate')->default(0)->nullable();
+//            $table->string('service_time_rate')->default(0)->nullable();
             $table->text('description')->nullable();
             $table->string('image')->nullable();
 

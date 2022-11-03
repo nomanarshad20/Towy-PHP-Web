@@ -25,10 +25,10 @@ class ServicesService
     {
         try{
             $service->name =  $request->name;
-            $service->initial_distance_rate =  $request->initial_distance_rate;
-            $service->initial_time_rate =  $request->initial_time_rate;
+//            $service->initial_distance_rate =  $request->initial_distance_rate;
+//            $service->initial_time_rate =  $request->initial_time_rate;
             $service->base_rate =  $request->base_rate;
-            $service->service_time_rate =  $request->service_time_rate;
+//            $service->service_time_rate =  $request->service_time_rate;
             $service->description = $request->description;
             if($request->has('image'))
             {

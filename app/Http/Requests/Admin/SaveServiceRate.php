@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateServiceRequest extends FormRequest
+class SaveServiceRate extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,13 +24,9 @@ class CreateServiceRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required',
-//            'initial_time_rate' => 'required',
-//            'initial_distance_rate' => 'required',
-            'base_rate' => 'required',
-//            'service_time_rate' => 'required',
-            'image' => 'mimes:jpeg,png,jpg'
+            'initial_time_rate' => 'required',
+            'initial_distance_rate' => 'required',
+            'service_time_rate' => 'required',
         ];
-
     }
 }

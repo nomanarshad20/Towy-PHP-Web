@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\VoucherCodeController;
 use App\Http\Controllers\Admin\BannerImageController;
 use App\Http\Controllers\Admin\PassengerController;
 use App\Http\Controllers\Admin\ServiceController;
+use App\Http\Controllers\Admin\ServiceRateController;
 //use App\Http\Controllers\Admin\HtmlPagesContentController;
 /*
 |--------------------------------------------------------------------------
@@ -108,6 +109,10 @@ Route::namespace('Admin')->group(function () {
         Route::post('service-delete',[ServiceController::class,'delete'])->name('serviceDelete');
 //        Route::get('vehicle-change-status',[VehicleController::class,'changeStatus'])->name('vehicleChangeStatus');
         Route::get('service-delete-image',[ServiceController::class,'deleteImage'])->name('serviceDeleteImage');
+
+
+        Route::get('service-rate',[ServiceRateController::class,'index'])->name('serviceRate');
+        Route::post('save-service-rate',[ServiceRateController::class,'save'])->name('saveServiceRate');
 
 
         Route::get('vehicle-type-listing',[VehicleTypeController::class,'index'])->name('vehicleTypeListing');

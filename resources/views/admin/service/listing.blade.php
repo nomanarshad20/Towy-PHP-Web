@@ -36,10 +36,10 @@
                             <tr>
                                 <th>#</th>
                                 <th>Name</th>
-                                <th>Initial Distance Rate</th>
-                                <th>Initial Time Rate</th>
+{{--                                <th>Initial Distance Rate</th>--}}
+{{--                                <th>Initial Time Rate</th>--}}
                                 <th>Service Rate</th>
-                                <th>Service Time Rate</th>
+{{--                                <th>Service Time Rate</th>--}}
                                 <th>Action</th>
                             </tr>
                             </thead>
@@ -48,10 +48,10 @@
                                 <tr>
                                     <td>{{$loop->iteration}}</td>
                                     <td>{{$service->name}}</td>
-                                    <td>{{$service->initial_distance_rate}}</td>
-                                    <td>{{$service->initial_time_rate}}</td>
+{{--                                    <td>{{$service->initial_distance_rate}}</td>--}}
+{{--                                    <td>{{$service->initial_time_rate}}</td>--}}
                                     <td>{{$service->base_rate}}</td>
-                                    <td>{{$service->service_time_rate}}</td>
+{{--                                    <td>{{$service->service_time_rate}}</td>--}}
 
                                     <td>
                                         <a title="Edit" href="{{route('serviceEdit',['id'=>$service->id])}}">
