@@ -28,7 +28,7 @@ class DriverLoginRequest extends FormRequest
         return [
             'login' => 'required',
             'fcm_token' => 'required',
-            'user_type' => 'required|in:2',
+            'user_type' => 'required|in:2,3',
             'password' => 'min:8|required'
         ];
     }
