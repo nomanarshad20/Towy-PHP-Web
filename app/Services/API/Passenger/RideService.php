@@ -161,7 +161,8 @@ class RideService
 
             return $response;
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             DB::rollBack();
             $response =  ['result' => 'error', 'message' => 'Error in Creating Booking Detail Request: ' . $e, 'code' => 500];
             return $response;

@@ -30,6 +30,7 @@ use App\Http\Controllers\API\Driver\Auth\ForgotPasswordController;
 use App\Http\Controllers\API\Passenger\StripeController;
 use App\Http\Controllers\API\Driver\ServicesController;
 use App\Http\Controllers\API\Passenger\ServiceController;
+use App\Http\Controllers\API\Passenger\ServiceBookingController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -60,12 +61,7 @@ Route::group(['middleware' => ['json.response']], function () {
 
         });
 
-//        Route::namespace('Common')->group(function () {
-//
-//            Route::post('social-login', [AuthController::class, 'socialLoginMobile']);
-//            Route::post('forget-password',[AuthController::class,'forgetPassword']);
-//
-//        });
+
 
         Route::namespace('Driver')->group(function () {
             Route::namespace('Auth')->group(function () {
@@ -101,7 +97,9 @@ Route::group(['middleware' => ['json.response']], function () {
 
                 Route::post('passenger-create-stripe-customer',[StripeController::class,'createCustomer']);
 
+                //services api
                 Route::get('passenger-service-list',[ServiceController::class,'index']);
+                Route::get('create-service-booking',[ServiceBookingController::class,'create']);
 
 
             });
