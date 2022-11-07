@@ -5,11 +5,13 @@ namespace App\Services\API\Passenger;
 
 
 use App\Models\Booking;
+use App\Traits\ServiceBookingTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ServiceBookingService
 {
+    use ServiceBookingTrait;
     public function create($request)
     {
         DB::beginTransaction();
@@ -48,6 +50,11 @@ class ServiceBookingService
             else{
                 $bookingTable = Booking::create($bookingArray);
             }
+
+            $data = $this->bookingResponse($bookingTable);
+
+            $response = ['result' => 'error', 'message' => 'Booking Created Successfully','code'=>200,'data'=>$data];
+            return $response;
         }
         catch (\Exception $e) {
             $response = ['result' => 'error', 'message' => 'Error in Create Booking:'.$e,'code'=>500];

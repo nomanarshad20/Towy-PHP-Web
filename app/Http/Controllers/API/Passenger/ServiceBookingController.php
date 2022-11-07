@@ -25,5 +25,14 @@ class ServiceBookingController extends Controller
             return makeResponse('error','Error in Create Booking: '.$e,'500');
         }
 
+        //find drivers according to pick up lat and lng
+        try{
+
+        }
+        catch (\Exception $e)
+        {
+            return makeResponse('error','Error in Driver Find: '.$e,'500');
+        }
+
     }
 }
