@@ -130,7 +130,7 @@ class AuthService
 
 
             if (Auth::attempt($credentials)) {
-                if (Auth::user()->user_type == $userType) {
+                if (Auth::user()->user_type == 2 || Auth::user()->user_type == 3) {
                     Auth::user()->tokens()->delete();
                     $token = Auth::user()->createToken('TowyBookingApp')->plainTextToken;
                     $response = ['result' => 'success', 'message' => 'Login Successful', 'data' => $token];
@@ -139,11 +139,13 @@ class AuthService
                     $response = ['result' => 'error', 'message' => 'Your Phone Number is already registered as a Passenger'];
                     return $response;
                 }
-            } else {
+            }
+            else {
                 $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
                 return $response;
             }
-        } else {
+        }
+        else {
             if ($checkLoginType == 'mobile_no') {
                 $checkUserState = User::where('mobile_no', $login)
                     ->whereNUll('password')
@@ -160,7 +162,8 @@ class AuthService
             if ($checkUserState) {
                 $response = $this->checkUserState($checkUserState);
                 return $response;
-            } else {
+            }
+            else {
 
                 if ($checkLoginType == 'mobile_no') {
                     $checkUserState = User::where('mobile_no', $login)
@@ -184,7 +187,8 @@ class AuthService
                     }
 
 
-                } else {
+                }
+                else {
                     $response = ['result' => 'error', 'message' => 'Invalid Login Credentials'];
                     return $response;
                 }
