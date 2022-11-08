@@ -130,7 +130,7 @@ class AuthService
 
 
             if (Auth::attempt($credentials)) {
-                if (Auth::user()->user_type == 2 || Auth::user()->user_type == 3) {
+                if (Auth::user()->user_type == 2 || Auth::user()->user_type == 4) {
                     Auth::user()->tokens()->delete();
                     $token = Auth::user()->createToken('TowyBookingApp')->plainTextToken;
                     $response = ['result' => 'success', 'message' => 'Login Successful', 'data' => $token];
