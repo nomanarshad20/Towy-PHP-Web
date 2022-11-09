@@ -8,7 +8,7 @@ use App\Models\Setting;
 
 trait FindServiceDriverTrait
 {
-    public function fetchDrivers($data,$services)
+    public function fetchDrivers($data, $services)
     {
 
         $distanceRange = 10;
@@ -46,12 +46,12 @@ trait FindServiceDriverTrait
 //            ->where('drivers.franchise_id', $franchise_id)
 //            ->where('users.is_verified', 1)
             ->where('status', 1)
-            ->where('users.user_type',4)
-            ->whereRaw("{$haveClause} <= ?", $distanceRange)
+            ->where('users.user_type', 4)
+            ->whereRaw("{$haveClause} <= ?  ", $distanceRange)
+//            ->where('driver_id',48)
             ->orderBY('distance', 'asc')
 //            ->limit($limit)
             ->get();
-
 
 
         $booking_id = null;
@@ -62,17 +62,25 @@ trait FindServiceDriverTrait
         if (isset($available_drivers) && $available_drivers != null) {
             foreach ($available_drivers as $public_driver) {
 
-                $getDriverService = DriverService::where('driver_id',$public_driver->driver_id)->get();
-//                    ->pluck('service_id')->toArray();
+                $getDriverService = DriverService::where('user_id', $public_driver->driver_id)
+//                    ->get();
+                    ->pluck('service_id')->toArray();
 
-                foreach($getDriverService  as $driverService)
+                foreach($getDriverService as $key => $singleService)
                 {
-                    if(in_array($driverService['service_id'],$services))
+                    if(in_array($singleService,$services))
                     {
-                       continue;
+                        continue;
                     }
+                    else{
+                        if($key+1 >= sizeof($getDriverService) )
+                        {
+                            break 2;
+                        }
 
+                    }
                 }
+
 
 
                 $driversList[] = array(
@@ -85,6 +93,7 @@ trait FindServiceDriverTrait
                     'latitude' => $public_driver->latitude,
                     'longitude' => $public_driver->longitude
                 );
+
             }
 
             return $driversList;

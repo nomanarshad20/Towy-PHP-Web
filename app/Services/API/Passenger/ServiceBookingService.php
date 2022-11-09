@@ -36,8 +36,8 @@ class ServiceBookingService
                 'booking_type' => $request->booking_type,
                 'request_type' => 'service',
                 'pick_up_area' => $request->pick_up_area,
-                'pick_up_latitude' => $request->pick_up_latitude,
-                'pick_up_longitude' => $request->pick_up_longitude,
+                'pick_up_latitude' => $request->pick_up_lat,
+                'pick_up_longitude' => $request->pick_up_lng,
                 'pick_up_date' => $pick_up_date,
                 'pick_up_time' => $pick_up_time,
                 'payment_type' => 'payment_gateway',
@@ -98,6 +98,7 @@ class ServiceBookingService
                 'vehicle_per_km_rate' =>  $serviceType->initial_distance_rate,
                 'vehicle_per_min_rate' => $serviceType->initial_time_rate,
                 'service_time_rate' => $serviceType->service_time_rate,
+                'min_vehicle_fare' => 0
             ];
 
             if($bookingTable->bookingDetail)
@@ -115,7 +116,7 @@ class ServiceBookingService
 
         } catch (\Exception $e) {
             DB::rollBack();
-            $response = ['result' => 'error', 'message' => 'Error in Create Service Record:' . $e, 'code' => 500];
+            $response = ['result' => 'error', 'message' => 'Error in Create Booking Detail Record:' . $e, 'code' => 500];
             return $response;
         }
 
@@ -209,7 +210,7 @@ class ServiceBookingService
         foreach ($driversList as $key => $driver) {
             $fareDistance = 0;
             $findDriver = User::find($driver['id']);
-            $fareDistance = $driver['distance'] *  $booking->bookingDetail->vehicle_per_min_rate;
+            $fareDistance = $driver['distance'] *  $findBooking->bookingDetail->vehicle_per_min_rate;
 
             $serviceProvided = array();
 
@@ -218,7 +219,7 @@ class ServiceBookingService
             foreach($getDriverService as $driverService)
             {
                 $serviceProvided[] = [
-                    'service_id' => $driverService->id,
+                    'service_id' => $driverService->service_id,
                     'service_name' => $driverService->service->name
                 ];
 
@@ -237,6 +238,8 @@ class ServiceBookingService
 
 
         }
+
+        return $calculateFare;
 
     }
 }

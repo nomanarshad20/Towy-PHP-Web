@@ -99,7 +99,7 @@ Route::group(['middleware' => ['json.response']], function () {
 
                 //services api
                 Route::get('passenger-service-list',[ServiceController::class,'index']);
-                Route::get('create-service-booking',[ServiceBookingController::class,'create']);
+                Route::post('passenger-create-service-booking',[ServiceBookingController::class,'create']);
 
 
             });

@@ -19,15 +19,18 @@ class ServiceBookingController extends Controller
 
     public function create(ServiceBookingCreate $request)
     {
+        DB::beginTransaction();
         try{
           $createBooking = $this->serviceBooking->create($request);
         }
         catch (\Exception $e)
         {
+            DB::rollBack();
             return makeResponse('error','Error in Create Booking: '.$e,'500');
         }
 
         if ($createBooking['result'] == 'error') {
+            DB::rollBack();
             return makeResponse('error', $createBooking['message'], 500);
         }
 
@@ -36,11 +39,13 @@ class ServiceBookingController extends Controller
             $availableDrivers = $this->serviceBooking->findNearestDrivers($createBooking['data'],$request->services);
 
             if ($availableDrivers['result'] == 'error') {
+                DB::rollBack();
                 return makeResponse('error', $availableDrivers['message'], $availableDrivers['code'], $availableDrivers['data']);
             }
         }
         catch (\Exception $e)
         {
+            DB::rollBack();
             return makeResponse('error','Error in Driver Find: '.$e,'500');
         }
 
@@ -48,11 +53,13 @@ class ServiceBookingController extends Controller
             $saveDrivers = $this->serviceBooking->saveAvailableDrivers($availableDrivers['data'], $createBooking['data'],);
 
             if ($saveDrivers['result'] == 'error') {
+                DB::rollBack();
                 return makeResponse('error', $saveDrivers['message'], $saveDrivers['code']);
             }
         }
         catch (\Exception $e)
         {
+            DB::rollBack();
             return makeResponse('error','Error in Driver Save: '.$e,'500');
         }
 
@@ -61,12 +68,14 @@ class ServiceBookingController extends Controller
         }
         catch (\Exception $e)
         {
+            DB::rollBack();
             return makeResponse('error','Error in Create Estimated Fare: '.$e,'500');
         }
+        DB::commit();
 
         $data = [
             'bookingRecord' => $createBooking['data'],
-            'driverList' => $availableDrivers
+            'driverList' => $fareArray
         ];
 
         return makeResponse('success','Booking Created',200,$data);
