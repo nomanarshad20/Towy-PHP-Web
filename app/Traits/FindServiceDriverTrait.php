@@ -70,7 +70,7 @@ trait FindServiceDriverTrait
                 {
                     if(in_array($singleService,$services))
                     {
-                        continue;
+                        break;
                     }
                     else{
                         if($key+1 >= sizeof($getDriverService) )
