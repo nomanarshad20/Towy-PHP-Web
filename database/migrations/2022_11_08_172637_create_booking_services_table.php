@@ -21,7 +21,6 @@ class CreateBookingServicesTable extends Migration
             $table->string('base_fare')->nullable();
             $table->string('service_per_min_rate')->nullable();
             $table->string('service_per_km_rate')->nullable();
-            $table->string('service_time_rate')->nullable();
 
             $table->timestamps();
         });
