@@ -232,7 +232,7 @@ class ServiceBookingService
                 'last_name' => $findDriver->last_name,
                 'email' => $findDriver->email,
                 'distance' => $driver['distance'],
-                'estimatedFare' => $fareDistance,
+                'estimatedFare' => ceil($fareDistance),
                 'service' => $serviceProvided
             ];
 
