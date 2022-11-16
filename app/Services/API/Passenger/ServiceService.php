@@ -10,7 +10,7 @@ class ServiceService
 {
     public function index()
     {
-        $data = Service::select('id', 'name', 'base_rate', 'description', 'image')->get();
+        $data = Service::select('id', 'name', 'base_rate', 'description', 'image','is_quantity_allowed')->get();
 
         if (sizeof($data) > 0) {
             return makeResponse('success', 'Service Found', 200, $data);

@@ -30,6 +30,11 @@ class ServicesService
             $service->base_rate =  $request->base_rate;
 //            $service->service_time_rate =  $request->service_time_rate;
             $service->description = $request->description;
+            if($request->is_quantity_allowed)
+            {
+                $service->is_quantity_allowed = $request->is_quantity_allowed;
+            }
+
             if($request->has('image'))
             {
                 $image = ImageUploadHelper::uploadImage($request->image, 'upload/service/');

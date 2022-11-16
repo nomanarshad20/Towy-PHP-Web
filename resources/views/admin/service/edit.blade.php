@@ -40,6 +40,16 @@
                                 </div>
                             </div><!-- Col -->
 
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Is Quantity Allowed</label>
+                                    <select class="form-control" name="is_quantity_allowed">
+                                        <option value="0" {{$data->is_quantity_allowed == 0 ? 'selected':''}}>No</option>
+                                        <option value="1" {{$data->is_quantity_allowed == 1 ? 'selected':''}}>Yes</option>
+                                    </select>
+                                </div>
+                            </div><!-- Col -->
+
 {{--                            <div class="col-sm-4">--}}
 {{--                                <div class="mb-3">--}}
 {{--                                    <label class="form-label">Initial Distance Rate</label>--}}

@@ -38,6 +38,16 @@
                                 </div>
                             </div><!-- Col -->
 
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Is Quantity Allowed</label>
+                                    <select class="form-control" name="is_quantity_allowed">
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
+                                    </select>
+                                </div>
+                            </div><!-- Col -->
+
 {{--                            <div class="col-sm-4">--}}
 {{--                                <div class="mb-3">--}}
 {{--                                    <label class="form-label">Initial Distance Rate</label>--}}
