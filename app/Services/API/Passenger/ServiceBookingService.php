@@ -71,11 +71,12 @@ class ServiceBookingService
             BookingService::where('booking_id', $bookingTable->id)->delete();
             foreach ($request->services as $service) {
 
-                $findService = Service::find($service);
+                $findService = Service::find($service['id']);
 
                 $serviceArray = [
                     'booking_id' => $bookingTable->id,
-                    'service_id' => $service,
+                    'service_id' => $service['id'],
+                    'quantity' => $service['quantity'],
                     'base_fare' => $findService->base_rate,
                     'service_per_min_rate' => $serviceType->initial_distance_rate,
                     'service_per_km_rate' => $serviceType->initial_time_rate,
@@ -187,24 +188,34 @@ class ServiceBookingService
     public function calculateEstimatedFare($driversList, $booking)
     {
         $findBooking = Booking::find($booking['id']);
-        $findBookingServices = BookingService::where('booking_id', $booking['id'])->get();
-        $fareArray = $serviceArray =   array();
-        $totalBaseFare = 0;
-        foreach ($findBookingServices as $bookingService) {
-            $serviceArray[] = [
-                'service_name' => $bookingService->service->name,
-                'service_id' => $bookingService->service_id,
-                'base_fare' => $bookingService->base_fare
-            ];
-
-            $totalBaseFare = $totalBaseFare +$bookingService->base_fare;
-
-            $fareArray = [
-                'service_per_min_rate' => $bookingService->service_per_min_rate,
-                'service_per_km_rate' => $bookingService->service_per_km_rate,
-                'service_time_rate' => $bookingService->service_time_rate,
-            ];
-        }
+//        $findBookingServices = BookingService::where('booking_id', $booking['id'])->get();
+//        $fareArray = $serviceArray =   array();
+//        $totalBaseFare = 0;
+//        foreach ($findBookingServices as $bookingService) {
+//            $serviceArray[] = [
+//                'service_name' => $bookingService->service->name,
+//                'service_id' => $bookingService->service_id,
+//                'base_fare' => $bookingService->base_fare
+//            ];
+//
+//            if($bookingService->quantity != 0)
+//            {
+//                $serviceFare = $bookingService->base_fare * $bookingService->quantity;
+//            }
+//            else{
+//                $serviceFare = $bookingService->base_fare;
+//            }
+//
+//            $totalBaseFare = $totalBaseFare + $serviceFare;
+//
+//
+//            $fareArray = [
+//                'service_per_min_rate' => $bookingService->service_per_min_rate,
+//                'service_per_km_rate' => $bookingService->service_per_km_rate,
+//                'service_time_rate' => $bookingService->service_time_rate,
+//                'totalBaseFare' => $totalBaseFare
+//            ];
+//        }
 
         $calculateFare = array();
         foreach ($driversList as $key => $driver) {
@@ -215,16 +226,35 @@ class ServiceBookingService
             $serviceProvided = array();
 
             $getDriverService =  \App\Models\DriverService::where('user_id',$driver['id'])->get();
-
+            $serviceFare = 0;
             foreach($getDriverService as $driverService)
             {
+
                 $serviceProvided[] = [
                     'service_id' => $driverService->service_id,
                     'service_name' => $driverService->service->name
                 ];
 
-                $fareDistance = $fareDistance + $driverService->service->base_rate;
+                $findBookingServices = BookingService::where('booking_id', $booking['id'])
+                    ->where('service_id',$driverService->service_id)
+                    ->first();
+
+
+                if($findBookingServices)
+                {
+                    if($findBookingServices->quantity != 0)
+                    {
+                       $singleServiceFare =  $findBookingServices->quantity * $findBookingServices->base_fare;
+                    }
+                    else{
+                        $singleServiceFare =  $findBookingServices->base_fare;
+                    }
+                    $fareDistance = $fareDistance;
+                    $serviceFare = $serviceFare + $singleServiceFare;
+                }
+
             }
+
 
             $calculateFare[]  = [
                 'driver_id' => $driver['id'],
@@ -232,7 +262,9 @@ class ServiceBookingService
                 'last_name' => $findDriver->last_name,
                 'email' => $findDriver->email,
                 'distance' => $driver['distance'],
-                'estimatedFare' => ceil($fareDistance),
+                'distanceFare' => ceil($fareDistance),
+                'service_fare' => $serviceFare,
+                'total_fare' => $serviceFare + ceil($fareDistance),
                 'service' => $serviceProvided
             ];
 

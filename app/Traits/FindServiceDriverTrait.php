@@ -59,6 +59,13 @@ trait FindServiceDriverTrait
             $booking_id = $data->id;
         }
 
+        $servicesArray = [];
+        foreach($services as $service)
+        {
+            $servicesArray = [$service['id']];
+        }
+
+
         if (isset($available_drivers) && $available_drivers != null) {
             foreach ($available_drivers as $public_driver) {
 
@@ -68,7 +75,7 @@ trait FindServiceDriverTrait
 
                 foreach($getDriverService as $key => $singleService)
                 {
-                    if(in_array($singleService,$services))
+                    if(in_array($singleService,$servicesArray))
                     {
                         break;
                     }
