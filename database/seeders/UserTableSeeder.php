@@ -21,7 +21,7 @@ class UserTableSeeder extends Seeder
 
 
         $users =  [
-            ['name'=>'admin','email'=>'admin@gmail.com',
+            ['first_name'=>'admin','last_name'=>'admin','email'=>'admin@gmail.com',
                 'password'=>bcrypt('11223344'), 'is_verified'=>1]
         ];
 
