@@ -14,10 +14,10 @@ class StripeService
 
     public function __construct()
     {
-//        $this->stripe = new \Stripe\StripeClient(
-//            env('STRIPE_SECRET')
-//        );
-//        Stripe::setApiKey(env('STRIPE_SECRET'));
+        $this->stripe = new \Stripe\StripeClient(
+            env('STRIPE_SECRET')
+        );
+        Stripe::setApiKey(env('STRIPE_SECRET'));
 
     }
 
