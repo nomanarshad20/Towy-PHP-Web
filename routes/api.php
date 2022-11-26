@@ -100,6 +100,7 @@ Route::group(['middleware' => ['json.response']], function () {
                 //services api
                 Route::get('passenger-service-list',[ServiceController::class,'index']);
                 Route::post('passenger-create-service-booking',[ServiceBookingController::class,'create']);
+                Route::post('send-ride-request-to-driver',[ServiceBookingController::class,'sendRideRequest']);
 
 
             });
@@ -134,6 +135,7 @@ Route::group(['middleware' => ['json.response']], function () {
 
                 Route::get('services-list',[ServicesController::class,'index']);
                 Route::post('save-driver-service',[ServicesController::class,'save']);
+
 
 
 

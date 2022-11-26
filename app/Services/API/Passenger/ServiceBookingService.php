@@ -274,4 +274,44 @@ class ServiceBookingService
         return $calculateFare;
 
     }
+
+    public function updateServiceForRequest($request)
+    {
+        DB::beginTransaction();
+        try {
+            $serviceType = ServiceRate::first();
+            BookingService::where('booking_id', $request->booking_id)->delete();
+            foreach ($request->services as $service) {
+
+                $findService = Service::find($service['id']);
+
+                $serviceArray = [
+                    'booking_id' => $request->booking_id,
+                    'service_id' => $service['id'],
+                    'quantity' => $service['quantity'],
+                    'base_fare' => $findService->base_rate,
+                    'service_per_min_rate' => $serviceType->initial_distance_rate,
+                    'service_per_km_rate' => $serviceType->initial_time_rate,
+                    'service_time_rate' => $serviceType->service_time_rate,
+                ];
+
+                $saveServices = BookingService::create($serviceArray);
+
+            }
+
+
+            DB::commit();
+
+            $response = ['result' => 'success', 'message' => 'Service Save', 'data' => $saveServices];
+
+            return $response;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $response = ['result' => 'error', 'message' => 'Error in Create Service Record:' . $e, 'code' => 500];
+            return $response;
+        }
+
+    }
+
+
 }

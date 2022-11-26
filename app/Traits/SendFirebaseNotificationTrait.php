@@ -156,6 +156,29 @@ trait SendFirebaseNotificationTrait
         return true;
     }
 
+
+    public function serviceRideRequestNotification($fcm,$booking,$notification_type)
+    {
+        $title  = 'New Ride Request';
+        $message = 'New Ride Request Received';
+
+        $data = array();
+        $data['notification_type']  = $notification_type;
+        $data ['title'] = $title;
+        $data['body'] = $message;
+        $data['data'] = (object)$booking;
+
+        $notification = array();
+        $notification['notification_type']  = $notification_type;
+        $notification ['title'] = $title;
+        $notification['body'] = $message;
+        $notification['data'] = (object)$booking;
+
+        $this->sendPushNotification($fcm,$data,$notification);
+
+        return true;
+    }
+
     public function sendPushNotification($fcm, $dataBody,$notificationBody)
     {
 

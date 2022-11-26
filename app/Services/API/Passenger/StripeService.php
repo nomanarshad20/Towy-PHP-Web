@@ -99,6 +99,41 @@ class StripeService
 
     }
 
+    public function holdAmountForService($fare,$booking)
+    {
+        try {
+            $amount = $fare;
+
+            $charge = \Stripe\Charge::create([
+                'amount' => $amount * 100,
+                'currency' => 'usd',
+                'description' => 'Towy Charge for Booking ID: ' . $booking,
+                'customer' => Auth::user()->stripe_customer_id,
+                'capture' => false,
+            ]);
+
+            return $charge->id;
+
+        } catch (\Stripe\Error\InvalidRequest $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\Authentication $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\ApiConnection $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Exception\CardException $e) {
+            $response = ['type' => 'error', 'message' => $e->getError()->message];
+            return $response;
+        } catch (Exception $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        }
+
+    }
+
+
     public function releasingAmount( $stripe_charge_id)
     {
 
