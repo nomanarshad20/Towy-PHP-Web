@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\DriversCoordinate;
 use App\Models\P2PBookingTracking;
 use App\Models\User;
+use App\Services\API\Socket\AcceptRejectServiceRide;
 use App\Services\API\Socket\DriverCancelService;
 use App\Services\API\Socket\DriverStatusService;
 use App\Services\API\Socket\RideAcceptRejectService;
@@ -25,12 +26,16 @@ class SocketController extends Controller
     public $acceptRejectService;
     public $driverService;
     public $driverCancelService;
+    public $acceptRejectServiceRide;
 
-    public function __construct(RideAcceptRejectService $acceptRejectService, DriverStatusService $driverStatusService,DriverCancelService $cancelService)
+    public function __construct(RideAcceptRejectService $acceptRejectService
+        , DriverStatusService $driverStatusService, DriverCancelService $cancelService
+        , AcceptRejectServiceRide $acceptRejectServiceRide)
     {
         $this->acceptRejectService = $acceptRejectService;
         $this->driverService = $driverStatusService;
-        $this->driverCancelService =  $cancelService;
+        $this->driverCancelService = $cancelService;
+        $this->acceptRejectServiceRide = $acceptRejectServiceRide;
     }
 
     public function updateUser($data, $socket, $io)
@@ -622,6 +627,31 @@ class SocketController extends Controller
 
         return $this->driverCancelService->cancelService($data, $socket, $io, $currentUser);
 
+    }
+
+    public function acceptRejectServiceRide($data, $socket, $io)
+    {
+        if (!isset($data['booking_id'])) {
+            return $socket->emit($data['user_id'] . '-finalRideStatus',
+                [
+                    'result' => 'error',
+                    'message' => 'Booking ID is a Required Field',
+                    'data' => null
+                ]
+            );
+        }
+
+        if (!isset($data['driver_action'])) {
+            return $socket->emit($data['user_id'] . '-finalRideStatus',
+                [
+                    'result' => 'error',
+                    'message' => 'Driver Action is a Required Field',
+                    'data' => null
+                ]
+            );
+        }
+
+        return $this->acceptRejectServiceRide->rideAcceptReject($data, $socket, $io);
 
     }
 

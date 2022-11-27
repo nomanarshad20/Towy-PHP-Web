@@ -88,6 +88,11 @@ class Socket extends Command
                 return $this->socketService->driverCancelBooking($data,$io,$socket);
             });
 
+            //accept and reject booking. Notification will be send by and also response will be send from socket as well
+            $socket->on('accept-reject-service-ride', function ($data) use ($io, $socket) {
+                return $this->socketService->acceptRejectServiceRide($data, $io, $socket);
+            });
+
 //            $socket->on('disconnect', function ($data) use ($io, $socket) {
 //
 //                if (!isset($data['socket_id'])) {
