@@ -11,6 +11,7 @@ use App\Services\API\Socket\AcceptRejectServiceRide;
 use App\Services\API\Socket\DriverCancelService;
 use App\Services\API\Socket\DriverStatusService;
 use App\Services\API\Socket\RideAcceptRejectService;
+use App\Services\API\Socket\ServiceBookingService;
 use App\Traits\BookingResponseTrait;
 use App\Traits\CreateUserWalletTrait;
 use App\Traits\FindDistanceTraits;
@@ -27,15 +28,17 @@ class SocketController extends Controller
     public $driverService;
     public $driverCancelService;
     public $acceptRejectServiceRide;
+    public $duringService;
 
     public function __construct(RideAcceptRejectService $acceptRejectService
         , DriverStatusService $driverStatusService, DriverCancelService $cancelService
-        , AcceptRejectServiceRide $acceptRejectServiceRide)
+        , AcceptRejectServiceRide $acceptRejectServiceRide, ServiceBookingService $serviceBookingService)
     {
         $this->acceptRejectService = $acceptRejectService;
         $this->driverService = $driverStatusService;
         $this->driverCancelService = $cancelService;
         $this->acceptRejectServiceRide = $acceptRejectServiceRide;
+        $this->duringService = $serviceBookingService;
     }
 
     public function updateUser($data, $socket, $io)
@@ -654,5 +657,60 @@ class SocketController extends Controller
         return $this->acceptRejectServiceRide->rideAcceptReject($data, $socket, $io);
 
     }
+
+    public function changeServiceDriverStatus($data, $socket, $io)
+    {
+
+        if (!$data['user_id']) {
+            return $socket->emit('driverStatus', [
+                    'result' => 'error',
+                    'message' => 'User ID is a Required Field',
+                    'data' => null
+                ]
+            );
+        }
+
+
+        $currentUser = User::where('id', $data['user_id'])
+            ->first();
+
+        if (!$currentUser) {
+            return $socket->emit($data['user_id'] . '-driverStatus',
+                [
+                    'result' => 'error',
+                    'message' => 'User Not Found',
+                    'data' => null
+                ]
+            );
+        }
+
+
+        if (!isset($data['booking_id'])) {
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Booking ID is a Required Field',
+                'data' => null
+            ]);
+        }
+
+        if (!isset($data['driver_status'])) {
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Driver Status is a Required Field',
+                'data' => null
+            ]);
+        }
+
+        if ($data['driver_status'] == 1) {
+            return $this->duringService->reachToPickUp($data, $socket, $io, $currentUser);
+        } elseif ($data['driver_status'] == 2) {
+            return $this->duringService->startRide($data, $socket, $io, $currentUser);
+        } elseif ($data['driver_status'] == 3) {
+            return $this->duringService->completeRide($data, $socket, $io, $currentUser);
+        } elseif ($data['driver_status'] == 4) {
+            return $this->duringService->collectFare($data, $socket, $io, $currentUser);
+        }
+    }
+
 
 }
