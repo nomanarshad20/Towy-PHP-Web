@@ -6,6 +6,7 @@ namespace App\Services\API\Socket;
 
 use App\Models\Booking;
 use App\Models\BookingPoint;
+use App\Models\BookingService;
 use App\Models\P2PBookingTracking;
 use App\Models\VoucherCodePassenger;
 use App\Services\API\Passenger\StripeService;
@@ -14,11 +15,12 @@ use App\Traits\BookingResponseTrait;
 use App\Traits\CreateUserWalletTrait;
 use App\Traits\FindDistanceTraits;
 use App\Traits\SendFirebaseNotificationTrait;
+use App\Traits\ServiceBookingTrait;
 use Carbon\Carbon;
 
 class ServiceBookingService
 {
-    use SendFirebaseNotificationTrait, BookingResponseTrait, CreateUserWalletTrait, FindDistanceTraits;
+    use SendFirebaseNotificationTrait, ServiceBookingTrait ,BookingResponseTrait, CreateUserWalletTrait, FindDistanceTraits;
 
     public $walletService;
     public $stripeService;
@@ -74,7 +76,7 @@ class ServiceBookingService
         }
         $passengerSocketId = $findBooking->passenger_id;
         $passengerFCMToken = $findBooking->passenger->fcm_token;
-        $bookingResponse = $this->driverBookingResponse($findBooking);
+        $bookingResponse = $this->bookingResponse($findBooking);
 
 //        DB::commit();
 
@@ -197,7 +199,7 @@ class ServiceBookingService
         $passengerSocketId = $findBooking->passenger_id;
         $passengerFCMToken = $findBooking->passenger->fcm_token;
 
-        $bookingResponse = $this->driverBookingResponse($findBooking);
+        $bookingResponse = $this->bookingResponse($findBooking);
 
         //ride start notification
         $notification_type = 3;
@@ -334,10 +336,10 @@ class ServiceBookingService
             $pickUpDistance = $this->gettingDistanceInKm($pickUpDistanceCalculate);
 
 
-            $rideDistanceCalculate = $this->getDistance($startPoints['lat'], $startPoints['lng'],
-                $endPoints['lat'], $endPoints['lng']);
+//            $rideDistanceCalculate = $this->getDistance($startPoints['lat'], $startPoints['lng'],
+//                $endPoints['lat'], $endPoints['lng']);
 
-            $rideDistance = $this->gettingDistanceInKm($rideDistanceCalculate);
+//            $rideDistance = $this->gettingDistanceInKm($rideDistanceCalculate);
 
         }
 
@@ -419,7 +421,8 @@ class ServiceBookingService
                 'p2p_before_pick_up_distance' => $p2pInitialDistance,
                 'p2p_after_pick_up_distance' => $p2pRideDistance,
                 'mobile_final_distance' => $rideDistance,
-                'mobile_initial_distance' => $pickUpDistance
+                'mobile_initial_distance' => $pickUpDistance,
+                'min_vehicle_fare' => $fare['serviceBaseFare']
             ]);
 
 
@@ -464,8 +467,8 @@ class ServiceBookingService
         $notification_type = 4;
         if ($passengerFCMToken) {
 //            $fcmToken = ['fcm_token' => $passengerFCMToken];
-            $title = 'Ride is Completed';
-            $message = 'Congratulations! You have Reached Your Destination.Hope you have enjoyed our services';
+            $title = 'Service is Completed';
+            $message = 'Congratulations! Service Provider has fixed your problem with automobile.Hope you have enjoyed our services';
             $sendFCMNotification = $this->duringRideNotifications($passengerFCMToken, $bookingResponse, $notification_type, $title, $message);
         }
 
@@ -622,7 +625,6 @@ class ServiceBookingService
             }
         }
 
-
         //updateWallet
         $walletUpdate = $this->walletService->updateFareWallets($findBooking);
 
@@ -643,7 +645,7 @@ class ServiceBookingService
         $passengerSocketId = $findBooking->passenger_id;
         $passengerFCMToken = $findBooking->passenger->fcm_token;
 
-        $bookingResponse = $this->driverBookingResponse($findBooking);
+        $bookingResponse = $this->bookingResponse($findBooking);
 
 
         //collect fare notification
@@ -651,7 +653,7 @@ class ServiceBookingService
         if ($passengerFCMToken) {
 //            $fcmToken = ['fcm_token' => $passengerFCMToken];
             $title = 'Rating:';
-            $message = 'Give your value able feedback to our driver.';
+            $message = 'Give your value able feedback to our service provider.';
             $sendFCMNotification = $this->duringRideNotifications($passengerFCMToken, $bookingResponse, $notification_type, $title, $message);
         }
 
@@ -709,6 +711,7 @@ class ServiceBookingService
         $totalInitialFare = $pickUpTimeCalculation + $pickUpDistanceCalculation;
 
 
+        //calculate service fare
         if ($findBooking->bookingDetail->ride_end_time) {
             $endTime = Carbon::parse($findBooking->bookingDetail->ride_end_time);
         } else {
@@ -723,12 +726,26 @@ class ServiceBookingService
         //mobile final distance will be final distance pickup to dropoff its just a name
         $totalDistanceFare = $mobile_final_distance * $findBooking->bookingDetail->vehicle_per_km_rate;
 
+        $serviceBaseFare = 0;
+        $getServices = BookingService::where('booking_id',$findBooking->id)->get();
+
+        foreach($getServices as $service)
+        {
+            if($service->quantity == 0)
+            {
+                $serviceBaseFare = $serviceBaseFare + $service->base_fare;
+            }
+            else{
+                $serviceBaseFare = $serviceBaseFare + ($service->base_fare * $service->quantity);
+            }
+        }
+
 
 //        $totalFare = (float)($totalRideTimeFare + $totalDistanceFare + $totalInitialFare
 //            + $pickUpDistanceCalculation + $calculateWaitingTime);
 
         $totalFare = (float)($totalRideTimeFare + $totalDistanceFare + $totalInitialFare
-            + $calculateWaitingTime);
+            + $calculateWaitingTime + $serviceBaseFare );
 
 
         //get passenger wallet
@@ -818,6 +835,7 @@ class ServiceBookingService
             'distance_fare' => $totalDistanceFare + $totalRideTimeFare,
             'totalRideTime' => $totalRideTime,
             'ride_end_time' => $endTime,
+            'serviceBaseFare' => $serviceBaseFare
 //            'fine' => $wallet_balance
         ];
 
