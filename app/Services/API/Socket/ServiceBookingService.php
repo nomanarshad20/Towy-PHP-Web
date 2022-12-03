@@ -114,21 +114,21 @@ class ServiceBookingService
     public function startRide($data, $socket, $io, $user)
     {
 
-//        if (!isset($data['lat'])) {
-//            return $socket->emit($data['user_id'] . '-driverStatus', [
-//                'result' => 'error',
-//                'message' => 'Latitude Field is Required',
-//                'data' => null
-//            ]);
-//        }
-//
-//        if (!isset($data['lng'])) {
-//            return $socket->emit($data['user_id'] . '-driverStatus', [
-//                'result' => 'error',
-//                'message' => 'Longitude Field is Required',
-//                'data' => null
-//            ]);
-//        }
+        if (!isset($data['lat'])) {
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Latitude Field is Required',
+                'data' => null
+            ]);
+        }
+
+        if (!isset($data['lng'])) {
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Longitude Field is Required',
+                'data' => null
+            ]);
+        }
 
 //        if (!isset($data['waiting_time'])) {
 //            $io->to($data['socket_id'])->emit('driverStatus', [
@@ -184,16 +184,16 @@ class ServiceBookingService
             ]);
         }
 
-//        try {
-//            BookingPoint::create(['booking_id' => $findBooking->id,
-//                'lat' => $data['lat'], 'lng' => $data['lng'], 'type' => 1]);
-//        } catch (\Exception $e) {
-//            return $socket->emit($data['user_id'] . '-driverStatus', [
-//                'result' => 'error',
-//                'message' => 'Error in Saving Driver Waiting Time: ' . $e,
-//                'data' => null
-//            ]);
-//        }
+        try {
+            BookingPoint::create(['booking_id' => $findBooking->id,
+                'lat' => $data['lat'], 'lng' => $data['lng'], 'type' => 1]);
+        } catch (\Exception $e) {
+            return $socket->emit($data['user_id'] . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Error in Saving Driver Waiting Time: ' . $e,
+                'data' => null
+            ]);
+        }
 
 
         $passengerSocketId = $findBooking->passenger_id;
@@ -312,6 +312,7 @@ class ServiceBookingService
         $p2pRideDistance = round($p2pRideDistance, 2);
         $p2pInitialDistance = round($p2pInitialDistance, 2);
 
+
         //calculating Distance From Google Location API
         $initialPoints = $endPoints = $startPoints = array();
         $pickUpDistance = $rideDistance = 0;
@@ -329,11 +330,16 @@ class ServiceBookingService
             }
 
 
-            $pickUpDistanceCalculate = $this->getDistance($initialPoints['lat'], $initialPoints['lng'],
-                $startPoints['lat'], $startPoints['lng']);
+            if(sizeof($startPoints) > 0 && sizeof($initialPoints) > 0)
+            {
+                $pickUpDistanceCalculate = $this->getDistance($initialPoints['lat'], $initialPoints['lng'],
+                    $startPoints['lat'], $startPoints['lng']);
 
 
-            $pickUpDistance = $this->gettingDistanceInKm($pickUpDistanceCalculate);
+                $pickUpDistance = $this->gettingDistanceInKm($pickUpDistanceCalculate);
+            }
+
+
 
 
 //            $rideDistanceCalculate = $this->getDistance($startPoints['lat'], $startPoints['lng'],
@@ -461,7 +467,7 @@ class ServiceBookingService
         $passengerSocketId = $findBooking->passenger_id;
         $passengerFCMToken = $findBooking->passenger->fcm_token;
 
-        $bookingResponse = $this->driverBookingResponse($findBooking);
+        $bookingResponse = $this->bookingResponse($findBooking);
 
         //end ride notification
         $notification_type = 4;
