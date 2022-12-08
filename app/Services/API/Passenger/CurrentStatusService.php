@@ -6,11 +6,12 @@ namespace App\Services\API\Passenger;
 
 use App\Models\Booking;
 use App\Traits\BookingResponseTrait;
+use App\Traits\ServiceBookingTrait;
 use Illuminate\Support\Facades\Auth;
 
 class CurrentStatusService
 {
-    use BookingResponseTrait;
+    use BookingResponseTrait,ServiceBookingTrait;
 
     public $passengerAuth;
 
@@ -45,7 +46,15 @@ class CurrentStatusService
 
         $bookingResponse = null;
         if ($booking) {
-            $bookingResponse = $this->driverBookingResponse($booking);
+            if($booking->request_type == 'service' )
+            {
+                $bookingResponse = $this->bookingResponse($booking);
+
+            }
+            else{
+                $bookingResponse = $this->driverBookingResponse($booking);
+            }
+
         }
         $passengerResponse = $this->passengerAuth->getUserData(Auth::user());
 

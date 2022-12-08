@@ -7,11 +7,12 @@ namespace App\Services\API\Driver;
 use App\Models\Booking;
 use App\Models\DriversCoordinate;
 use App\Traits\BookingResponseTrait;
+use App\Traits\ServiceBookingTrait;
 use Illuminate\Support\Facades\Auth;
 
 class DriverService
 {
-    use BookingResponseTrait;
+    use BookingResponseTrait,ServiceBookingTrait;
 
     public function changeStatus($request)
     {
@@ -45,7 +46,15 @@ class DriverService
                 return $response;
             }
 
-            $currentBooking = $this->driverBookingResponse($findBooking);
+            if($findBooking->request_type == 'service' )
+            {
+                $currentBooking = $this->bookingResponse($findBooking);
+
+            }
+            else{
+                $currentBooking = $this->driverBookingResponse($findBooking);
+
+            }
 
             $response = ['result' => 'success', 'message' => 'Booking Found', 'code' => 200, 'data' => $currentBooking];
         }
