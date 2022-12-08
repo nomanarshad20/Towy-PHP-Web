@@ -6,12 +6,13 @@ namespace App\Services\API\Passenger;
 
 use App\Models\Booking;
 use App\Traits\BookingResponseTrait;
+use App\Traits\ServiceBookingTrait;
 use Illuminate\Support\Facades\Auth;
 
 class TripHistoryService
 {
 
-    use BookingResponseTrait;
+    use BookingResponseTrait,ServiceBookingTrait;
     public function upcomingTrip()
     {
         $bookings = Booking::where('passenger_id',Auth::user()->id)
@@ -39,7 +40,15 @@ class TripHistoryService
 //
 //            ];
 
-            $upcomingBookingArray[] = $this->passengerTripHistoryResponse($booking);
+            if($booking->request_type == 'service')
+            {
+                $upcomingBookingArray[] = $this->passengerServiceTripHistoryResponse($booking);
+
+            }
+            else{
+                $upcomingBookingArray[] = $this->passengerTripHistoryResponse($booking);
+
+            }
 
         }
 
@@ -57,23 +66,13 @@ class TripHistoryService
         $pastBookingArray = array();
         foreach($bookings as $booking)
         {
-//            $pastBookingArray[] = [
-//                'booking_id'=>$booking->id,
-//                'passenger_id'=>$booking->passenger_id,
-//                'passenger_name' => $booking->passenger->name,
-//                'passenger_mobile_no' => $booking->passenger->mobile_no,
-//                'booking_type' => $booking->booking_type,
-//                'pick_up_date' => isset($booking->pick_up_date) ? Carbon::parse($booking->pick_up_date)->format('d M Y'):'N/A',
-//                'pick_up_time' => isset($booking->pick_up_time) ? Carbon::parse($booking->pick_up_time)->format('H:i:s A'):'N/A',
-//                'payment_type' => $booking->payment_type,
-//                'estimated_fare' => $booking->estimated_fare,
-//                'vehicle_id' => $booking->vehicle_id,
-//                'vehicle_number' => isset($booking->vehicle) ? $booking->vehicle->registration_number:'',
-//                'vehicle_model' => isset($booking->vehicle) ? $booking->vehicle->model:'',
-//                'vehicle_model_year' => isset($booking->vehicle) ? $booking->vehicle->model_year:'',
-//                'actual_fare' => $booking->actual_fare
-//            ];
-            $pastBookingArray[] = $this->passengerTripHistoryResponse($booking);
+            if($booking->request_type == 'service')
+            {
+                $pastBookingArray[] = $this->passengerServiceTripHistoryResponse($booking);
+            }
+            else{
+                $pastBookingArray[] = $this->passengerTripHistoryResponse($booking);
+            }
         }
 
         return $pastBookingArray;
