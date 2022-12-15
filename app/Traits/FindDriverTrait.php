@@ -48,6 +48,7 @@ trait FindDriverTrait
 //            ->where('drivers.franchise_id', $franchise_id)
 //            ->where('users.is_verified', 1)
             ->where('status', 1)
+            ->where('users.user_type', 2)
             ->whereRaw("{$haveClause} <= ?", $distanceRange)
             ->orderBY('distance', 'asc')
 //            ->limit($limit)
