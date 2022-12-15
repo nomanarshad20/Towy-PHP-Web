@@ -13,6 +13,7 @@ use App\Traits\CreateUserWalletTrait;
 use Illuminate\Support\Facades\Notification;
 use Symfony\Component\Mime\Email;
 use App\Models\DriverService;
+
 class AuthService
 {
     use CreateUserWalletTrait;
@@ -44,8 +45,7 @@ class AuthService
                     $response = ['result' => 'error', 'message' => 'This mobile number is already is in use', 'code' => 422];
                     return $response;
                 }
-            }
-            elseif ($checkType == 'email') {
+            } elseif ($checkType == 'email') {
                 $mobile = null;
                 $email = $request->login;
 //                $otpCode = mt_rand(1000, 9999);
@@ -55,8 +55,7 @@ class AuthService
                     $response = ['result' => 'error', 'message' => 'The email is already is in use', 'code' => 422];
                     return $response;
                 }
-            }
-            else {
+            } else {
                 $response = ['result' => 'error', 'message' => 'Please Enter Valid Mobile No or Email', 'code' => 422];
                 return $response;
             }
@@ -139,13 +138,11 @@ class AuthService
                     $response = ['result' => 'error', 'message' => 'Your Phone Number is already registered as a Passenger'];
                     return $response;
                 }
-            }
-            else {
+            } else {
                 $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
                 return $response;
             }
-        }
-        else {
+        } else {
             if ($checkLoginType == 'mobile_no') {
                 $checkUserState = User::where('mobile_no', $login)
                     ->whereNUll('password')
@@ -162,8 +159,7 @@ class AuthService
             if ($checkUserState) {
                 $response = $this->checkUserState($checkUserState);
                 return $response;
-            }
-            else {
+            } else {
 
                 if ($checkLoginType == 'mobile_no') {
                     $checkUserState = User::where('mobile_no', $login)
@@ -187,8 +183,7 @@ class AuthService
                     }
 
 
-                }
-                else {
+                } else {
                     $response = ['result' => 'error', 'message' => 'Invalid Login Credentials'];
                     return $response;
                 }
@@ -227,11 +222,10 @@ class AuthService
         }
 
         $services = array();
-        if(Auth::user()->user_type == 4)
-        {
-            foreach (Auth::user()->service as $service)
-            {
-                $services[] = ['service_id'=>$service->service_id,'service_name'=>$service->service->name];
+        if (Auth::user()->user_type == 4) {
+            foreach (Auth::user()->service as $service) {
+                $services[] = ['service_id' => $service->service_id, 'service_name' => $service->service->name,
+                    'service_image' => $service->image];
             }
         }
 
@@ -394,7 +388,7 @@ class AuthService
         $user->save();
         $data = [
             'otp' => $otpCode,
-            'email' =>  $request->login
+            'email' => $request->login
         ];
 
         Notification::send($user, new ResetPasswordNotification($data));
