@@ -36,7 +36,11 @@ class ServicesService
             foreach ($request->services as $service) {
                 $save = DriverService::create(['user_id' => Auth::user()->id, 'service_id' => $service]);
             }
-            Auth::user()->steps = 3;
+            if(Auth::user()->steps < 3)
+            {
+                Auth::user()->steps = 3;
+            }
+
             Auth::user()->user_type = 4;
             Auth::user()->save();
 

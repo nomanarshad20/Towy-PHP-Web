@@ -49,12 +49,10 @@ class CurrentStatusService
             if($booking->request_type == 'service' )
             {
                 $bookingResponse = $this->bookingResponse($booking);
-
             }
             else{
                 $bookingResponse = $this->driverBookingResponse($booking);
             }
-
         }
         $passengerResponse = $this->passengerAuth->getUserData(Auth::user());
 
