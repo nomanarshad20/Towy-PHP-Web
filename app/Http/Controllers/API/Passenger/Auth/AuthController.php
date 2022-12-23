@@ -74,6 +74,20 @@ class AuthController extends Controller
         DB::beginTransaction();
         try {
 
+            $checkMobile = User::where('mobile_no', $request->mobile_no)->where('user_type',1)->first();
+            if ($checkMobile) {
+                return makeResponse( 'error','This mobile number is already is in use',  422);
+//                return $response;
+            }
+
+            $checkEmail = User::where('email', $request->email)->where('user_type',1)->first();
+            if ($checkEmail) {
+                return makeResponse( 'error',  'This mobile number is already is in use',  422);
+//                return $response;
+            }
+
+
+
             $createUser = $this->authService->createUser($request);
 
             if ($createUser['result'] == 'error') {

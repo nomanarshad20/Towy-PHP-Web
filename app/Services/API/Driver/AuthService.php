@@ -40,7 +40,7 @@ class AuthService
                 $mobile = $request->login;
                 $email = null;
 //                $otp = null;
-                $checkUser = User::where('mobile_no', $mobile)->first();
+                $checkUser = User::where('mobile_no', $mobile)->where('user_type',2)->first();
                 if ($checkUser) {
                     $response = ['result' => 'error', 'message' => 'This mobile number is already is in use', 'code' => 422];
                     return $response;
@@ -50,7 +50,7 @@ class AuthService
                 $email = $request->login;
 //                $otpCode = mt_rand(1000, 9999);
 
-                $checkUser = User::where('email', $email)->first();
+                $checkUser = User::where('email', $email)->where('user_type',2)->first();
                 if ($checkUser) {
                     $response = ['result' => 'error', 'message' => 'The email is already is in use', 'code' => 422];
                     return $response;

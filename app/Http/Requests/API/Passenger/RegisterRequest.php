@@ -28,11 +28,13 @@ class RegisterRequest extends FormRequest
         return [
             'first_name' => 'required|max:255',
             'last_name' => 'required|max:255',
-            'email' => 'required|email|unique:users',
+//            'email' => 'required|email|unique:users',
             'password' => 'required',
             'user_type' => 'required',
             'fcm_token' => 'required',
-            'mobile_no' => 'required|unique:users'
+//            'mobile_no' => 'required|unique:users'
+            'email' => 'required|email',
+            'mobile_no' => 'required'
         ];
     }
 

@@ -84,6 +84,7 @@ class AuthService
     {
         DB::beginTransaction();
         try {
+
 //            $otpCode = mt_rand(1000, 9999);
             $user = User::create([
                 'mobile_no' => $request->mobile_no,
