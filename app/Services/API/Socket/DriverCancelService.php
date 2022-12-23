@@ -96,7 +96,7 @@ class DriverCancelService
             if ($passengerFCM) {
                 $notificationType = 6;
                 $title = 'Driver Cancel The Ride';
-                $message = 'Driver han Cancelled your ride request';
+                $message = 'Driver has Cancelled your ride request';
                 $sendNotification = $this->cancelRide($passengerFCM, $notificationType, $title, $message);
             }
 

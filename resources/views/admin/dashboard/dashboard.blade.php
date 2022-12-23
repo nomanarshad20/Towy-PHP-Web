@@ -310,7 +310,7 @@
 
             var series1 = chart.series.push(
                 am5xy.ColumnSeries.new(root, {
-                    name: "Total Bookingx",
+                    name: "Total Booking",
                     xAxis: xAxis,
                     yAxis: yAxis,
                     valueYField: "total",
