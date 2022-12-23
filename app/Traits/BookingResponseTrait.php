@@ -102,13 +102,16 @@ trait BookingResponseTrait
             'vehicle_name' => isset($booking->vehicle) ? $booking->vehicle->name : null,
             'vehicle_registration_number' => isset($booking->vehicle) ? $booking->vehicle->registration_number : null,
 
+
+
             'driver_rating_from_passenger' => $driver_rating,
             'driver_comment_from_passenger' => $driver_comment,
             'passenger_rating_from_driver' => $passenger_rating,
             'passenger_comment_from_driver' => $passenger_comment,
 
 
-            'otp' => $booking->otp
+            'otp' => $booking->otp,
+            'request_type' => $booking->request_type,
 
 
         ];

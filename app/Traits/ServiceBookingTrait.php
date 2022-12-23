@@ -114,6 +114,7 @@ trait ServiceBookingTrait
             'driver_comment_from_passenger' => $driver_comment,
             'passenger_rating_from_driver' => $passenger_rating,
             'passenger_comment_from_driver' => $passenger_comment,
+            'request_type' => $booking->request_type,
 
             'services' => $servicesArray
 
