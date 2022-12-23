@@ -225,7 +225,7 @@ class AuthService
         if (Auth::user()->user_type == 4) {
             foreach (Auth::user()->service as $service) {
                 $services[] = ['service_id' => $service->service_id, 'service_name' => $service->service->name,
-                    'service_image' => $service->service->image];
+                    'service_image' => isset($service->service) ? $service->service->image ?  $service->service->image:'':''];
             }
         }
 
