@@ -27,7 +27,9 @@ class CancelService
 
     public function cancelService($request)
     {
-        $findBooking = Booking::with('bookingDetail')->where('id', $request->booking_id)->where('passenger_id', Auth::user()->id)
+        $findBooking = Booking::with('bookingDetail')
+            ->where('id', $request->booking_id)
+            ->where('passenger_id', Auth::user()->id)
             ->first();
 
         if (!$findBooking) {

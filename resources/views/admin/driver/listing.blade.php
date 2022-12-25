@@ -51,7 +51,7 @@
                                     <td>{{$loop->iteration}}</td>
                                     <td>{{$user->first_name}}</td>
                                     <td>{{$user->last_name}}</td>
-                                    <td>{{$user->email}}</td>
+                                    <td>{{$user->email ? $user->email:'N/A'}}</td>
                                     <td>{{$user->mobile_no}}</td>
                                     <td><a href="{{url('driver-portal/'.$user->id)}}">{{$user->referral_code}}</a></td>
                                     <td>{{$user->steps == 4 ? 'Yes':'No'}}</td>
