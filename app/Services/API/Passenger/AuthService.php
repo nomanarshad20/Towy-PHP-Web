@@ -378,7 +378,7 @@ class AuthService
                 'email' => $user->email,
                 'mobile_no' => $user->mobile_no,
                 'fcm_token' => $user->fcm_token,
-                'user_type' => $user->user_type,
+                'user_type' => (int)$user->user_type,
                 'is_verified' => $user->is_verified,
                 'referral_code' => $user->referral_code,
                 'steps' => $user->steps,
