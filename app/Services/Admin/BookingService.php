@@ -372,7 +372,15 @@ class BookingService
         $data = Booking::find($id);
 
         if ($data) {
-            return view('admin.booking.detail', compact('data'));
+            if($data->request_type == 'tow')
+            {
+                return view('admin.booking.detail', compact('data'));
+            }
+            elseif($data->request_type == 'service')
+            {
+                return view('admin.booking.service_detail', compact('data'));
+            }
+
         } else {
             return redirect()->route('bookingListing')->with('error', 'Record Not Found');
         }

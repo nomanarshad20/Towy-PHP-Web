@@ -61,8 +61,8 @@
                         <div class="col-lg-3 ps-0">
                             <a href="#" class="noble-ui-logo d-block mt-3">Booking</a>
                             <p class="mt-1 mb-1"><b>Location:</b></p>
-                            <p><strong>From:</strong> {{$data->pick_up_area}}</p>
-                            <p><strong>To:</strong> {{$data->drop_off_area}}</p>
+                            <p><strong>Service Location:</strong> {{$data->pick_up_area}}</p>
+{{--                            <p><strong>To:</strong> {{$data->drop_off_area}}</p>--}}
 
                             <h5 class="mt-5 mb-2 text-muted">Passenger :</h5>
                             <p>{{$data->passenger->first_name.' '.$data->passenger->last_name}}</p>
@@ -110,51 +110,62 @@
                                     <th>#</th>
                                     <th>Title</th>
                                     <th>Cost</th>
-                                    <th>Total Distance/Time</th>
+{{--                                    <th>Total Distance/Time/Quantity</th>--}}
+                                    <th>Quantity</th>
                                     <th class="text-end">Total</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr class="text-end">
-                                    <td class="text-start">1</td>
-                                    <td class="text-start">Per Km Rate</td>
-                                    <td class="text-start">{{$data->bookingDetail->vehicle_per_km_rate}}</td>
-                                    <td class="text-start">{{$data->total_calculated_distance ? $data->bookingDetail->mobile_final_distance :0}}</td>
-                                    <td>{{ $data->bookingDetail->vehicle_per_km_rate * $data->bookingDetail->mobile_final_distance}}</td>
-                                </tr>
+{{--                                <tr class="text-end">--}}
+{{--                                    <td class="text-start">1</td>--}}
+{{--                                    <td class="text-start">Per Km Rate</td>--}}
+{{--                                    <td class="text-start">{{$data->bookingDetail->vehicle_per_km_rate}}</td>--}}
+{{--                                    <td class="text-start">{{$data->total_calculated_distance ? $data->bookingDetail->mobile_final_distance :0}}</td>--}}
+{{--                                    <td>{{ $data->bookingDetail->vehicle_per_km_rate * $data->bookingDetail->mobile_final_distance}}</td>--}}
+{{--                                </tr>--}}
 
-                                <tr class="text-end">
-                                    <td class="text-start">2</td>
-                                    <td class="text-start">Per Min Rate</td>
-                                    <td class="text-start">{{$data->bookingDetail->vehicle_per_min_rate}}</td>
-                                    <td class="text-start">{{$data->bookingDetail->total_ride_minutes ? $data->bookingDetail->total_ride_minutes:0}}</td>
-                                    <td>{{$data->bookingDetail->vehicle_per_min_rate * $data->bookingDetail->total_ride_minutes}}</td>
-                                </tr>
+{{--                                <tr class="text-end">--}}
+{{--                                    <td class="text-start">2</td>--}}
+{{--                                    <td class="text-start">Per Min Rate</td>--}}
+{{--                                    <td class="text-start">{{$data->bookingDetail->vehicle_per_min_rate}}</td>--}}
+{{--                                    <td class="text-start">{{$data->bookingDetail->total_ride_minutes ? $data->bookingDetail->total_ride_minutes:0}}</td>--}}
+{{--                                    <td>{{$data->bookingDetail->vehicle_per_min_rate * $data->bookingDetail->total_ride_minutes}}</td>--}}
+{{--                                </tr>--}}
 
 
-                                <tr class="text-end">
-                                    <td class="text-start">3</td>
-                                    <td class="text-start">Pick Up KM Rate</td>
-                                    <td class="text-start">{{$data->bookingDetail->initial_distance_rate ? $data->bookingDetail->initial_distance_rate:0}}</td>
-                                    <td class="text-start">{{$data->bookingDetail->mobile_initial_distance ? $data->bookingDetail->mobile_initial_distance:0}}</td>
-                                    <td>{{$data->bookingDetail->initial_distance_rate * $data->bookingDetail->mobile_initial_distance}}</td>
-                                </tr>
+{{--                                <tr class="text-end">--}}
+{{--                                    <td class="text-start">3</td>--}}
+{{--                                    <td class="text-start">Pick Up KM Rate</td>--}}
+{{--                                    <td class="text-start">{{$data->bookingDetail->initial_distance_rate ? $data->bookingDetail->initial_distance_rate:0}}</td>--}}
+{{--                                    <td class="text-start">{{$data->bookingDetail->mobile_initial_distance ? $data->bookingDetail->mobile_initial_distance:0}}</td>--}}
+{{--                                    <td>{{$data->bookingDetail->initial_distance_rate * $data->bookingDetail->mobile_initial_distance}}</td>--}}
+{{--                                </tr>--}}
 
-                                <tr class="text-end">
-                                    <td class="text-start">4</td>
-                                    <td class="text-start">Pick Up Min Rate</td>
-                                    <td class="text-start">{{$data->bookingDetail->initial_time_rate ? $data->bookingDetail->initial_time_rate:0}}</td>
-                                    <td class="text-start">{{$data->bookingDetail->initial_time_rate ? $data->bookingDetail->total_minutes_to_reach_pick_up_point:0}}</td>
-                                    <td>{{$data->bookingDetail->initial_time_rate * $data->bookingDetail->total_minutes_to_reach_pick_up_point}}</td>
-                                </tr>
+{{--                                <tr class="text-end">--}}
+{{--                                    <td class="text-start">4</td>--}}
+{{--                                    <td class="text-start">Pick Up Min Rate</td>--}}
+{{--                                    <td class="text-start">{{$data->bookingDetail->initial_time_rate ? $data->bookingDetail->initial_time_rate:0}}</td>--}}
+{{--                                    <td class="text-start">{{$data->bookingDetail->initial_time_rate ? $data->bookingDetail->total_minutes_to_reach_pick_up_point:0}}</td>--}}
+{{--                                    <td>{{$data->bookingDetail->initial_time_rate * $data->bookingDetail->total_minutes_to_reach_pick_up_point}}</td>--}}
+{{--                                </tr>--}}
 
-                                <tr class="text-end">
-                                    <td class="text-start">5</td>
-                                    <td class="text-start">Waiting Time</td>
-                                    <td class="text-start">{{$data->bookingDetail->waiting_price_per_min ? $data->bookingDetail->waiting_price_per_min:0}}</td>
-                                    <td class="text-start">{{$data->bookingDetail->driver_waiting_time ? $data->bookingDetail->driver_waiting_time:0}}</td>
-                                    <td>{{$data->bookingDetail->waiting_price_per_min * $data->bookingDetail->driver_waiting_time}}</td>
-                                </tr>
+{{--                                <tr class="text-end">--}}
+{{--                                    <td class="text-start">5</td>--}}
+{{--                                    <td class="text-start">Waiting Time</td>--}}
+{{--                                    <td class="text-start">{{$data->bookingDetail->waiting_price_per_min ? $data->bookingDetail->waiting_price_per_min:0}}</td>--}}
+{{--                                    <td class="text-start">{{$data->bookingDetail->driver_waiting_time ? $data->bookingDetail->driver_waiting_time:0}}</td>--}}
+{{--                                    <td>{{$data->bookingDetail->waiting_price_per_min * $data->bookingDetail->driver_waiting_time}}</td>--}}
+{{--                                </tr>--}}
+
+                                @foreach($data->bookingServices as $service)
+                                    <tr class="text-end">
+                                        <td class="text-start">6</td>
+                                        <td class="text-start">{{$service->service->name}}</td>
+                                        <td class="text-start">{{$service->base_fare}}</td>
+                                        <td class="text-start">{{$service->quantity}}</td>
+                                        <td>{{$service->quantity !=0 ?  $service->base_fare * $service->quantity :$service->base_fare}}</td>
+                                    </tr>
+                                @endforeach
 
 
 
