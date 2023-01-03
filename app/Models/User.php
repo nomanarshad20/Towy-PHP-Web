@@ -105,4 +105,9 @@ class User extends Authenticatable
     }
     */
 
+    public function rating()
+    {
+        return $this->hasMany(BookingRating::class,'receiver_id');
+    }
+
 }
