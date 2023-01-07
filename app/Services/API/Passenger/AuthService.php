@@ -388,7 +388,8 @@ class AuthService
                 'last_name' => $user->last_name,
                 'wallet_balance' => $balance,
                 'rating' => $rating,
-                'stripe_customer_id' => $user->stripe_customer_id
+                'stripe_customer_id' => $user->stripe_customer_id,
+                'card_number' => $user->card_last_4_digit
             ];
 
             if (isset($accessToken) && $accessToken != null) {

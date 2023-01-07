@@ -33,7 +33,7 @@ class StripeService
                 ],
             ]);
 
-            $response = ['type' => 'success', 'data' => $token->id];
+            $response = ['type' => 'success', 'data' => $token->id,'card_last_4'=>$token->card->last4];
             return $response;
         } catch (\Stripe\Error\InvalidRequest $e) {
             $response = ['type' => 'error', 'message' => $e->getMessage()];
