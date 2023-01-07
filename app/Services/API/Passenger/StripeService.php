@@ -221,5 +221,37 @@ class StripeService
 
     }
 
+    public function directCharge($token,$amount)
+    {
+        try {
+
+            $charge = \Stripe\Charge::create([
+                'amount' => $amount * 100,
+                'currency' => 'usd',
+                'source' => $token,
+                'description' => 'Add To Wallet Amount'
+            ]);
+
+            return $charge->id;
+
+        } catch (\Stripe\Error\InvalidRequest $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\Authentication $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\ApiConnection $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Exception\CardException $e) {
+            $response = ['type' => 'error', 'message' => $e->getError()->message];
+            return $response;
+        } catch (Exception $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        }
+
+    }
+
 
 }

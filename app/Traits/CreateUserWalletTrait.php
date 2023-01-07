@@ -3,6 +3,7 @@
 
 namespace App\Traits;
 
+use App\Services\API\Driver\AuthService;
 use CoreProc\WalletPlus\Models\WalletType;
 use App\Models\Setting;
 use App\Models\FranchiseWallet;
@@ -10,6 +11,7 @@ use App\Models\DriverWalletModel;
 use App\Models\PassengersWallet;
 use App\Models\CompanyWallet;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 trait CreateUserWalletTrait
 {
@@ -185,14 +187,17 @@ trait CreateUserWalletTrait
     }
 
     // Passenger Wallet
-    public function passengerWalletUpdate($data, $amount=0, $type="debit", $payment_method="cash", $desc="Ride Fares Paid.")
+    public function passengerWalletUpdate($data = null, $amount=0, $type="debit", $payment_method="cash", $desc="Ride Fares Paid.")
     {
 
         $wallet                         = new PassengersWallet;
         if(isset($data)) {
             $wallet->passenger_id       = $data->passenger_id;
-            $wallet->booking_id         = $data->id;
-            $wallet->ride_total_amount  = $data->actual_fare;
+            $wallet->booking_id         = $data->id ? $data->id:null;
+            $wallet->ride_total_amount  = $data->actual_fare ? $data->actual_fare:null;
+        }
+        else{
+            $wallet->passenger_id       = Auth::user()->id;
         }
         $wallet->payment_method         = $payment_method;
         $wallet->type                   = $type;

@@ -31,6 +31,8 @@ use App\Http\Controllers\API\Passenger\StripeController;
 use App\Http\Controllers\API\Driver\ServicesController;
 use App\Http\Controllers\API\Passenger\ServiceController;
 use App\Http\Controllers\API\Passenger\ServiceBookingController;
+use App\Http\Controllers\API\Passenger\AddToWalletController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -102,6 +104,8 @@ Route::group(['middleware' => ['json.response']], function () {
                 Route::post('passenger-create-service-booking',[ServiceBookingController::class,'create']);
                 Route::post('send-ride-request-to-driver',[ServiceBookingController::class,'sendRideRequest']);
 
+                Route::post('passenger-amount-add-to-wallet',[AddToWalletController::class,'save']);
+
 
             });
 
@@ -135,9 +139,6 @@ Route::group(['middleware' => ['json.response']], function () {
 
                 Route::get('services-list',[ServicesController::class,'index']);
                 Route::post('save-driver-service',[ServicesController::class,'save']);
-
-
-
 
             });
 
