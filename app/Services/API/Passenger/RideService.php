@@ -56,7 +56,7 @@ class RideService
                 'drop_off_latitude' => $request->drop_off_latitude,
                 'drop_off_longitude' => $request->drop_off_longitude,
                 'total_distance' => $request->total_distance,
-                'payment_type' => 'payment_gateway',
+                'payment_type' => $request->payment_type,
                 'estimated_fare' => $request->estimated_fare,
                 'actual_fare' => 0,
                 'ride_status' => 0,

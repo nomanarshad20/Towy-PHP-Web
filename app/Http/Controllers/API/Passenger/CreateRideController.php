@@ -70,7 +70,7 @@ class CreateRideController extends Controller
 
 
             //hold amount on user account
-            $holdFare = $this->stripeService->holdAmount($bookingData['data']);
+            $holdFare = $this->stripeService->holdAmount($bookingData['data'],'create_ride');
 
             if(isset($holdFare['type']) && $holdFare['type'] =='error')
             {
@@ -90,7 +90,11 @@ class CreateRideController extends Controller
                         ->update(['ride_send_time' => Carbon::now()->format('Y-m-d H:i:s')]);
                 }
 
-                Booking::where('id',$bookingData['data']['id'])->update(['stripe_charge_id'=>$holdFare]);
+                if(isset($holdFare['type']) && $holdFare['type'] =='success')
+                {}
+                else{
+                    Booking::where('id',$bookingData['data']['id'])->update(['stripe_charge_id'=>$holdFare]);
+                }
 
                 $notification_type = 11;
                 $sendNotificationToDriver = $this->rideRequestNotification($saveDrivers['data'], $bookingData['data'], $notification_type);

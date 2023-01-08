@@ -4,6 +4,7 @@
 namespace App\Services\API\Passenger;
 
 
+use App\Traits\CreateUserWalletTrait;
 use Illuminate\Support\Facades\Auth;
 use Stripe\Customer;
 use Stripe\Stripe;
@@ -11,6 +12,7 @@ use Stripe\Stripe;
 class StripeService
 {
     public $stripe;
+    use CreateUserWalletTrait;
 
     public function __construct()
     {
@@ -65,21 +67,41 @@ class StripeService
         return $customerId;
     }
 
-    public function holdAmount($bookingRecord)
+    public function holdAmount($bookingRecord,$timeOfHold = 'create_ride')
     {
         try {
             $amount = $bookingRecord['estimated_fare'];
+            $diff = 0;
+            $wallet_balance = 0;
+            if($timeOfHold == 'create_ride')
+            {
+                if($bookingRecord['payment_type'] == 'wallet')
+                {
+                    $wallet_balance = $this->passengerWalletBalance(Auth::user()->id);
+                    if($wallet_balance > 0 && $wallet_balance < $bookingRecord['estimated_fare'])
+                    {
+                        $diff = $bookingRecord['estimated_fare'] - $wallet_balance;
+                    }
+                }
 
-            $charge = \Stripe\Charge::create([
-                'amount' => $amount * 100,
-                'currency' => 'usd',
-                'description' => 'Towy Charge for Booking ID: ' . $bookingRecord['booking_unique_id'],
-                'customer' => Auth::user()->stripe_customer_id,
-                'capture' => false,
-            ]);
+            }
 
-            return $charge->id;
 
+            if($wallet_balance < $bookingRecord['estimated_fare'])
+            {
+                $charge = \Stripe\Charge::create([
+                    'amount' => $amount * 100,
+                    'currency' => 'usd',
+                    'description' => 'Towy Charge for Booking ID: ' . $bookingRecord['booking_unique_id'],
+                    'customer' => Auth::user()->stripe_customer_id,
+                    'capture' => false,
+                ]);
+
+                return $charge->id;
+
+            }
+            $response = ['type' => 'success','message'=>'Wallet Amount is deducted'];
+            return $response;
         } catch (\Stripe\Error\InvalidRequest $e) {
             $response = ['type' => 'error', 'message' => $e->getMessage()];
             return $response;

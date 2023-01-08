@@ -91,7 +91,6 @@ class DriverStatusService
         }
 
 
-
 //        dd('here');
 //        if ($passengerSocketId) {
         $socket->emit($passengerSocketId . '-driverStatus', [
@@ -234,7 +233,7 @@ class DriverStatusService
     {
 //        DB::beginTransaction();
 
-                if (!isset($data['lat'])) {
+        if (!isset($data['lat'])) {
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
                 'message' => 'Latitude is a required field',
@@ -345,7 +344,6 @@ class DriverStatusService
         }
 
 
-
 //        $totalDistance = $mobileDistance;
 //        $initialDistance = $data['mobile_initial_distance'];
 //        $finalDistance = $data['mobile_final_distance'];
@@ -397,17 +395,13 @@ class DriverStatusService
         try {
 
             //get passenger wallet
+            if ($findBooking->payment_type == 'wallet') {
 
-//            $wallet_balance = $this->passengerWalletBalance($findBooking->passenger_id);
-//
-//            if ($findBooking->payment_type == 'wallet') {
-//                if ($wallet_balance > 0) {
-//                    $findBooking->bookingDetail->update([
-//                        'passenger_wallet_paid' => $wallet_balance
-//                    ]);
-//                }
-//
-//            }
+                $findBooking->bookingDetail->update([
+                    'passenger_wallet_paid' => isset($fare['walletPayAmount']) ? $fare['walletPayAmount'] : 0
+                ]);
+
+            }
 
 
             $findBooking->driver_status = $data['driver_status'];
@@ -426,8 +420,7 @@ class DriverStatusService
             ]);
 
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
 //            DB::rollBack();
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
@@ -447,8 +440,7 @@ class DriverStatusService
                     ->where('voucher_code_id', $voucherId)->update(['is_used' => 1]);
             }
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
 //            DB::rollBack();
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
@@ -571,24 +563,49 @@ class DriverStatusService
         //deduct payment
         try {
 
-            $calculateDiff = $findBooking->actual_fare - $findBooking->estimated_fare;
-
-            $fareAmount = $findBooking->estimated_fare;
-            if ($calculateDiff < 0) {
-                $fareAmount = $findBooking->actual_fare;
+            $passengerWalletAmount = 0;
+            if ($findBooking->payment_type == 'wallet') {
+                $passengerWalletAmount = $this->passengerWalletBalance($findBooking->passenger_id);
             }
 
 
-            $funds = $this->stripeService->captureFund($fareAmount, $findBooking->stripe_charge_id);
+            $calculateDiff = $findBooking->actual_fare - $findBooking->estimated_fare - $passengerWalletAmount;
 
-            if ($funds['type'] == 'error') {
-                return $socket->emit($data['user_id'] . '-driverStatus', [
-                    'result' => 'error',
-                    'message' => $funds['message'],
-                    'data' => null
-                ]);
+            if ($findBooking->actual_fare > $passengerWalletAmount) {
+
+
+                $fareAmount = $findBooking->estimated_fare;
+                if ($calculateDiff < 0) {
+                    $fareAmount = $findBooking->actual_fare - $passengerWalletAmount;
+                }
+
+                if($findBooking->stripe_charge_id)
+                {
+                    $funds = $this->stripeService->captureFund($fareAmount, $findBooking->stripe_charge_id);
+
+                    if ($funds['type'] == 'error') {
+                        return $socket->emit($data['user_id'] . '-driverStatus', [
+                            'result' => 'error',
+                            'message' => $funds['message'],
+                            'data' => null
+                        ]);
+                    }
+                }
+                else{
+                    $passengerCustomerID = $findBooking->passenger->stripe_customer_id;
+
+                    $charge = $this->stripeService->charge($findBooking, $passengerCustomerID, $fareAmount);
+
+                    if (isset($charge['type']) && $charge['type'] == 'error') {
+                        return makeResponse('error', $charge['message'], 500);
+                    }
+
+                    $findBooking->stripe_charge_id = $charge;
+                    $findBooking->save();
+
+                }
+
             }
-
 
         } catch (\Exception $e) {
             return $socket->emit($data['user_id'] . '-driverStatus', [
@@ -599,33 +616,34 @@ class DriverStatusService
         }
 
 
-        if ($calculateDiff > 0) {
-            if ($findBooking->actual_fare != $findBooking->estimated_fare) {
-                //if we have new fare then charge user directly
-                try {
+        if ($findBooking->actual_fare > $passengerWalletAmount) {
+            if ($calculateDiff > 0) {
+                if ($findBooking->actual_fare != $findBooking->estimated_fare) {
+                    //if we have new fare then charge user directly
+                    try {
 
-                    $passengerCustomerID = $findBooking->passenger->stripe_customer_id;
+                        $passengerCustomerID = $findBooking->passenger->stripe_customer_id;
 
-                    $charge = $this->stripeService->charge($findBooking, $passengerCustomerID, $calculateDiff);
+                        $charge = $this->stripeService->charge($findBooking, $passengerCustomerID, $calculateDiff);
 
-                    if (isset($charge['type']) && $charge['type'] == 'error') {
-                        return makeResponse('error', $charge['message'], 500);
+                        if (isset($charge['type']) && $charge['type'] == 'error') {
+                            return makeResponse('error', $charge['message'], 500);
+                        }
+
+                        $findBooking->stripe_charge_id = $charge;
+                        $findBooking->save();
+
+                    } catch (\Exception $e) {
+                        return $socket->emit($data['user_id'] . '-driverStatus', [
+                            'result' => 'error',
+                            'message' => 'Error during Payment from Stripe direct Charge: ' . $e,
+                            'data' => null
+                        ]);
                     }
-
-                    $findBooking->stripe_charge_id = $charge;
-                    $findBooking->save();
-
-                } catch (\Exception $e) {
-                    return $socket->emit($data['user_id'] . '-driverStatus', [
-                        'result' => 'error',
-                        'message' => 'Error during Payment from Stripe direct Charge: ' . $e,
-                        'data' => null
-                    ]);
                 }
             }
+
         }
-
-
         //updateWallet
         $walletUpdate = $this->walletService->updateFareWallets($findBooking);
 
@@ -693,8 +711,7 @@ class DriverStatusService
             $calculateWaitingTime = (float)($waitingTimePrice * $totalTime);
 
 
-        }
-        else {
+        } else {
 
             $waitingTimePrice = $findBooking->bookingDetail->waiting_price_per_min;
             $calculateWaitingTime = (float)($waitingTimePrice * $driverWaitingTime);
@@ -746,6 +763,7 @@ class DriverStatusService
             $totalFare = $totalFare * $findBooking->bookingDetail->peak_factor_rate;
         }
 
+        //check for wallet fine amount
         if ($wallet_balance != 0 && $wallet_balance < 0) {
             $totalFare = $totalFare + $wallet_balance;
         }
@@ -789,7 +807,6 @@ class DriverStatusService
         $totalFare = $totalFare + $findBooking->bookingDetail->min_vehicle_fare;
 
         //find Tax
-
         if (isset($findBooking->bookingDetail->vehicle_tax)) {
             $tax = ($totalFare * $findBooking->bookingDetail->vehicle_tax) / 100;
         } else {
@@ -797,11 +814,21 @@ class DriverStatusService
         }
 
         //add Tax
-
         $totalFare = $totalFare + $tax;
 
-
         $totalCollectFare = 0;
+
+        if ($wallet_balance > 0 && $findBooking->payment_type == 'wallet') {
+            if ($wallet_balance > $totalFare) {
+                $totalCollectFare = $wallet_balance - $totalFare;
+                $walletPayAmount = abs($totalFare);
+            } else {
+                $totalCollectFare = $totalFare - $wallet_balance;
+                $walletPayAmount = abs($wallet_balance);
+            }
+        } else {
+            $totalCollectFare = $totalFare;
+        }
 
 //        if ($wallet_balance > 0 && $findBooking->payment_type == 'wallet') {
 //            if ($wallet_balance > $totalFare) {
@@ -811,7 +838,7 @@ class DriverStatusService
 //            }
 //
 //        } else {
-        $totalCollectFare = $totalFare;
+//        $totalCollectFare = $totalFare;
 //        }
 
         $fare = [
@@ -821,6 +848,8 @@ class DriverStatusService
             'distance_fare' => $totalDistanceFare + $totalRideTimeFare,
             'totalRideTime' => $totalRideTime,
             'ride_end_time' => $endTime,
+            'walletPayAmount' => ceil($walletPayAmount),
+
 //            'fine' => $wallet_balance
         ];
 
