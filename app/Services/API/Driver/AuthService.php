@@ -298,7 +298,8 @@ class AuthService
             'last_name' => Auth::user()->last_name,
             'vehicle_model_year' => isset(Auth::user()->driver->vehicle) ? Auth::user()->driver->vehicle->model_year : null,
             'ssn' => isset(Auth::user()->driver) ? Auth::user()->driver->ssn : null,
-            'services' => $services
+            'services' => $services,
+            'stripe_customer_id' => Auth::user()->stripe_customer_id
         ];
 
         if ($token) {
