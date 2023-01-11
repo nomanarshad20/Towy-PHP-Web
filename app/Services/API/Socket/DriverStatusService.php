@@ -9,6 +9,7 @@ use App\Models\BookingPoint;
 use App\Models\P2PBookingTracking;
 use App\Models\User;
 use App\Models\VoucherCodePassenger;
+use App\Notifications\SendReceiptNotification;
 use App\Services\API\Passenger\StripeService;
 use App\Services\API\UpdateWalletService;
 use App\Traits\BookingResponseTrait;
@@ -18,6 +19,7 @@ use App\Traits\SendFirebaseNotificationTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
 class DriverStatusService
 {
@@ -665,6 +667,19 @@ class DriverStatusService
         $passengerFCMToken = $findBooking->passenger->fcm_token;
 
         $bookingResponse = $this->driverBookingResponse($findBooking);
+
+        try{
+            $passenegerUser = User::find($findBooking->passenger_id);
+            Notification::send($passenegerUser,new SendReceiptNotification((object)$bookingResponse));
+        }
+        catch (\Exception $e)
+        {
+            $socket->emit($passengerSocketId . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Error in Sending Receipt to Passenger on Email: '.$e,
+                'data' => (object)$bookingResponse
+            ]);
+        }
 
 
         //collect fare notification
