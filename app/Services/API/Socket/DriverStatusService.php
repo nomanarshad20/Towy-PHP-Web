@@ -494,6 +494,7 @@ class DriverStatusService
             ->where('ride_status', '=', 1)
             ->first();
 
+
         if (!$findBooking) {
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
@@ -539,8 +540,8 @@ class DriverStatusService
 //        }
 
         try {
-//            $findBooking->driver_status = $data['driver_status'];
-//            $findBooking->ride_status = 4;
+            $findBooking->driver_status = $data['driver_status'];
+            $findBooking->ride_status = 4;
 //            if ($findBooking->payment_type == 'cash_wallet' && $data['payment_type'] == 'cash_wallet') {
 //                $findBooking->payment_type = 'cash_wallet';
 //            }
@@ -670,7 +671,7 @@ class DriverStatusService
 
         try{
             $passenegerUser = User::find($findBooking->passenger_id);
-            Notification::send($passenegerUser,new SendReceiptNotification((object)$bookingResponse));
+            Notification::route('mail', $passenegerUser->email)->notify(new SendReceiptNotification($findBooking));
         }
         catch (\Exception $e)
         {
