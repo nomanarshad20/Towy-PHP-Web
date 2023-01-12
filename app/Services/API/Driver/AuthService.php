@@ -10,6 +10,7 @@ use App\Notifications\ResetPasswordNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Traits\CreateUserWalletTrait;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Symfony\Component\Mime\Email;
 use App\Models\DriverService;
@@ -124,8 +125,18 @@ class AuthService
                     ->whereIn('user_type',[2,4])->first();
             } elseif ($checkLoginType == 'email') {
                 $credentials = ['email' => $login, 'password' => $password];
-                $checkForUser =  User::where('email',$login)->where('password',$password)
+                $checkForUser =  User::where('email',$login)
+//                    ->where('password',$password)
                         ->whereIn('user_type',[2,4])->first();
+                if($checkForUser)
+                {
+                    if(!Hash::check($checkForUser->password,$password))
+                    {
+                        $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
+                        return $response;
+                    }
+
+                }
             } else {
                 $response = ['result' => 'error', 'message' => 'Please Enter Valid Mobile No or Email', 'code' => 422];
                 return $response;
