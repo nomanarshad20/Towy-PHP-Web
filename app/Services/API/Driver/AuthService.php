@@ -129,7 +129,7 @@ class AuthService
 
 
                 if($checkForUser)
-
+                {
                     dd(Hash::check($checkForUser->password,$password),!Hash::check($checkForUser->password,$password));
                     if(!Hash::check($checkForUser->password,$password))
                     {
