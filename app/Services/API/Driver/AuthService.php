@@ -41,7 +41,7 @@ class AuthService
                 $mobile = $request->login;
                 $email = null;
 //                $otp = null;
-                $checkUser = User::where('mobile_no', $mobile)->where('user_type',2)->first();
+                $checkUser = User::where('mobile_no', $mobile)->where('user_type', 2)->first();
                 if ($checkUser) {
                     $response = ['result' => 'error', 'message' => 'This mobile number is already is in use', 'code' => 422];
                     return $response;
@@ -51,7 +51,7 @@ class AuthService
                 $email = $request->login;
 //                $otpCode = mt_rand(1000, 9999);
 
-                $checkUser = User::where('email', $email)->where('user_type',2)->first();
+                $checkUser = User::where('email', $email)->where('user_type', 2)->first();
                 if ($checkUser) {
                     $response = ['result' => 'error', 'message' => 'The email is already is in use', 'code' => 422];
                     return $response;
@@ -123,17 +123,14 @@ class AuthService
             if ($checkLoginType == 'mobile_no') {
                 $credentials = ['mobile_no' => $login, 'password' => $password];
 
-                $checkForUser =  User::where('mobile_no',$login)
+                $checkForUser = User::where('mobile_no', $login)
 //                    ->where('password',$password)
-                    ->whereIn('user_type',[2,4])->first();
+                    ->whereIn('user_type', [2, 4])->first();
 
 
-                if($checkForUser)
-                {
-                    dd(Hash::check($password,$checkForUser->password),
-                        !Hash::check($password,$checkForUser->password));
-                    if(!Hash::check($checkForUser->password,$password))
-                    {
+                if ($checkForUser) {
+
+                    if (!Hash::check($password, $checkForUser->password)) {
                         $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
                         return $response;
                     }
@@ -142,13 +139,11 @@ class AuthService
 
             } elseif ($checkLoginType == 'email') {
                 $credentials = ['email' => $login, 'password' => $password];
-                $checkForUser =  User::where('email',$login)
+                $checkForUser = User::where('email', $login)
 //                    ->where('password',$password)
-                        ->whereIn('user_type',[2,4])->first();
-                if($checkForUser)
-                {
-                    if(!Hash::check($checkForUser->password,$password))
-                    {
+                    ->whereIn('user_type', [2, 4])->first();
+                if ($checkForUser) {
+                    if (!Hash::check($password, $checkForUser->password)) {
                         $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
                         return $response;
                     }
@@ -161,12 +156,12 @@ class AuthService
 
 
             if ($checkForUser) {
-                    Auth::loginUsingId($checkForUser->id);
+                Auth::loginUsingId($checkForUser->id);
 //                if (Auth::user()->user_type == 2 || Auth::user()->user_type == 4) {
-                    Auth::user()->tokens()->delete();
-                    $token = Auth::user()->createToken('TowyBookingApp')->plainTextToken;
-                    $response = ['result' => 'success', 'message' => 'Login Successful', 'data' => $token];
-                    return $response;
+                Auth::user()->tokens()->delete();
+                $token = Auth::user()->createToken('TowyBookingApp')->plainTextToken;
+                $response = ['result' => 'success', 'message' => 'Login Successful', 'data' => $token];
+                return $response;
 //                }
 //                else {
 //                    $response = ['result' => 'error', 'message' => 'Your Phone Number is already registered as a Passenger'];
@@ -176,17 +171,16 @@ class AuthService
                 $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
                 return $response;
             }
-        }
-        else {
+        } else {
             if ($checkLoginType == 'mobile_no') {
                 $checkUserState = User::where('mobile_no', $login)
                     ->whereNUll('password')
-                    ->whereIn('user_type', [2,4])
+                    ->whereIn('user_type', [2, 4])
                     ->first();
             } elseif ($checkLoginType == 'email') {
                 $checkUserState = User::where('email', $login)
                     ->whereNUll('password')
-                    ->whereIn('user_type', [2,4])
+                    ->whereIn('user_type', [2, 4])
                     ->first();
             }
 
@@ -198,13 +192,13 @@ class AuthService
 
                 if ($checkLoginType == 'mobile_no') {
                     $checkUserState = User::where('mobile_no', $login)
-                        ->whereIn('user_type', [2,4])
+                        ->whereIn('user_type', [2, 4])
                         ->first();
 
                 } elseif ($checkLoginType == 'email') {
 
                     $checkUserState = User::where('email', $login)
-                        ->whereIn('user_type', [2,4])
+                        ->whereIn('user_type', [2, 4])
                         ->first();
 
                 }
@@ -260,7 +254,7 @@ class AuthService
         if (Auth::user()->user_type == 4) {
             foreach (Auth::user()->service as $service) {
                 $services[] = ['service_id' => $service->service_id, 'service_name' => $service->service->name,
-                    'service_image' => isset($service->service) ? $service->service->image ?  $service->service->image:'':''];
+                    'service_image' => isset($service->service) ? $service->service->image ? $service->service->image : '' : ''];
             }
         }
 
