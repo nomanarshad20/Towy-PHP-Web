@@ -142,16 +142,17 @@ class AuthService
                 $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
                 return $response;
             }
-        } else {
+        }
+        else {
             if ($checkLoginType == 'mobile_no') {
                 $checkUserState = User::where('mobile_no', $login)
                     ->whereNUll('password')
-                    ->where('user_type', $userType)
+                    ->where('user_type', 2)
                     ->first();
             } elseif ($checkLoginType == 'email') {
                 $checkUserState = User::where('email', $login)
                     ->whereNUll('password')
-                    ->where('user_type', $userType)
+                    ->where('user_type', 2)
                     ->first();
             }
 
@@ -163,13 +164,13 @@ class AuthService
 
                 if ($checkLoginType == 'mobile_no') {
                     $checkUserState = User::where('mobile_no', $login)
-                        ->where('user_type', $userType)
+                        ->where('user_type', 2)
                         ->first();
 
                 } elseif ($checkLoginType == 'email') {
 
                     $checkUserState = User::where('email', $login)
-                        ->where('user_type', $userType)
+                        ->where('user_type', 2)
                         ->first();
 
                 }
