@@ -117,6 +117,8 @@ class AuthService
     {
         $checkLoginType = $this->checkType($login);
 
+        dd($checkLoginType);
+
         if ($password) {
 
             if ($checkLoginType == 'mobile_no') {
@@ -129,13 +131,11 @@ class AuthService
                 {
                     if(!Hash::check($checkForUser->password,$password))
                     {
-                        $response = ['result' => 'error', 'message' => 'Invalid Credentials 123'];
+                        $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
                         return $response;
                     }
 
                 }
-
-
 
             } elseif ($checkLoginType == 'email') {
                 $credentials = ['email' => $login, 'password' => $password];
@@ -146,7 +146,7 @@ class AuthService
                 {
                     if(!Hash::check($checkForUser->password,$password))
                     {
-                        $response = ['result' => 'error', 'message' => 'Invalid Credentials 123'];
+                        $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
                         return $response;
                     }
 
