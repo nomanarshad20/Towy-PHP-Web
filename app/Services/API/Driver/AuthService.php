@@ -121,8 +121,22 @@ class AuthService
 
             if ($checkLoginType == 'mobile_no') {
                 $credentials = ['mobile_no' => $login, 'password' => $password];
-                $checkForUser =  User::where('mobile_no',$login)->where('password',$password)
+                $checkForUser =  User::where('mobile_no',$login)
+//                    ->where('password',$password)
                     ->whereIn('user_type',[2,4])->first();
+
+                if($checkForUser)
+                {
+                    if(!Hash::check($checkForUser->password,$password))
+                    {
+                        $response = ['result' => 'error', 'message' => 'Invalid Credentials 123'];
+                        return $response;
+                    }
+
+                }
+
+
+
             } elseif ($checkLoginType == 'email') {
                 $credentials = ['email' => $login, 'password' => $password];
                 $checkForUser =  User::where('email',$login)
