@@ -127,10 +127,10 @@ class AuthService
 //                    ->where('password',$password)
                     ->whereIn('user_type',[2,4])->first();
 
-                dd($checkForUser);
 
                 if($checkForUser)
-                {
+
+                    dd(Hash::check($checkForUser->password,$password),!Hash::check($checkForUser->password,$password));
                     if(!Hash::check($checkForUser->password,$password))
                     {
                         $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
