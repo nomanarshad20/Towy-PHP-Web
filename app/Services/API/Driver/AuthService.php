@@ -130,7 +130,8 @@ class AuthService
 
                 if($checkForUser)
                 {
-                    dd(Hash::check($checkForUser->password,$password),!Hash::check($checkForUser->password,$password));
+                    dd(Hash::check($password,$checkForUser->password),
+                        !Hash::check($password,$checkForUser->password));
                     if(!Hash::check($checkForUser->password,$password))
                     {
                         $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
