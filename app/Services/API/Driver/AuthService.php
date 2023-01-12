@@ -117,15 +117,17 @@ class AuthService
     {
         $checkLoginType = $this->checkType($login);
 
-        dd($checkLoginType);
 
         if ($password) {
 
             if ($checkLoginType == 'mobile_no') {
                 $credentials = ['mobile_no' => $login, 'password' => $password];
+
                 $checkForUser =  User::where('mobile_no',$login)
 //                    ->where('password',$password)
                     ->whereIn('user_type',[2,4])->first();
+
+                dd($checkForUser);
 
                 if($checkForUser)
                 {
