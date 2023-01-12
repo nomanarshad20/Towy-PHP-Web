@@ -120,24 +120,30 @@ class AuthService
 
             if ($checkLoginType == 'mobile_no') {
                 $credentials = ['mobile_no' => $login, 'password' => $password];
+                $checkForUser =  User::where('mobile_no',$login)->where('password',$password)
+                    ->whereIn('user_type',[2,4])->first();
             } elseif ($checkLoginType == 'email') {
                 $credentials = ['email' => $login, 'password' => $password];
+                $checkForUser =  User::where('email',$login)->where('password',$password)
+                        ->whereIn('user_type',[2,4])->first();
             } else {
                 $response = ['result' => 'error', 'message' => 'Please Enter Valid Mobile No or Email', 'code' => 422];
                 return $response;
             }
 
 
-            if (Auth::attempt($credentials)) {
-                if (Auth::user()->user_type == 2 || Auth::user()->user_type == 4) {
+            if ($checkForUser) {
+                    Auth::loginUsingId($checkForUser->id);
+//                if (Auth::user()->user_type == 2 || Auth::user()->user_type == 4) {
                     Auth::user()->tokens()->delete();
                     $token = Auth::user()->createToken('TowyBookingApp')->plainTextToken;
                     $response = ['result' => 'success', 'message' => 'Login Successful', 'data' => $token];
                     return $response;
-                } else {
-                    $response = ['result' => 'error', 'message' => 'Your Phone Number is already registered as a Passenger'];
-                    return $response;
-                }
+//                }
+//                else {
+//                    $response = ['result' => 'error', 'message' => 'Your Phone Number is already registered as a Passenger'];
+//                    return $response;
+//                }
             } else {
                 $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
                 return $response;
@@ -147,12 +153,12 @@ class AuthService
             if ($checkLoginType == 'mobile_no') {
                 $checkUserState = User::where('mobile_no', $login)
                     ->whereNUll('password')
-                    ->where('user_type', 2)
+                    ->whereIn('user_type', [2,4])
                     ->first();
             } elseif ($checkLoginType == 'email') {
                 $checkUserState = User::where('email', $login)
                     ->whereNUll('password')
-                    ->where('user_type', 2)
+                    ->whereIn('user_type', [2,4])
                     ->first();
             }
 
@@ -164,13 +170,13 @@ class AuthService
 
                 if ($checkLoginType == 'mobile_no') {
                     $checkUserState = User::where('mobile_no', $login)
-                        ->where('user_type', 2)
+                        ->whereIn('user_type', [2,4])
                         ->first();
 
                 } elseif ($checkLoginType == 'email') {
 
                     $checkUserState = User::where('email', $login)
-                        ->where('user_type', 2)
+                        ->whereIn('user_type', [2,4])
                         ->first();
 
                 }
