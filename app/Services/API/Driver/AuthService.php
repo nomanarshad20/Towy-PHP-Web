@@ -10,6 +10,7 @@ use App\Notifications\ResetPasswordNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Traits\CreateUserWalletTrait;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Symfony\Component\Mime\Email;
 use App\Models\DriverService;
@@ -40,7 +41,7 @@ class AuthService
                 $mobile = $request->login;
                 $email = null;
 //                $otp = null;
-                $checkUser = User::where('mobile_no', $mobile)->where('user_type',2)->first();
+                $checkUser = User::where('mobile_no', $mobile)->where('user_type', 2)->first();
                 if ($checkUser) {
                     $response = ['result' => 'error', 'message' => 'This mobile number is already is in use', 'code' => 422];
                     return $response;
@@ -50,7 +51,7 @@ class AuthService
                 $email = $request->login;
 //                $otpCode = mt_rand(1000, 9999);
 
-                $checkUser = User::where('email', $email)->where('user_type',2)->first();
+                $checkUser = User::where('email', $email)->where('user_type', 2)->first();
                 if ($checkUser) {
                     $response = ['result' => 'error', 'message' => 'The email is already is in use', 'code' => 422];
                     return $response;
@@ -116,28 +117,56 @@ class AuthService
     {
         $checkLoginType = $this->checkType($login);
 
+
         if ($password) {
 
             if ($checkLoginType == 'mobile_no') {
                 $credentials = ['mobile_no' => $login, 'password' => $password];
+
+                $checkForUser = User::where('mobile_no', $login)
+//                    ->where('password',$password)
+                    ->whereIn('user_type', [2, 4])->first();
+
+
+                if ($checkForUser) {
+
+                    if (!Hash::check($password, $checkForUser->password)) {
+                        $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
+                        return $response;
+                    }
+
+                }
+
             } elseif ($checkLoginType == 'email') {
                 $credentials = ['email' => $login, 'password' => $password];
+                $checkForUser = User::where('email', $login)
+//                    ->where('password',$password)
+                    ->whereIn('user_type', [2, 4])->first();
+                if ($checkForUser) {
+                    if (!Hash::check($password, $checkForUser->password)) {
+                        $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
+                        return $response;
+                    }
+
+                }
             } else {
                 $response = ['result' => 'error', 'message' => 'Please Enter Valid Mobile No or Email', 'code' => 422];
                 return $response;
             }
 
 
-            if (Auth::attempt($credentials)) {
-                if (Auth::user()->user_type == 2 || Auth::user()->user_type == 4) {
-                    Auth::user()->tokens()->delete();
-                    $token = Auth::user()->createToken('TowyBookingApp')->plainTextToken;
-                    $response = ['result' => 'success', 'message' => 'Login Successful', 'data' => $token];
-                    return $response;
-                } else {
-                    $response = ['result' => 'error', 'message' => 'Your Phone Number is already registered as a Passenger'];
-                    return $response;
-                }
+            if ($checkForUser) {
+                Auth::loginUsingId($checkForUser->id);
+//                if (Auth::user()->user_type == 2 || Auth::user()->user_type == 4) {
+                Auth::user()->tokens()->delete();
+                $token = Auth::user()->createToken('TowyBookingApp')->plainTextToken;
+                $response = ['result' => 'success', 'message' => 'Login Successful', 'data' => $token];
+                return $response;
+//                }
+//                else {
+//                    $response = ['result' => 'error', 'message' => 'Your Phone Number is already registered as a Passenger'];
+//                    return $response;
+//                }
             } else {
                 $response = ['result' => 'error', 'message' => 'Invalid Credentials'];
                 return $response;
@@ -146,12 +175,12 @@ class AuthService
             if ($checkLoginType == 'mobile_no') {
                 $checkUserState = User::where('mobile_no', $login)
                     ->whereNUll('password')
-                    ->where('user_type', $userType)
+                    ->whereIn('user_type', [2, 4])
                     ->first();
             } elseif ($checkLoginType == 'email') {
                 $checkUserState = User::where('email', $login)
                     ->whereNUll('password')
-                    ->where('user_type', $userType)
+                    ->whereIn('user_type', [2, 4])
                     ->first();
             }
 
@@ -163,13 +192,13 @@ class AuthService
 
                 if ($checkLoginType == 'mobile_no') {
                     $checkUserState = User::where('mobile_no', $login)
-                        ->where('user_type', $userType)
+                        ->whereIn('user_type', [2, 4])
                         ->first();
 
                 } elseif ($checkLoginType == 'email') {
 
                     $checkUserState = User::where('email', $login)
-                        ->where('user_type', $userType)
+                        ->whereIn('user_type', [2, 4])
                         ->first();
 
                 }
@@ -225,7 +254,7 @@ class AuthService
         if (Auth::user()->user_type == 4) {
             foreach (Auth::user()->service as $service) {
                 $services[] = ['service_id' => $service->service_id, 'service_name' => $service->service->name,
-                    'service_image' => isset($service->service) ? $service->service->image ?  $service->service->image:'':''];
+                    'service_image' => isset($service->service) ? $service->service->image ? $service->service->image : '' : ''];
             }
         }
 

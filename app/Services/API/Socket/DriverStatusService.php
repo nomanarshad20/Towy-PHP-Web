@@ -9,6 +9,7 @@ use App\Models\BookingPoint;
 use App\Models\P2PBookingTracking;
 use App\Models\User;
 use App\Models\VoucherCodePassenger;
+use App\Notifications\SendReceiptNotification;
 use App\Services\API\Passenger\StripeService;
 use App\Services\API\UpdateWalletService;
 use App\Traits\BookingResponseTrait;
@@ -18,6 +19,7 @@ use App\Traits\SendFirebaseNotificationTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
 class DriverStatusService
 {
@@ -492,6 +494,7 @@ class DriverStatusService
             ->where('ride_status', '=', 1)
             ->first();
 
+
         if (!$findBooking) {
             return $socket->emit($data['user_id'] . '-driverStatus', [
                 'result' => 'error',
@@ -537,8 +540,8 @@ class DriverStatusService
 //        }
 
         try {
-//            $findBooking->driver_status = $data['driver_status'];
-//            $findBooking->ride_status = 4;
+            $findBooking->driver_status = $data['driver_status'];
+            $findBooking->ride_status = 4;
 //            if ($findBooking->payment_type == 'cash_wallet' && $data['payment_type'] == 'cash_wallet') {
 //                $findBooking->payment_type = 'cash_wallet';
 //            }
@@ -665,6 +668,19 @@ class DriverStatusService
         $passengerFCMToken = $findBooking->passenger->fcm_token;
 
         $bookingResponse = $this->driverBookingResponse($findBooking);
+
+        try{
+            $passenegerUser = User::find($findBooking->passenger_id);
+            Notification::route('mail', $passenegerUser->email)->notify(new SendReceiptNotification($findBooking));
+        }
+        catch (\Exception $e)
+        {
+            $socket->emit($passengerSocketId . '-driverStatus', [
+                'result' => 'error',
+                'message' => 'Error in Sending Receipt to Passenger on Email: '.$e,
+                'data' => (object)$bookingResponse
+            ]);
+        }
 
 
         //collect fare notification
