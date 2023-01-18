@@ -32,7 +32,7 @@ use App\Http\Controllers\API\Driver\ServicesController;
 use App\Http\Controllers\API\Passenger\ServiceController;
 use App\Http\Controllers\API\Passenger\ServiceBookingController;
 use App\Http\Controllers\API\Passenger\AddToWalletController;
-
+use App\Http\Controllers\API\Driver\StripeController as DriverStripeController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -140,7 +140,7 @@ Route::group(['middleware' => ['json.response']], function () {
                 Route::get('services-list',[ServicesController::class,'index']);
                 Route::post('save-driver-service',[ServicesController::class,'save']);
 
-                Route::post('driver-create-stripe-customer',[StripeController::class,'createCustomer']);
+                Route::post('driver-create-stripe-customer',[DriverStripeController::class,'createCustomer']);
 
             });
 
