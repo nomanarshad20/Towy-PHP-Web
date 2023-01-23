@@ -12,5 +12,15 @@ use PHPUnit\Exception;
 
 class StripeController extends Controller
 {
+    public $stripeService;
 
+    public function __construct(StripeService  $service)
+    {
+        $this->stripeService = $service;
+    }
+
+    public function createConnectAccountLink(Request  $request)
+    {
+        $this->stripeService->createConnectAccountLink($request);
+    }
 }

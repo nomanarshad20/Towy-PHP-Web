@@ -35,7 +35,7 @@ class StripeService
                 ],
             ]);
 
-            $response = ['type' => 'success', 'data' => $token->id,'card_last_4'=>$token->card->last4];
+            $response = ['type' => 'success', 'data' => $token->id, 'card_last_4' => $token->card->last4];
             return $response;
         } catch (\Stripe\Error\InvalidRequest $e) {
             $response = ['type' => 'error', 'message' => $e->getMessage()];
@@ -67,19 +67,16 @@ class StripeService
         return $customerId;
     }
 
-    public function holdAmount($bookingRecord,$timeOfHold = 'create_ride')
+    public function holdAmount($bookingRecord, $timeOfHold = 'create_ride')
     {
         try {
             $amount = $bookingRecord['estimated_fare'];
             $diff = 0;
             $wallet_balance = 0;
-            if($timeOfHold == 'create_ride')
-            {
-                if($bookingRecord['payment_type'] == 'wallet')
-                {
+            if ($timeOfHold == 'create_ride') {
+                if ($bookingRecord['payment_type'] == 'wallet') {
                     $wallet_balance = $this->passengerWalletBalance(Auth::user()->id);
-                    if($wallet_balance > 0 && $wallet_balance < $bookingRecord['estimated_fare'])
-                    {
+                    if ($wallet_balance > 0 && $wallet_balance < $bookingRecord['estimated_fare']) {
                         $diff = $bookingRecord['estimated_fare'] - $wallet_balance;
                     }
                 }
@@ -87,8 +84,7 @@ class StripeService
             }
 
 
-            if($wallet_balance < $bookingRecord['estimated_fare'])
-            {
+            if ($wallet_balance < $bookingRecord['estimated_fare']) {
                 $charge = \Stripe\Charge::create([
                     'amount' => $amount * 100,
                     'currency' => 'usd',
@@ -100,7 +96,7 @@ class StripeService
                 return $charge->id;
 
             }
-            $response = ['type' => 'success','message'=>'Wallet Amount is deducted'];
+            $response = ['type' => 'success', 'message' => 'Wallet Amount is deducted'];
             return $response;
         } catch (\Stripe\Error\InvalidRequest $e) {
             $response = ['type' => 'error', 'message' => $e->getMessage()];
@@ -121,7 +117,7 @@ class StripeService
 
     }
 
-    public function holdAmountForService($fare,$booking)
+    public function holdAmountForService($fare, $booking)
     {
         try {
             $amount = $fare;
@@ -156,7 +152,7 @@ class StripeService
     }
 
 
-    public function releasingAmount( $stripe_charge_id)
+    public function releasingAmount($stripe_charge_id)
     {
 
         $release = $this->stripe->refunds->create([
@@ -199,20 +195,17 @@ class StripeService
 
     }
 
-    public function charge($bookingRecord,$customerID = null,$amount = null)
+    public function charge($bookingRecord, $customerID = null, $amount = null)
     {
         try {
 
-            if(!$customerID)
-            {
+            if (!$customerID) {
                 $customerID = Auth::user()->stripe_customer_id;
             }
 
-            if(!$amount)
-            {
+            if (!$amount) {
                 $amount = $bookingRecord->actual_fare;
             }
-
 
 
             $charge = \Stripe\Charge::create([
@@ -243,7 +236,7 @@ class StripeService
 
     }
 
-    public function directCharge($token,$amount)
+    public function directCharge($token, $amount)
     {
         try {
 
@@ -273,6 +266,36 @@ class StripeService
             return $response;
         }
 
+    }
+
+    public function createConnectAccountLink($request)
+    {
+        try {
+            $accountLink  = $this->stripe->accountLinks->create([
+                'account' => 'acct_1LXrIlKxgIbBTP6d',
+                'refresh_url' => 'https://example.com/reauth',
+                'return_url' => 'https://example.com/return',
+                'type' => 'account_onboarding',
+            ]);
+
+            dd($accountLink);
+        }
+        catch (\Stripe\Error\InvalidRequest $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\Authentication $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\ApiConnection $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Exception\CardException $e) {
+            $response = ['type' => 'error', 'message' => $e->getError()->message];
+            return $response;
+        } catch (Exception $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        }
     }
 
 
