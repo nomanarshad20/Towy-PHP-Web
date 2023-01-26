@@ -140,7 +140,10 @@ Route::group(['middleware' => ['json.response']], function () {
                 Route::get('services-list',[ServicesController::class,'index']);
                 Route::post('save-driver-service',[ServicesController::class,'save']);
 
-//                Route::post('create-stripe-account-link',[DriverStripeController::class,'createConnectAccountLink']);
+                Route::post('create-stripe-account',[DriverStripeController::class,'createConnectAccount']);
+
+                Route::get('create-stripe-account-link',[DriverStripeController::class,'refreshConnectAccountLink'])->name('refreshAccountLink');
+
 
 
             });

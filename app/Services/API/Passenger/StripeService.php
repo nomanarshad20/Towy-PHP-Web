@@ -268,19 +268,54 @@ class StripeService
 
     }
 
-    public function createConnectAccountLink($request)
+    public function createConnectAccountLink($request = null)
     {
         try {
-            $accountLink  = $this->stripe->accountLinks->create([
-                'account' => 'acct_1LXrIlKxgIbBTP6d',
-                'refresh_url' => 'https://example.com/reauth',
-                'return_url' => 'https://example.com/return',
+            if(Auth::check())
+            {
+                $accountID = Auth::user()->stripe_customer_id;
+            }
+            else{
+                $accountID = $request->accountID;
+            }
+            $accountLink = $this->stripe->accountLinks->create([
+                'account' => $accountID,
+                'refresh_url' => route('refreshAccountLink', ['accountID' => $accountID]),
+                'return_url' => route('loginPage'),
                 'type' => 'account_onboarding',
             ]);
 
-            dd($accountLink);
+            return ['type' => 'success', 'data' => $accountLink];
+        } catch (\Stripe\Error\InvalidRequest $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\Authentication $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\ApiConnection $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Exception\CardException $e) {
+            $response = ['type' => 'error', 'message' => $e->getError()->message];
+            return $response;
+        } catch (Exception $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
         }
-        catch (\Stripe\Error\InvalidRequest $e) {
+    }
+
+    public function createConnectAccount($request)
+    {
+        try {
+            $accountLink = $this->stripe->accounts->create([
+                'type' => 'express',
+                'country' => 'US',
+                'email' => $request->email
+            ]);
+
+            return ['type' => 'success', 'data' => $accountLink->id];
+
+        } catch (\Stripe\Error\InvalidRequest $e) {
             $response = ['type' => 'error', 'message' => $e->getMessage()];
             return $response;
         } catch (\Stripe\Error\Authentication $e) {
