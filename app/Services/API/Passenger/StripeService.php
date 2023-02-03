@@ -334,4 +334,35 @@ class StripeService
     }
 
 
+    public function getBalance()
+    {
+        try {
+            $balance = $this->stripe->balance->retrieve([]);
+
+            foreach($balance->available as $available)
+            {
+                $availableAmount = $available->amount;
+            }
+
+            return ['type' => 'success', 'data' => $availableAmount];
+
+        } catch (\Stripe\Error\InvalidRequest $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\Authentication $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\ApiConnection $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Exception\CardException $e) {
+            $response = ['type' => 'error', 'message' => $e->getError()->message];
+            return $response;
+        } catch (Exception $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        }
+    }
+
+
 }

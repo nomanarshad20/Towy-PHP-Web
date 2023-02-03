@@ -6,11 +6,18 @@ namespace App\Services\Admin;
 
 use App\Models\Booking;
 use App\Models\User;
+use App\Services\API\Passenger\StripeService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
+    public $stripeService;
+    public function __construct(StripeService  $service)
+    {
+        $this->stripeService = $service;
+    }
+
     public function index()
     {
         $users = User::select('user_type', DB::raw('count(*) as total'))
@@ -42,8 +49,11 @@ class DashboardService
         }
 
 
+        $getBalance = $this->stripeService->getBalance();
+
+        $amount = $getBalance["data"];
 
         return view('admin.dashboard.dashboard', compact('users',
-            'bookings','totalBooking','bookingArray'));
+            'bookings','totalBooking','bookingArray','amount'));
     }
 }
