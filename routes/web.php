@@ -52,13 +52,13 @@ Route::namespace('Admin')->group(function () {
 
         });
 
-        Route::middleware(['auth'])->group(function () {
+        Route::middleware(['web_auth'])->group(function () {
             Route::get('logout', [LogoutController::class, 'logout'])->name('logoutUser');
         });
     });
 
 
-    Route::middleware(['role:administrator'])->group(function () {
+    Route::middleware(['web_auth','role:administrator'])->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('adminDashboard');
 
         Route::get('driver-listing',[DriverController::class,'index'])->name('driverListing');
