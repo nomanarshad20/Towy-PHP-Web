@@ -74,7 +74,6 @@
                                                     </a>
 
                                                 </div>
-                                            @endif
 
                                             @elseif($user['user_type'] == 3)
 
