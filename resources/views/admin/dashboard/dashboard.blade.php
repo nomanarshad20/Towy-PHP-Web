@@ -36,6 +36,8 @@
                                             <h6 class="card-title mb-0">Total Driver</h6>
                                         @elseif($user['user_type'] == 3)
                                             <h6 class="card-title mb-0">Total Franchise</h6>
+                                        @elseif($user['user_type'] == 4)
+                                            <h6 class="card-title mb-0">Total Service Providers</h6>
                                         @endif
                                         <div class="dropdown mb-2">
                                             <button class="btn p-0" type="button" id="dropdownMenuButton"
@@ -67,6 +69,18 @@
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                                     <a class="dropdown-item d-flex align-items-center"
                                                        href="{{route('franchiseListing')}}">
+                                                        <i data-feather="eye" class="icon-sm me-2"></i>
+                                                        <span class="">View</span>
+                                                    </a>
+
+                                                </div>
+                                            @endif
+
+                                            @elseif($user['user_type'] == 3)
+
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                    <a class="dropdown-item d-flex align-items-center"
+                                                       href="{{route('driverListing')}}">
                                                         <i data-feather="eye" class="icon-sm me-2"></i>
                                                         <span class="">View</span>
                                                     </a>
