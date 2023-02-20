@@ -41,6 +41,7 @@
                                 <th>Mobile No</th>
                                 <th>Referral Code</th>
                                 <th>Document Available To Check</th>
+                                <th>User Type</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -55,6 +56,7 @@
                                     <td>{{$user->mobile_no}}</td>
                                     <td><a href="{{url('driver-portal/'.$user->id)}}">{{$user->referral_code}}</a></td>
                                     <td>{{$user->steps == 4 ? 'Yes':'No'}}</td>
+                                    <td>{{$user->user_type == 2 ? 'Driver':'Service Provider'}}</td>
                                     <td>
                                         @if($user->is_verified == 1)
                                             <span class="badge bg-success">Verified</span>
