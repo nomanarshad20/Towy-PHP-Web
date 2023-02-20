@@ -271,11 +271,9 @@ class StripeService
     public function createConnectAccountLink($request = null)
     {
         try {
-            if(Auth::check())
-            {
+            if (Auth::check()) {
                 $accountID = Auth::user()->stripe_customer_id;
-            }
-            else{
+            } else {
                 $accountID = $request->accountID;
             }
             $accountLink = $this->stripe->accountLinks->create([
@@ -339,8 +337,7 @@ class StripeService
         try {
             $balance = $this->stripe->balance->retrieve([]);
 
-            foreach($balance->available as $available)
-            {
+            foreach ($balance->available as $available) {
                 $availableAmount = $available->amount;
             }
 
@@ -364,5 +361,32 @@ class StripeService
         }
     }
 
+    public function transferAmount($amount, $accountID)
+    {
+        try {
+            $data = $this->stripe->transfers->create([
+                'amount' => $amount * 100,
+                'currency' => 'usd',
+                'destination' => $accountID,
+            ]);
+
+            return ['type' => 'success', 'data' => $data->id];
+        } catch (\Stripe\Error\InvalidRequest $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\Authentication $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Error\ApiConnection $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        } catch (\Stripe\Exception\CardException $e) {
+            $response = ['type' => 'error', 'message' => $e->getError()->message];
+            return $response;
+        } catch (Exception $e) {
+            $response = ['type' => 'error', 'message' => $e->getMessage()];
+            return $response;
+        }
+    }
 
 }

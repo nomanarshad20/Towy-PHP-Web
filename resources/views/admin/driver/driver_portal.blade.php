@@ -69,7 +69,7 @@
                             </div>
 
                             <button type="submit" id="searchReportFrm" class="btn btn-primary btn-user">
-                                Create
+                                Search
                             </button>
 
 
@@ -334,6 +334,7 @@
                     <form action="{{route('payReceiveFromDriver')}}" method="post" class="rechargeWalletForm">
                         <div class="row">
                             @csrf
+                            <input type="hidden" name="id" value="{{$userInfo->id}}">
                             <div class="col-sm-6">
                                 <div class="mb-3">
                                     <label class="form-label">From</label>

@@ -12,6 +12,7 @@ use App\Models\Service;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleType;
+use App\Services\API\Passenger\StripeService;
 use App\Traits\CreateUserWalletTrait;
 use App\Traits\DriverPortalTrait;
 use Carbon\Carbon;
@@ -19,12 +20,11 @@ use Illuminate\Support\Facades\DB;
 
 class DriverService
 {
-
     use CreateUserWalletTrait, DriverPortalTrait;
 
     public function index()
     {
-        $data = User::whereIn('user_type', [2,4])->get();
+        $data = User::whereIn('user_type', [2, 4])->get();
         return view('admin.driver.listing', compact('data'));
     }
 
@@ -83,9 +83,8 @@ class DriverService
         try {
 
             $vehicle = null;
-            if(isset($vehicle->id))
-            {
-                $vehicle =  $vehicle->id;
+            if (isset($vehicle->id)) {
+                $vehicle = $vehicle->id;
             }
 
 
@@ -119,11 +118,11 @@ class DriverService
 
             $services = Service::all();
             $franchises = User::where('user_type', 3)->where('is_verified', 1)->get();
-            $userServices = \App\Models\DriverService::where('user_id',$id)->pluck('service_id')->toArray();
+            $userServices = \App\Models\DriverService::where('user_id', $id)->pluck('service_id')->toArray();
 //            $vehicleTypes =  VehicleType::where('status',1)->get();
 
 
-            return view('admin.driver.edit', compact('data', 'franchises','services','userServices'));
+            return view('admin.driver.edit', compact('data', 'franchises', 'services', 'userServices'));
         } else {
             return redirect()->route('driverListing')->with('error', 'Record Not Found');
         }
@@ -167,7 +166,7 @@ class DriverService
             }
 
 
-            if($request->user_type == 2) {
+            if ($request->user_type == 2) {
                 try {
                     if (isset($data->driver->vehicle)) {
                         $data->driver->vehicle->update(['name' => $request->vehicle_name,
@@ -188,10 +187,9 @@ class DriverService
                     DB::rollBack();
                     return makeResponse('error', 'Error in Creating Vehicle: ' . $e, 200);
                 }
-            }
-            elseif($request->user_type == 4){
+            } elseif ($request->user_type == 4) {
                 try {
-                    \App\Models\DriverService::where('user_id',$request->id)->delete();
+                    \App\Models\DriverService::where('user_id', $request->id)->delete();
 
                     foreach ($request->services as $service) {
                         $driverService = \App\Models\DriverService::create([
@@ -208,13 +206,11 @@ class DriverService
             try {
 
                 $vehicle = null;
-                if(isset($saveVehicle->id))
-                {
+                if (isset($saveVehicle->id)) {
                     $vehicle = $saveVehicle->id;
                 }
 
-                if(isset($data->driver->vehicle) )
-                {
+                if (isset($data->driver->vehicle)) {
                     $vehicle = $data->driver->vehicle->id;
                 }
 
@@ -224,7 +220,7 @@ class DriverService
                             'franchise_id' => $request->franchise_id,
                             'vehicle_type_id' => $request->vehicle_type_id,
 //                            'vehicle_id' => isset($data->driver->vehicle) ? $data->driver->vehicle->id : $saveVehicle->id,
-                            'vehicle_id' =>$vehicle,
+                            'vehicle_id' => $vehicle,
                             'user_id' => $request->id]);
 
                 } else {
@@ -232,7 +228,7 @@ class DriverService
                         'franchise_id' => $request->franchise_id,
                         'vehicle_type_id' => $request->vehicle_type_id,
 //                        'vehicle_id' => $saveVehicle->id,
-                        'vehicle_id' =>$vehicle,
+                        'vehicle_id' => $vehicle,
                         'user_id' => $request->id,
 
                     ]);
@@ -429,6 +425,7 @@ class DriverService
 
     public function payOrReceivePartnerAmount($request)
     {
+        DB::beginTransaction();
         try {
             $amount = $request->amount;
             $partnerId = $request->id;
@@ -439,7 +436,14 @@ class DriverService
             $description = "Rs. " . $amount . " " . $payReceiveFlag . " to Partner";
 
             $user = User::with('driver')->where('id', $partnerId)->first();
+
             if (isset($user) && $amount > 0) {
+
+                if (!$user->stripe_customer_id) {
+                    return Redirect()->back()->withErrors(['error', 'User is not connected with our Account on Stripe!']);
+                }
+
+
                 if ($amount > 0) {
                     $data[] = [
                         "driver_id" => $user->id,
@@ -463,14 +467,35 @@ class DriverService
                         $franchiseCalculations = $this->franchiseWalletUpdate($data, 0, 0, 0, $amount, $type, $payment_method, $description);
                     }
 
-                    return Redirect()->back()->with('success', 'Amount successfully Paid');
+//                    return Redirect()->back()->with('success', 'Amount successfully Paid');
                 } else {
                     return Redirect()->back()->withErrors(['error', 'Invalid Request, Driver not found!']);
                 }
             } else {
                 return Redirect()->back()->withErrors(['error', 'Invalid Request, Driver not found! or Invalid Amount']);
             }
+
+            //payFromStripe
+            try {
+                $stripeService = new StripeService;
+
+                $amount = $stripeService->transferAmount($amount, $user->stripe_customer_id);
+
+                if ($amount['type'] == 'error') {
+                    DB::rollBack();
+                    return Redirect()->back()->withErrors(['error', $amount['message']]);
+                }
+            }
+            catch (\Exception $e) {
+                DB::rollBack();
+                return Redirect()->back()->withErrors(['error', $e->getMessage()]);
+            }
+            DB::commit();
+            return Redirect()->back()->with('success', 'Amount successfully Paid');
+
         } catch (\Exception $e) {
+            DB::rollBack();
+
             return Redirect()->back()->withErrors(['error', $e->getMessage()]);
         }
     }
