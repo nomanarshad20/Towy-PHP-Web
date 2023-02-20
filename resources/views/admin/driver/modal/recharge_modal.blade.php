@@ -9,11 +9,11 @@
             </div>
 
             <div class="modal-body">
-                <strong class="para3"> Are you sure you want to Update Driver Payment Status?</strong>
+                <strong class="para3"> Are you sure you want to transfer Amount ?</strong>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" id="rechargeRecordBtn" class="btn btn-danger">Update</button>
+                <button type="button" id="rechargeRecordBtn" class="btn btn-primary">Submiut</button>
             </div>
         </div>
     </div>
