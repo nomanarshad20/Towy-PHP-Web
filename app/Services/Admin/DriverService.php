@@ -440,7 +440,7 @@ class DriverService
             if (isset($user) && $amount > 0) {
 
                 if (!$user->stripe_customer_id) {
-                    return Redirect()->back()->withErrors(['error', 'User is not connected with our Account on Stripe!']);
+                    return Redirect()->back()->with('error', 'User is not connected with our Account on Stripe!');
                 }
 
 
@@ -469,10 +469,10 @@ class DriverService
 
 //                    return Redirect()->back()->with('success', 'Amount successfully Paid');
                 } else {
-                    return Redirect()->back()->withErrors(['error', 'Invalid Request, Driver not found!']);
+                    return Redirect()->back()->with('error', 'Invalid Request, Driver not found!');
                 }
             } else {
-                return Redirect()->back()->withErrors(['error', 'Invalid Request, Driver not found! or Invalid Amount']);
+                return Redirect()->back()->with('error', 'Invalid Request, Driver not found! or Invalid Amount');
             }
 
             //payFromStripe
@@ -483,12 +483,12 @@ class DriverService
 
                 if ($amount['type'] == 'error') {
                     DB::rollBack();
-                    return Redirect()->back()->withErrors(['error', $amount['message']]);
+                    return Redirect()->back()->with('error', $amount['message']);
                 }
             }
             catch (\Exception $e) {
                 DB::rollBack();
-                return Redirect()->back()->withErrors(['error', $e->getMessage()]);
+                return Redirect()->back()->with('error', $e->getMessage());
             }
             DB::commit();
             return Redirect()->back()->with('success', 'Amount successfully Paid');
@@ -496,7 +496,7 @@ class DriverService
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return Redirect()->back()->withErrors(['error', $e->getMessage()]);
+            return Redirect()->back()->with('error', $e->getMessage());
         }
     }
 
