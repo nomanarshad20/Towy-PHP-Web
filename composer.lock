@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f5fc97c4f4caada03da236d79c795a91",
+    "content-hash": "5af2e770d4a956c7a43354da8c5f7d83",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2202,6 +2202,71 @@
                 }
             ],
             "time": "2022-04-17T13:12:02+00:00"
+        },
+        {
+            "name": "lyal/checkr",
+            "version": "0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lyal/checkr.git",
+                "reference": "af2bd5aa7b6f4f0876887b523af68ee837fa4b5d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lyal/checkr/zipball/af2bd5aa7b6f4f0876887b523af68ee837fa4b5d",
+                "reference": "af2bd5aa7b6f4f0876887b523af68ee837fa4b5d",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "~7.0|~6.0|~5.0|~4.0",
+                "illuminate/routing": "~8.0|~7.0|~6.0|^5.5",
+                "illuminate/support": "~8.0|~7.0|~6.0|^5.5",
+                "php": ">=7.1.3"
+            },
+            "require-dev": {
+                "mockery/mockery": "0.9.*",
+                "phpunit/phpunit": "~7.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Lyal\\Checkr\\Laravel\\CheckrServiceProvider"
+                    ],
+                    "aliases": {
+                        "Checkr": "Lyal\\Checkr\\Laravel\\Facades\\Checkr"
+                    }
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "Lyal\\Checkr\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-2-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "lyal",
+                    "email": "lyal@pullrequest.com"
+                }
+            ],
+            "description": "A PHP client for checkr.io, a background screening service ",
+            "keywords": [
+                "checkr",
+                "laravel",
+                "symphony"
+            ],
+            "support": {
+                "issues": "https://github.com/lyal/checkr/issues",
+                "source": "https://github.com/lyal/checkr/tree/0.3"
+            },
+            "time": "2020-10-08T19:32:02+00:00"
         },
         {
             "name": "monolog/monolog",

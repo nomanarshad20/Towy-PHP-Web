@@ -179,6 +179,13 @@ Route::namespace('Admin')->group(function () {
     });
 
     Route::get('test',[\App\Http\Controllers\Admin\TestController::class,'test']);
+    Route::get('test1',[\App\Http\Controllers\Admin\TestController::class,'test1']);
+    Route::get('test2',[\App\Http\Controllers\Admin\TestController::class,'test2']);
+    Route::get('create-report',[\App\Http\Controllers\Admin\TestController::class,'createReport']);
+    Route::get('packages',[\App\Http\Controllers\Admin\TestController::class,'listPackage']);
+    Route::get('candidates',[\App\Http\Controllers\Admin\TestController::class,'listCandidate']);
+    Route::get('retrieve-report',[\App\Http\Controllers\Admin\TestController::class,'retrieveReport']);
+
 
 });
 

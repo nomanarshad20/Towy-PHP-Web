@@ -14,9 +14,10 @@
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.4",
+        "lyal/checkr": "*",
         "santigarcor/laratrust": "^7.1",
-        "workerman/phpsocket.io": "^1.1",
-        "stripe/stripe-php": "^7.28"
+        "stripe/stripe-php": "^7.28",
+        "workerman/phpsocket.io": "^1.1"
     },
     "require-dev": {
         "facade/ignition": "^2.5",
